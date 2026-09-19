@@ -131,15 +131,7 @@
             <span>Back</span>
           </button>
 
-          <div class="w-full flex items-center justify-center mb-2">
-            <!-- Duty indicator strip (Status pill without "change" button) -->
-            <div id="dutyIndicatorStrip" class="duty-indicator-strip duty-strip-mpro hidden" aria-label="Active duty assignment">
-              <span class="duty-pulse-dot duty-pulse-mpro" id="dutyPulseDot"></span>
-              <span id="dutyIndicatorLabel">MPRO - Production</span>
-            </div>
-          </div>
-
-          <div id="loginHeaderBadgeContainer" class="flex justify-center mb-1.5">
+          <div id="loginHeaderBadgeContainer" class="flex justify-center mb-2 mt-1">
             <div class="duty-badge-container duty-badge-mpro !w-auto !py-1 !px-3 shadow-lg">
               <div class="duty-badge-brand text-xl leading-none">MCGI</div>
               <div class="duty-badge-bar">
@@ -246,11 +238,6 @@
                     Register Profile
                   </button>
                 </p>
-                <button type="button" onclick="DutySelection.backToDutySelection()"
-                  class="login-bottom-back-btn mt-3.5 text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors">
-                  <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-                  <span>Back to Duty Selection (MPRO / GCOS / TK)</span>
-                </button>
               </div>
             </div>
 

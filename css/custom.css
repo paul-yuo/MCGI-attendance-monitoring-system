@@ -887,6 +887,65 @@ body.login-page {
   margin: 3px 0;
 }
 
+/* =========================================================================
+   MOBILE RESPONSIVE: Compact duty selection cards on small screens
+   Applies only to screens < 640px (typical phone viewport)
+   ========================================================================= */
+@media (max-width: 639px) {
+  /* Card container: narrower and shorter on mobile */
+  .duty-card .duty-badge-container {
+    width: 200px;
+    min-height: 80px;
+    padding: 0.9rem 1.1rem 0.85rem;
+    border-radius: 1rem;
+    gap: 3px;
+  }
+
+  /* Smaller MCGI brand text on mobile */
+  .duty-card .duty-badge-brand {
+    font-size: 1.65rem;
+    line-height: 1;
+  }
+
+  /* Tighter spacing on mobile */
+  .duty-card .duty-badge-bar {
+    margin-top: 2px;
+  }
+
+  .duty-card .duty-badge-line {
+    margin: 2px 0;
+  }
+
+  /* Tighter gap between the three stacked cards on mobile */
+  #dutySelectorScreen .flex-col {
+    gap: 0.6rem;
+  }
+
+  /* No hover lift on touch devices */
+  .duty-card:hover {
+    transform: none;
+  }
+  .duty-card:active {
+    transform: scale(0.97);
+  }
+  .duty-card:hover .duty-badge-container {
+    transform: none;
+  }
+}
+
+/* Very small phones (e.g. iPhone SE 375px) – even more compact */
+@media (max-width: 400px) {
+  .duty-card .duty-badge-container {
+    width: 175px;
+    min-height: 72px;
+    padding: 0.75rem 0.9rem 0.7rem;
+  }
+
+  .duty-card .duty-badge-brand {
+    font-size: 1.45rem;
+  }
+}
+
 .duty-badge-bar {
   display: flex;
   flex-direction: column;
