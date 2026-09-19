@@ -1,0 +1,22 @@
+{
+  "name": "mcgi-production-monitoring-system",
+  "version": "2.5.0",
+  "description": "MCGI Production Attendance & Monitoring System - Native Desktop Application",
+  "main": "electron_main.js",
+  "scripts": {
+    "start": "electron .",
+    "app": "python app_launcher.py"
+  },
+  "keywords": [
+    "mcgi",
+    "attendance",
+    "monitoring",
+    "production",
+    "kiosk"
+  ],
+  "author": "MCGI Productions",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}

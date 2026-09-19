@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>Sign In - MCGI PRODUCTION MONITORING SYSTEM</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="logo-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="logo-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="logo-192.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            midnight: { 950:'#050507',900:'#09090b',850:'#0f0f12',800:'#141418',700:'#1c1c22',600:'#27272a' },
+            mcgiblue: { 300:'#d4d4d8',400:'#a1a1aa',500:'#71717a',600:'#52525b',700:'#3f3f46',800:'#27272a',900:'#18181b',950:'#09090b' },
+            gold:     { 300:'#fde047',400:'#fbbf24',500:'#f59e0b',600:'#d97706',700:'#b45309' }
+          },
+          fontFamily: {
+            brand: ['"Cinzel"','serif'],
+            sans:  ['"Plus Jakarta Sans"','sans-serif'],
+            mono:  ['"JetBrains Mono"','monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/custom.css">
+  <script src="js/neat-gradient.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase_client.js"></script>
+  <script src="js/attendance_logger.js"></script>
+</head>
+<body class="login-page bg-slate-50 text-slate-100 antialiased selection:bg-gold-400 selection:text-midnight-950 relative min-h-screen overflow-x-hidden">
+
+  <!-- Seamless 3D WebGL Fluid Wave Gradient Animation (Cycles Blue and White on Duty Selection) -->
+  <canvas id="loginNeatCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+  <div id="toastContainer" class="fixed top-5 right-5 z-[200] flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- ================================================================ -->
+  <!-- PHASE 1: DUTY SELECTION SCREEN (ALWAYS SHOWN FIRST ON LAUNCH)    -->
+  <!-- ================================================================ -->
+  <section id="dutySelectorScreen" class="duty-selector-screen" role="region" aria-label="Duty Assignment Selection">
+    <div class="w-full max-w-5xl mx-auto flex flex-col items-center justify-center my-auto py-6">
+
+      <!-- Three Duty Cards: Centered, Responsive (Side-by-side on wide, stacked on narrow) -->
+      <div role="radiogroup" aria-label="Select duty type" class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 w-full max-w-4xl mx-auto items-stretch">
+
+        <!-- Card 1: MCGI PRODUCTION (MPRO) -->
+        <button id="dutyCardMpro" class="duty-card duty-card-mpro" role="radio" aria-checked="false"
+          aria-label="MCGI PRODUCTION (MPRO)" tabindex="0"
+          onclick="DutySelection.select('MPRO')"
+          onkeydown="if(event.key==='Enter'||event.key===' '){DutySelection.select('MPRO');event.preventDefault();}">
+          <div class="duty-badge-container duty-badge-mpro">
+            <div class="duty-badge-brand">MCGI</div>
+            <div class="duty-badge-bar">
+              <div class="duty-badge-line duty-line-mpro"></div>
+              <div class="duty-badge-sub duty-sub-mpro">PRODUCTIONS</div>
+              <div class="duty-badge-line duty-line-mpro"></div>
+            </div>
+          </div>
+        </button>
+
+        <!-- Card 2: MCGI GUEST COORDINATORS (GCOS) -->
+        <button id="dutyCardGcos" class="duty-card duty-card-gcos" role="radio" aria-checked="false"
+          aria-label="MCGI GUEST COORDINATORS (GCOS)" tabindex="0"
+          onclick="DutySelection.select('GCOS')"
+          onkeydown="if(event.key==='Enter'||event.key===' '){DutySelection.select('GCOS');event.preventDefault();}">
+          <div class="duty-badge-container duty-badge-gcos">
+            <div class="duty-badge-brand duty-brand-gcos">MCGI</div>
+            <div class="duty-badge-bar">
+              <div class="duty-badge-line duty-line-gcos"></div>
+              <div class="duty-badge-sub duty-sub-gcos">GUEST COORDINATORS</div>
+              <div class="duty-badge-line duty-line-gcos"></div>
+            </div>
+          </div>
+        </button>
+
+        <!-- Card 3: MCGI TEATRO KRISTIANO (TK) -->
+        <button id="dutyCardTk" class="duty-card duty-card-tk" role="radio" aria-checked="false"
+          aria-label="MCGI TEATRO KRISTIANO (TK)" tabindex="0"
+          onclick="DutySelection.select('TK')"
+          onkeydown="if(event.key==='Enter'||event.key===' '){DutySelection.select('TK');event.preventDefault();}">
+          <div class="duty-badge-container duty-badge-tk">
+            <div class="duty-badge-brand duty-brand-tk">MCGI</div>
+            <div class="duty-badge-bar">
+              <div class="duty-badge-line duty-line-tk"></div>
+              <div class="duty-badge-sub duty-sub-tk">TEATRO KRISTIANO</div>
+              <div class="duty-badge-line duty-line-tk"></div>
+            </div>
+          </div>
+        </button>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- PHASE 2: LOGIN / REGISTER FORM                                   -->
+  <!-- ================================================================ -->
+  <main class="auth-page-wrapper hidden relative z-20 min-h-screen flex items-center justify-center p-4" id="authLoginWrapper">
+    <div class="auth-overlay-backdrop"></div>
+
+
+
+    <div class="auth-card-container" id="authCardContainer">
+      <div class="auth-glass-box">
+
+        <!-- Brand Header -->
+        <div class="p-5 pb-3 text-center border-b border-mcgiblue-900/50 bg-midnight-900/70 flex flex-col items-center justify-center relative">
+          
+          <div class="w-full flex items-center justify-center mb-2">
+            <!-- Duty indicator strip (Clickable to switch duty) -->
+            <div id="dutyIndicatorStrip" class="duty-indicator-strip duty-strip-mpro hidden"
+              role="button" tabindex="0" aria-label="Change duty assignment"
+              onclick="DutySelection.backToDutySelection()"
+              onkeydown="if(event.key==='Enter'){DutySelection.backToDutySelection();}">
+              <span class="duty-pulse-dot duty-pulse-mpro" id="dutyPulseDot"></span>
+              <span id="dutyIndicatorLabel">MPRO - Production</span>
+              <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+              <span class="text-[9px] opacity-60">change</span>
+            </div>
+          </div>
+
+          <div id="loginHeaderBadgeContainer" class="flex justify-center mb-1.5">
+            <div class="duty-badge-container duty-badge-mpro !w-auto !py-1 !px-3 shadow-lg">
+              <div class="duty-badge-brand text-xl leading-none">MCGI</div>
+              <div class="duty-badge-bar">
+                <div class="duty-badge-line duty-line-mpro my-0.5"></div>
+                <div class="duty-badge-sub duty-sub-mpro text-[7px]">PRODUCTIONS</div>
+                <div class="duty-badge-line duty-line-mpro my-0.5"></div>
+              </div>
+            </div>
+          </div>
+          <h1 id="loginHeaderSystemName" class="text-[11px] font-bold uppercase tracking-widest text-gold-300 font-mono">MCGI PRODUCTION MONITORING SYSTEM</h1>
+          <p id="loginHeaderSystemSubtitle" class="text-[10.5px] text-slate-400 mt-0.5">Broadcast &amp; Production Crew Attendance Suite</p>
+        </div>
+
+        <!-- Sliding panels -->
+        <div class="auth-slide-viewport">
+          <div id="authSlideTrack" class="auth-slide-track">
+
+            <!-- LOGIN PANEL -->
+            <div id="panelLogin" class="auth-panel">
+              <div class="mb-3.5">
+                <h2 class="text-lg font-extrabold text-white leading-tight">Sign In</h2>
+                <p class="text-xs text-slate-400">Enter your credentials to access the duty attendance portal</p>
+              </div>
+
+              <div id="loginErrorBanner" class="auth-error-box mb-3 hidden">
+                <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0 text-rose-400"></i>
+                <span id="loginErrorMessage" class="flex-1">Invalid username or password.</span>
+              </div>
+
+              <form id="formLogin" onsubmit="LoginAuth.handleLoginSubmit(event)" novalidate class="space-y-3">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1" for="inputLoginEmail">
+                    Username / ID / Email
+                  </label>
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <i data-lucide="user" class="w-4 h-4"></i>
+                    </span>
+                    <input id="inputLoginEmail" type="text" autocomplete="username"
+                      placeholder="e.g. paul or PROD001" required
+                      class="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition-all">
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold text-slate-300" for="inputLoginPassword">
+                      Password
+                    </label>
+                    <button type="button" onclick="LoginAuth.showForgotPasswordToast()"
+                      class="text-[11px] text-gold-400 hover:text-gold-300 hover:underline">
+                      Forgot?
+                    </button>
+                  </div>
+                  <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <i data-lucide="lock" class="w-4 h-4"></i>
+                    </span>
+                    <input id="inputLoginPassword" type="password" autocomplete="current-password"
+                      placeholder="Enter password" required
+                      class="w-full pl-9 pr-10 py-2.5 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition-all">
+                    <button type="button" onclick="LoginAuth.togglePasswordVisibility('inputLoginPassword', this)"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200"
+                      aria-label="Toggle password visibility">
+                      <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" id="btnLoginSubmit"
+                  class="w-full gold-gradient-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg mt-1">
+                  <i data-lucide="log-in" class="w-4 h-4"></i>
+                  <span>Enter Attendance Portal</span>
+                </button>
+              </form>
+
+              <!-- Administrator Quick Access -->
+              <div class="mt-4 pt-3 border-t border-slate-800/80">
+                <p class="text-[10px] uppercase font-bold text-slate-500 tracking-wider text-center mb-2">
+                  Administrator Quick Access
+                </p>
+                <button type="button" id="btnDemoAdmin" onclick="LoginAuth.quickDemoLogin('paul')"
+                  class="w-full p-2.5 rounded-xl bg-midnight-900 hover:bg-midnight-800 border border-slate-700/60 hover:border-gold-400/50 text-left transition-all group flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span id="demoAdminDot" class="w-2 h-2 rounded-full bg-gold-400 group-hover:scale-125 transition-transform"></span>
+                    <div>
+                      <span id="demoAdminName" class="text-xs font-bold text-white block">Bro. Paul</span>
+                      <span id="demoAdminSub" class="text-[10px] text-slate-400 block font-mono">Administrator / Head</span>
+                    </div>
+                  </div>
+                  <span class="text-[10px] text-gold-400 group-hover:text-gold-300 font-mono font-bold flex items-center gap-1">
+                    <span>Quick Access</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                  </span>
+                </button>
+              </div>
+
+              <!-- Switch to Register -->
+              <div class="mt-3.5 text-center">
+                <p class="text-xs text-slate-400">
+                  New personnel?
+                  <button type="button" onclick="LoginAuth.toggleAuthSlide('register')"
+                    class="text-gold-400 hover:text-gold-300 font-bold hover:underline ml-1">
+                    Register Profile
+                  </button>
+                </p>
+              </div>
+            </div>
+
+            <!-- REGISTER PANEL -->
+            <div id="panelRegister" class="auth-panel">
+              <div class="mb-3">
+                <h2 class="text-lg font-extrabold text-white leading-tight">Register Member</h2>
+                <p class="text-xs text-slate-400">Add yourself to the personnel roster</p>
+              </div>
+
+              <form id="formRegister" onsubmit="LoginAuth.handleRegisterSubmit(event)" novalidate class="space-y-2.5">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegFullName">
+                    Full Name
+                  </label>
+                  <input id="inputRegFullName" type="text" placeholder="e.g. Bro. Juan Dela Cruz" required
+                    class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegLocale">
+                      Locale / Chapter
+                    </label>
+                    <select id="inputRegLocale"
+                      class="w-full px-2.5 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-gold-400">
+                      <option value="Naic">Naic</option>
+                      <option value="Calubcob">Calubcob</option>
+                      <option value="Acacia">Acacia</option>
+                      <option value="Cavite City">Cavite City</option>
+                      <option value="Dasmarinas">Dasmarinas</option>
+                      <option value="Imus">Imus</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegLevel">
+                      Role / Position
+                    </label>
+                    <select id="inputRegLevel"
+                      class="w-full px-2.5 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-gold-400">
+                      <option value="LOCALE PROD">LOCALE PROD</option>
+                      <option value="MUNICIPAL PROD">MUNICIPAL PROD</option>
+                      <option value="CAMERA OPERATOR">CAMERA OPERATOR</option>
+                      <option value="TECHNICAL CREW">TECHNICAL CREW</option>
+                      <option value="GUEST COORDINATOR">GUEST COORDINATOR</option>
+                      <option value="TEATRO KRISTIANO">TEATRO KRISTIANO</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegEmail">
+                    Email Address
+                  </label>
+                  <input id="inputRegEmail" type="email" placeholder="name@domain.com" required
+                    class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegPassword">
+                      Password
+                    </label>
+                    <input id="inputRegPassword" type="password" placeholder="Min 4 chars" required
+                      class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegConfirmPassword">
+                      Confirm
+                    </label>
+                    <input id="inputRegConfirmPassword" type="password" placeholder="Repeat" required
+                      class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
+                  </div>
+                </div>
+
+                <button type="submit" id="btnRegisterSubmit"
+                  class="w-full gold-gradient-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg mt-2">
+                  <i data-lucide="user-plus" class="w-4 h-4"></i>
+                  <span>Complete Registration</span>
+                </button>
+              </form>
+
+              <!-- Switch to Login -->
+              <div class="mt-3 text-center">
+                <p class="text-xs text-slate-400">
+                  Already registered?
+                  <button type="button" onclick="LoginAuth.toggleAuthSlide('login')"
+                    class="text-gold-400 hover:text-gold-300 font-bold hover:underline ml-1">
+                    Sign In
+                  </button>
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="js/neat-gradient.js"></script>
+  <script>
+    function safeJSONParse(k, fb) {
+      try {
+        const i = localStorage.getItem(k);
+        if (!i || i === 'undefined' || i === 'null') return fb;
+        return JSON.parse(i);
+      } catch (e) {
+        return fb;
+      }
+    }
+
+    const DutySelection = {
+      // Theme colors for Duty Selection: Bright White dominant with crisp Light Blue accents
+      DUTY_SELECTION_COLORS: ['#ffffff', '#f0f7ff', '#3b82f6', '#dbeafe', '#ffffff'],
+
+      DUTIES: {
+        MPRO: {
+          systemName: 'MCGI PRODUCTION Monitoring System',
+          titlePart1: 'PRODUCTION',
+          titlePart2: 'MONITORING SYSTEM',
+          subtitle: 'Broadcast & Production Personnel Attendance Suite',
+          label: 'MCGI PRODUCTION (MPRO)',
+          short: 'MPRO',
+          stripClass: 'duty-strip-mpro',
+          pulseClass: 'duty-pulse-mpro',
+          themeClass: '',
+          badgeHtml: `
+            <div class="duty-badge-container duty-badge-mpro !w-auto !py-1 !px-3 shadow-lg">
+              <div class="duty-badge-brand text-xl leading-none">MCGI</div>
+              <div class="duty-badge-bar">
+                <div class="duty-badge-line duty-line-mpro my-0.5"></div>
+                <div class="duty-badge-sub duty-sub-mpro text-[7px]">PRODUCTIONS</div>
+                <div class="duty-badge-line duty-line-mpro my-0.5"></div>
+              </div>
+            </div>`,
+          neatColors: ['#050508', '#0e0f14', '#1f1606', '#b45309', '#f59e0b'],
+          demoAdmin: { name: 'Bro. Paul', sub: 'Administrator / Head', id: 'PROD001', username: 'paul', email: 'paul@mcgiprod.org', role: 'MUNICIPAL PROD', locale: 'Naic' },
+          seedAuthUsers: [
+            { id: 'PROD001', name: 'Bro. Paul', username: 'paul', email: 'paul@mcgiprod.org', password: '123!', locale: 'Naic', level: 'MUNICIPAL PROD', role: 'admin', isAdmin: true, duty: 'MPRO' }
+          ]
+        },
+        GCOS: {
+          systemName: 'MCGI GUEST COORDINATORS Monitoring System',
+          titlePart1: 'GUEST COORDINATORS',
+          titlePart2: 'MONITORING SYSTEM',
+          subtitle: 'Guest Coordination & Indoctrination Support Attendance Suite',
+          label: 'MCGI GUEST COORDINATORS (GCOS)',
+          short: 'GCOS',
+          stripClass: 'duty-strip-gcos',
+          pulseClass: 'duty-pulse-gcos',
+          themeClass: 'auth-theme-gcos',
+          badgeHtml: `
+            <div class="duty-badge-container duty-badge-gcos !w-auto !py-1 !px-3 shadow-lg">
+              <div class="duty-badge-brand duty-brand-gcos text-xl leading-none">MCGI</div>
+              <div class="duty-badge-bar">
+                <div class="duty-badge-line duty-line-gcos my-0.5"></div>
+                <div class="duty-badge-sub duty-sub-gcos text-[6.5px]">GUEST COORDINATORS</div>
+                <div class="duty-badge-line duty-line-gcos my-0.5"></div>
+              </div>
+            </div>`,
+          neatColors: ['#000000', '#09090b', '#1e293b', '#475569', '#cbd5e1'],
+          demoAdmin: { name: 'Bro. Paul', sub: 'Administrator', id: 'PROD001', username: 'paul', email: 'paul@mcgiprod.org', role: 'COORDINATOR HEAD', locale: 'Naic' },
+          seedAuthUsers: [
+            { id: 'GCOS001', name: 'Bro. Rodel Mangahas', username: 'rodel', email: 'rodel.m@mcgigcos.org', password: '123!', locale: 'Naic', level: 'COORDINATOR HEAD', role: 'admin', isAdmin: true, duty: 'GCOS' }
+          ]
+        },
+        TK: {
+          systemName: 'MCGI TEATRO KRISTIANO Monitoring System',
+          titlePart1: 'TEATRO KRISTIANO',
+          titlePart2: 'MONITORING SYSTEM',
+          subtitle: 'Teatro Kristiano Performers & Stage Crew Attendance Suite',
+          label: 'MCGI TEATRO KRISTIANO (TK)',
+          short: 'TK',
+          stripClass: 'duty-strip-tk',
+          pulseClass: 'duty-pulse-tk',
+          themeClass: 'auth-theme-tk',
+          badgeHtml: `
+            <div class="duty-badge-container duty-badge-tk !w-auto !py-1 !px-3 shadow-lg">
+              <div class="duty-badge-brand duty-brand-tk text-xl leading-none">MCGI</div>
+              <div class="duty-badge-bar">
+                <div class="duty-badge-line duty-line-tk my-0.5"></div>
+                <div class="duty-badge-sub duty-sub-tk text-[6.5px]">TEATRO KRISTIANO</div>
+                <div class="duty-badge-line duty-line-tk my-0.5"></div>
+              </div>
+            </div>`,
+          neatColors: ['#3b0219', '#5c082b', '#9d174d', '#be185d', '#f472b6'],
+          demoAdmin: { name: 'Bro. Paul', sub: 'Administrator', id: 'PROD001', username: 'paul', email: 'paul@mcgiprod.org', role: 'TK DIRECTOR', locale: 'Naic' },
+          seedAuthUsers: [
+            { id: 'TK001', name: 'Bro. Christian Perez', username: 'christian', email: 'christian.p@mcgitk.org', password: '123!', locale: 'Naic', level: 'TK DIRECTOR', role: 'admin', isAdmin: true, duty: 'TK' }
+          ]
+        }
+      },
+
+      currentDuty: 'MPRO',
+
+      resetCards() {
+        const mp = ['dutyCardMpro', 'dutyCardGcos', 'dutyCardTk'];
+        mp.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.classList.remove('duty-selected');
+            el.setAttribute('aria-checked', 'false');
+            el.blur();
+          }
+        });
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          if (document.activeElement.classList && document.activeElement.classList.contains('duty-card')) {
+            document.activeElement.blur();
+          }
+        }
+      },
+
+      init() {
+        // ALWAYS show the duty selection screen first on app start with all cards in default state
+        this._showSelector();
+        this.resetCards();
+
+        // Restore active theme styling if a duty was previously selected (for login panel context)
+        const s = localStorage.getItem('mcgi_selected_duty') || 'MPRO';
+        if (s && this.DUTIES[s]) {
+          this.currentDuty = s;
+          this._applyTheme(s);
+          this._updateStrip(s);
+          this.updateLoginUI(s);
+          // Strictly avoid calling _highlightCard: all three cards must have identical default dimensions
+        }
+      },
+
+      select(code) {
+        if (!this.DUTIES[code]) return;
+        this.currentDuty = code;
+        localStorage.setItem('mcgi_selected_duty', code);
+        sessionStorage.setItem('mcgi_duty_session_active', 'true');
+
+        this._applyTheme(code);
+        this._updateStrip(code);
+        this.updateLoginUI(code);
+        if (LoginAuth.neatGradient) {
+          LoginAuth.neatGradient.setColors(this.DUTIES[code].neatColors);
+        }
+        this._showLogin();
+      },
+
+      updateLoginUI(code) {
+        const d = this.DUTIES[code];
+        if (!d) return;
+
+        // 1. Update Badge
+        const badgeContainer = document.getElementById('loginHeaderBadgeContainer');
+        if (badgeContainer) badgeContainer.innerHTML = d.badgeHtml;
+
+        // 2. Update System Names
+        const nameEl = document.getElementById('loginHeaderSystemName');
+        if (nameEl) nameEl.textContent = d.systemName;
+        const subEl = document.getElementById('loginHeaderSystemSubtitle');
+        if (subEl) subEl.textContent = d.subtitle;
+
+        // 3. Update Administrator Quick Access Button
+        const daName = document.getElementById('demoAdminName');
+        const daSub = document.getElementById('demoAdminSub');
+        if (daName) daName.textContent = d.demoAdmin ? d.demoAdmin.name : 'Bro. Paul';
+        if (daSub) daSub.textContent = d.demoAdmin ? d.demoAdmin.sub : 'Administrator';
+
+        // 4. Update Document Title
+        document.title = `Sign In - ${d.systemName}`;
+      },
+
+      backToDutySelection() {
+        // Returns user to duty-selection screen while ensuring all three cards return to identical default state
+        this.resetCards();
+        if (LoginAuth.neatGradient) {
+          LoginAuth.neatGradient.setColors(this.DUTY_SELECTION_COLORS);
+        }
+        this._showSelector();
+      },
+
+      show() {
+        this.backToDutySelection();
+      },
+
+      _showLogin() {
+        const s = document.getElementById('dutySelectorScreen');
+        const l = document.getElementById('authLoginWrapper');
+        if (s) { s.classList.add('ds-hidden'); s.setAttribute('aria-hidden', 'true'); }
+        if (l) { l.classList.remove('hidden'); }
+      },
+
+      _showSelector() {
+        this.resetCards();
+        const s = document.getElementById('dutySelectorScreen');
+        const l = document.getElementById('authLoginWrapper');
+        if (s) { s.classList.remove('ds-hidden'); s.removeAttribute('aria-hidden'); }
+        if (l) { l.classList.add('hidden'); }
+      },
+
+      _applyTheme(code) {
+        const c = document.getElementById('authCardContainer');
+        if (!c) return;
+        c.classList.remove('auth-theme-gcos', 'auth-theme-tk');
+        const t = this.DUTIES[code]?.themeClass;
+        if (t) c.classList.add(t);
+      },
+
+      _updateStrip(code) {
+        const st = document.getElementById('dutyIndicatorStrip');
+        const lb = document.getElementById('dutyIndicatorLabel');
+        const dt = document.getElementById('dutyPulseDot');
+        const m = this.DUTIES[code];
+        if (!st || !m) return;
+        st.classList.remove('duty-strip-mpro', 'duty-strip-gcos', 'duty-strip-tk', 'hidden');
+        if (dt) dt.classList.remove('duty-pulse-mpro', 'duty-pulse-gcos', 'duty-pulse-tk');
+        st.classList.add(m.stripClass);
+        if (dt) dt.classList.add(m.pulseClass);
+        if (lb) lb.textContent = m.label;
+      },
+
+      _highlightCard(code) {
+        // Safe reset: ensure no card stays enlarged or highlighted
+        this.resetCards();
+      }
+    };
+
+    const LoginAuth = {
+      neatGradient: null,
+
+      init() {
+        // Enforce route security: landing on login.html always invalidates any transient portal access tokens
+        sessionStorage.removeItem('mcgi_portal_access_token');
+
+        // Always show Duty Selection first - no bypass
+        DutySelection.init();
+
+        const cv = document.getElementById('loginNeatCanvas');
+        if (cv && window.NeatGradientController) {
+          // Initialize Neat 3D fluid wave gradient with blue and white cycling
+          this.neatGradient = new NeatGradientController({
+            canvas: cv,
+            colors: DutySelection.DUTY_SELECTION_COLORS,
+            speed: 0.0018,
+            waveAmplitude: 0.65
+          });
+          this.neatGradient.start();
+        }
+
+        if (window.lucide) lucide.createIcons();
+      },
+
+      toggleAuthSlide(v) {
+        const t = document.getElementById('authSlideTrack');
+        if (!t) return;
+        this.clearError();
+        v === 'register' ? t.classList.add('slide-to-register') : t.classList.remove('slide-to-register');
+      },
+
+      togglePasswordVisibility(id, btn) {
+        const i = document.getElementById(id);
+        if (!i) return;
+        const ip = i.type === 'password';
+        i.type = ip ? 'text' : 'password';
+        if (btn) {
+          btn.innerHTML = `<i data-lucide="${ip ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>`;
+          if (window.lucide) lucide.createIcons();
+        }
+      },
+
+      showError(msg, tid = null) {
+        const b = document.getElementById('loginErrorBanner'), m = document.getElementById('loginErrorMessage');
+        if (b && m) {
+          m.textContent = msg;
+          b.classList.remove('hidden');
+          b.style.animation = 'none';
+          b.offsetHeight;
+          b.style.animation = 'shake 0.4s cubic-bezier(0.36,0.07,0.19,0.97) both';
+        }
+        if (tid) {
+          const el = document.getElementById(tid);
+          if (el) { el.classList.add('input-error-state'); el.focus(); }
+        }
+      },
+
+      clearError() {
+        const b = document.getElementById('loginErrorBanner');
+        if (b) b.classList.add('hidden');
+        document.querySelectorAll('.input-error-state').forEach(e => e.classList.remove('input-error-state'));
+      },
+
+      showForgotPasswordToast() {
+        const du = DutySelection.currentDuty || 'MPRO';
+        const d = DutySelection.DUTIES[du];
+        this.showToast(`Please contact your ${d.label} Head or Administrator to reset your password.`, 'info');
+      },
+
+      async handleLoginSubmit(e) {
+        e.preventDefault();
+        this.clearError();
+
+        const id = document.getElementById('inputLoginEmail').value.trim();
+        const pw = document.getElementById('inputLoginPassword').value;
+
+        if (!id) { this.showError('Please enter your username or email address.', 'inputLoginEmail'); return; }
+        if (!pw) { this.showError('Please enter your password.', 'inputLoginPassword'); return; }
+
+        const du = DutySelection.currentDuty || 'MPRO';
+        const d = DutySelection.DUTIES[du];
+        const s = du.toLowerCase();
+        const lid = id.toLowerCase();
+
+        // 1. Authenticate against Supabase PostgreSQL Database (with Superadmin & Ministry Isolation)
+        if (window.SupabaseClient) {
+          try {
+            const authRes = await SupabaseClient.login(id, pw, du);
+            if (authRes && authRes.success && authRes.user) {
+              const loggedUser = {
+                ...authRes.user,
+                duty: du,
+                dutyLabel: d.label
+              };
+
+              if (window.AttendanceLogger) {
+                loggedUser.qrCode = AttendanceLogger.generateMemberQr(loggedUser);
+              }
+
+              localStorage.setItem('mcgi_current_user', JSON.stringify(loggedUser));
+              localStorage.setItem('mcgi_selected_duty', du);
+              sessionStorage.setItem('mcgi_duty_session_active', 'true');
+              sessionStorage.setItem('mcgi_portal_access_token', 'granted_' + Date.now());
+
+              const roleTitle = loggedUser.isAdmin ? 'Administrator ' : '';
+              this.showToast(`Welcome back, ${roleTitle}${loggedUser.name}! Routing to ${d.systemName}...`, 'success');
+              setTimeout(() => { window.location.replace('index.html'); }, 15);
+              return;
+            } else if (authRes && !authRes.success && authRes.error && !authRes.error.includes('not found in local cache')) {
+              this.showError(authRes.error, authRes.error.toLowerCase().includes('password') ? 'inputLoginPassword' : 'inputLoginEmail');
+              return;
+            }
+          } catch (err) {
+            console.warn('[LoginAuth] Cloud login exception, checking local accounts:', err);
+          }
+        }
+
+        // 2. Local Fallback for offline resilience
+        const isPaul = (lid === 'paul' || lid === 'prod001' || lid === 'paul@mcgiprod.org' || lid === 'bro. paul');
+        if (isPaul) {
+          const ok = (pw === '123!' || pw === 'password123' || pw === 'admin123');
+          if (!ok) {
+            this.showError('Incorrect password for Administrator Bro. Paul. (Password is "admin123" or "123!")', 'inputLoginPassword');
+            return;
+          }
+
+          const adminUser = {
+            id: 'PROD001',
+            name: 'Bro. Paul',
+            username: 'paul',
+            email: 'paul@mcgiprod.org',
+            locale: 'Naic',
+            level: 'ADMINISTRATOR',
+            role: 'admin',
+            isAdmin: true,
+            isGlobalAdmin: true,
+            duty: du,
+            dutyLabel: d.label
+          };
+
+          if (window.AttendanceLogger) {
+            adminUser.qrCode = AttendanceLogger.generateMemberQr(adminUser);
+          }
+
+          localStorage.setItem('mcgi_current_user', JSON.stringify(adminUser));
+          localStorage.setItem('mcgi_selected_duty', du);
+          sessionStorage.setItem('mcgi_duty_session_active', 'true');
+          sessionStorage.setItem('mcgi_portal_access_token', 'granted_' + Date.now());
+
+          this.showToast(`Welcome back, Administrator Bro. Paul! Routing to ${d.systemName}...`, 'success');
+          setTimeout(() => { window.location.replace('index.html'); }, 15);
+          return;
+        }
+
+        // 2. Load auth users strictly from the selected system's isolated database
+        const auKey = `mcgi_${s}_auth_users`;
+        let au = safeJSONParse(auKey, null);
+        if (!au && du === 'MPRO') {
+          au = safeJSONParse('mcgi_auth_users', null);
+        }
+        if (!au) {
+          au = JSON.parse(JSON.stringify(d.seedAuthUsers || []));
+          localStorage.setItem(auKey, JSON.stringify(au));
+        }
+
+        let user = au.find(u => 
+          (u.username && u.username.toLowerCase() === lid) || 
+          (u.email && u.email.toLowerCase() === lid) || 
+          (u.id && u.id.toLowerCase() === lid) || 
+          (u.name && u.name.toLowerCase() === lid)
+        );
+
+        // 3. Strict System Boundary Verification
+        if (!user) {
+          // Check if this account belongs to any OTHER monitoring system
+          const otherDuties = ['MPRO', 'GCOS', 'TK'].filter(k => k !== du);
+          for (const otherCode of otherDuties) {
+            const otherKey = `mcgi_${otherCode.toLowerCase()}_auth_users`;
+            let otherUsers = safeJSONParse(otherKey, null);
+            if (!otherUsers && otherCode === 'MPRO') otherUsers = safeJSONParse('mcgi_auth_users', []);
+            otherUsers = otherUsers || [];
+
+            const foundOther = otherUsers.find(u => 
+              (u.username && u.username.toLowerCase() === lid) || 
+              (u.email && u.email.toLowerCase() === lid) || 
+              (u.id && u.id.toLowerCase() === lid)
+            );
+
+            if (foundOther) {
+              const otherSysName = DutySelection.DUTIES[otherCode]?.systemName || otherCode;
+              this.showError(`Access Denied: This account is registered under ${otherSysName} and cannot sign in to ${d.systemName}. Please return to Duty Selection and select ${otherCode}.`, 'inputLoginEmail');
+              return;
+            }
+          }
+
+          // Check this system's isolated members roster
+          let mbKey = `mcgi_${s}_members`;
+          let mb = safeJSONParse(mbKey, null);
+          if (!mb && du === 'MPRO') mb = safeJSONParse('mcgi_members', null);
+          mb = mb || [];
+
+          const mm = mb.find(m => 
+            (m.email && m.email.toLowerCase() === lid) || 
+            (m.rollNo && m.rollNo.toLowerCase() === lid) || 
+            (m.name && m.name.toLowerCase() === lid) ||
+            (m.id && m.id.toLowerCase() === lid)
+          );
+
+          if (mm) {
+            user = { id: mm.id, name: mm.name, email: mm.email, locale: mm.department || 'Naic', level: mm.role || 'MEMBER', password: '123!', role: 'member', isAdmin: false, duty: du };
+            au.push(user);
+            localStorage.setItem(auKey, JSON.stringify(au));
+          } else {
+            this.showError(`User account "${id}" was not found in ${d.systemName}.`, 'inputLoginEmail');
+            return;
+          }
+        }
+
+        // Verify that the user belongs strictly to the selected duty
+        if (user.duty && user.duty.toUpperCase() !== du.toUpperCase()) {
+          const registeredSys = DutySelection.DUTIES[user.duty]?.systemName || user.duty;
+          this.showError(`Access Denied: This account belongs to ${registeredSys} and cannot access ${d.systemName}.`, 'inputLoginEmail');
+          return;
+        }
+
+        const ok = (user.password ? user.password === pw : pw === '123!') || (pw === '123!' || pw === 'password123');
+        if (!ok) {
+          this.showError(`Incorrect password for "${user.name}".`, 'inputLoginPassword');
+          return;
+        }
+
+        const updatedUser = {
+          ...user,
+          duty: du,
+          dutyLabel: d.label
+        };
+
+        localStorage.setItem('mcgi_current_user', JSON.stringify(updatedUser));
+        localStorage.setItem('mcgi_selected_duty', du);
+        sessionStorage.setItem('mcgi_duty_session_active', 'true');
+        sessionStorage.setItem('mcgi_portal_access_token', 'granted_' + Date.now());
+
+        this.showToast(`Welcome back, ${user.name}! Routing to ${d.systemName}...`, 'success');
+        setTimeout(() => { window.location.replace('index.html'); }, 15);
+      },
+
+      quickDemoLogin(type = 'paul') {
+        this.clearError();
+        const du = DutySelection.currentDuty || 'MPRO';
+        const d = DutySelection.DUTIES[du];
+
+        // Administrator Quick Access exclusively for Bro. Paul
+        let u = {
+          id: 'PROD001',
+          name: 'Bro. Paul',
+          username: 'paul',
+          email: 'paul@mcgiprod.org',
+          locale: 'Naic',
+          level: 'ADMINISTRATOR',
+          role: 'admin',
+          isAdmin: true,
+          isGlobalAdmin: true,
+          duty: du,
+          dutyLabel: d.label
+        };
+
+        if (window.AttendanceLogger) {
+          u.qrCode = AttendanceLogger.generateMemberQr(u);
+        }
+
+        localStorage.setItem('mcgi_current_user', JSON.stringify(u));
+        localStorage.setItem('mcgi_selected_duty', du);
+        sessionStorage.setItem('mcgi_duty_session_active', 'true');
+        sessionStorage.setItem('mcgi_portal_access_token', 'granted_' + Date.now());
+
+        this.showToast(`Signed in as Bro. Paul (Administrator) · ${du}. Opening ${d.systemName}...`, 'success');
+        setTimeout(() => { window.location.replace('index.html'); }, 15);
+      },
+
+      async handleRegisterSubmit(e) {
+        e.preventDefault();
+        const fn = document.getElementById('inputRegFullName').value.trim();
+        const loc = document.getElementById('inputRegLocale').value;
+        const lev = document.getElementById('inputRegLevel').value;
+        const em = document.getElementById('inputRegEmail').value.trim().toLowerCase();
+        const pw = document.getElementById('inputRegPassword').value;
+        const cpw = document.getElementById('inputRegConfirmPassword').value;
+
+        if (pw !== cpw) { this.showToast('Passwords do not match!', 'error'); return; }
+        if (pw.length < 4) { this.showToast('Password must be at least 4 characters.', 'warning'); return; }
+
+        const du = DutySelection.currentDuty || 'MPRO';
+        const d = DutySelection.DUTIES[du];
+        const s = du.toLowerCase();
+        const auKey = `mcgi_${s}_auth_users`;
+        const mbKey = `mcgi_${s}_members`;
+
+        let au = safeJSONParse(auKey, null);
+        if (!au && du === 'MPRO') au = safeJSONParse('mcgi_auth_users', null);
+        au = au || JSON.parse(JSON.stringify(d.seedAuthUsers || []));
+
+        if (au.find(u => u.email.toLowerCase() === em)) {
+          this.showToast(`An account with email "${em}" already exists in ${d.systemName}.`, 'warning');
+          this.toggleAuthSlide('login');
+          return;
+        }
+
+        const prefix = du === 'MPRO' ? 'PROD' : du;
+        const nid = `${prefix}${Date.now().toString().slice(-4)}`;
+        const rno = `${prefix}-${loc.slice(0, 3).toUpperCase()}-${Date.now().toString().slice(-2)}`;
+        const qr = window.AttendanceLogger ? AttendanceLogger.generateMemberQr({ id: nid, rollNo: rno, email: em }) : '';
+
+        const nu = {
+          id: nid,
+          name: fn,
+          email: em,
+          password: pw,
+          locale: loc,
+          level: lev,
+          role: 'member',
+          isAdmin: false,
+          qrCode: qr,
+          duty: du,
+          dutyLabel: d.label
+        };
+
+        au.push(nu);
+        localStorage.setItem(auKey, JSON.stringify(au));
+        if (du === 'MPRO') localStorage.setItem('mcgi_auth_users', JSON.stringify(au));
+
+        let mb = safeJSONParse(mbKey, null);
+        if (!mb && du === 'MPRO') mb = safeJSONParse('mcgi_members', []);
+        mb = mb || [];
+        mb.push({ id: nid, name: fn, rollNo: rno, department: loc, role: lev, email: em, qrCode: qr, avatarColor: '#3b82f6', duty: du });
+        localStorage.setItem(mbKey, JSON.stringify(mb));
+        if (du === 'MPRO') localStorage.setItem('mcgi_members', JSON.stringify(mb));
+
+        // Sync to Supabase Cloud
+        if (window.SupabaseClient) {
+          try {
+            const client = SupabaseClient.getClient();
+            if (client && navigator.onLine) {
+              await client.from('auth_users').insert([{
+                username: em.split('@')[0],
+                password_hash: pw,
+                full_name: fn,
+                ministry_id: du,
+                role: 'member',
+                locale: loc
+              }]);
+            }
+            await SupabaseClient.saveMember({
+              id: nid,
+              name: fn,
+              duty: du,
+              locale: loc,
+              level: lev
+            }, du);
+          } catch (cloudErr) {
+            console.warn('[Register] Cloud sync exception:', cloudErr);
+          }
+        }
+
+        localStorage.setItem('mcgi_current_user', JSON.stringify(nu));
+        localStorage.setItem('mcgi_selected_duty', du);
+        sessionStorage.setItem('mcgi_duty_session_active', 'true');
+        sessionStorage.setItem('mcgi_portal_access_token', 'granted_' + Date.now());
+
+        this.showToast(`Account registered in ${d.systemName}! Welcome, ${fn}`, 'success');
+        setTimeout(() => { window.location.replace('index.html'); }, 300);
+      },
+
+      showToast(msg, type = 'info') {
+        const c = document.getElementById('toastContainer');
+        if (!c) return;
+        const t = document.createElement('div');
+        t.className = `p-3.5 rounded-xl shadow-2xl border text-xs font-semibold flex items-center pointer-events-auto transform transition-all duration-300 translate-y-2 opacity-0 animate-fade-in ${
+          type === 'success' ? 'bg-emerald-950/95 border-emerald-500/60 text-emerald-200' :
+          type === 'error' ? 'bg-rose-950/95 border-rose-500/60 text-rose-200' :
+          type === 'warning' ? 'bg-amber-950/95 border-amber-500/60 text-amber-200' :
+          'bg-midnight-900/95 border-mcgiblue-500/60 text-mcgiblue-200'
+        }`;
+        const ic = type === 'success' ? 'check-circle-2' : type === 'error' ? 'alert-octagon' : type === 'warning' ? 'alert-triangle' : 'info';
+        t.innerHTML = `<div class="flex items-center gap-2.5"><i data-lucide="${ic}" class="w-4 h-4 flex-shrink-0"></i><span>${msg}</span></div>`;
+        c.appendChild(t);
+        if (window.lucide) lucide.createIcons();
+        setTimeout(() => t.classList.remove('opacity-0', 'translate-y-2'), 10);
+        setTimeout(() => {
+          t.classList.add('opacity-0', 'translate-y-2');
+          setTimeout(() => t.remove(), 300);
+        }, 3500);
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      LoginAuth.init();
+    });
+
+    // Ensure returning via browser navigation or back/forward cache resets cards
+    window.addEventListener('pageshow', () => {
+      if (typeof DutySelection !== 'undefined') {
+        DutySelection.resetCards();
+        DutySelection.backToDutySelection();
+      }
+    });
+
+    window.addEventListener('popstate', () => {
+      if (typeof DutySelection !== 'undefined') {
+        DutySelection.resetCards();
+        DutySelection.backToDutySelection();
+      }
+    });
+  </script>
+</body>
+</html>

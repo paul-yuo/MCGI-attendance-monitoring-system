@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <!-- Mandatory Three-Card Selection & Protected Route Security Guard -->
+  <script>
+    (function() {
+      // 1. Check if user refreshed the page or navigated directly
+      var isReload = false;
+      try {
+        var navEntries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+        if (navEntries && navEntries.length > 0) {
+          isReload = (navEntries[0].type === 'reload');
+        } else if (performance.navigation) {
+          isReload = (performance.navigation.type === 1);
+        }
+      } catch (e) {}
+
+      var token = sessionStorage.getItem('mcgi_portal_access_token');
+      var user = localStorage.getItem('mcgi_current_user');
+      var dutyActive = sessionStorage.getItem('mcgi_duty_session_active');
+      var selectedDuty = sessionStorage.getItem('mcgi_selected_duty') || localStorage.getItem('mcgi_selected_duty');
+
+      // Requirement: Opening or refreshing must ALWAYS start at the Three-Card Selection Screen
+      // Bypasses to index.html without completing card selection + authentication are blocked
+      if (isReload || !token || !user || !dutyActive || !selectedDuty) {
+        sessionStorage.removeItem('mcgi_portal_access_token');
+        sessionStorage.removeItem('mcgi_duty_session_active');
+        window.location.replace('login.html');
+        return;
+      }
+
+      try {
+        var parsedUser = JSON.parse(user);
+        var isPaul = parsedUser.isGlobalAdmin === true || (parsedUser.username && parsedUser.username.toLowerCase() === 'paul');
+        if (!isPaul && parsedUser.duty && parsedUser.duty.toUpperCase() !== selectedDuty.toUpperCase()) {
+          sessionStorage.clear();
+          localStorage.removeItem('mcgi_current_user');
+          window.location.replace('login.html');
+          return;
+        }
+      } catch (e) {
+        window.location.replace('login.html');
+        return;
+      }
+
+      // Intercept browser back/forward cache restoration
+      window.addEventListener('pageshow', function(e) {
+        if (e.persisted || !sessionStorage.getItem('mcgi_portal_access_token')) {
+          sessionStorage.removeItem('mcgi_portal_access_token');
+          sessionStorage.removeItem('mcgi_duty_session_active');
+          window.location.replace('login.html');
+        }
+      });
+    })();
+  </script>
+  <title>MCGI PRODUCTION MONITORING SYSTEM</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="logo-16.png">
+  <link rel="icon" type="image/png" sizes="20x20" href="logo-20.png">
+  <link rel="icon" type="image/png" sizes="24x24" href="logo-24.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="logo-32.png">
+  <link rel="icon" type="image/png" sizes="40x40" href="logo-40.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="logo-48.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="logo-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="logo-192.png">
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Google Fonts: Plus Jakarta Sans, JetBrains Mono, & Cinzel for MCGI brand -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            midnight: {
+              950: '#050507',
+              900: '#09090b',
+              850: '#0f0f12',
+              800: '#141418',
+              700: '#1c1c22',
+              600: '#27272a',
+            },
+            mcgiblue: {
+              300: '#d4d4d8',
+              400: '#a1a1aa',
+              500: '#71717a',
+              600: '#52525b',
+              700: '#3f3f46',
+              800: '#27272a',
+              900: '#18181b',
+              950: '#09090b',
+            },
+            gold: {
+              300: '#fde047',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+            }
+          },
+          fontFamily: {
+            brand: ['"Cinzel"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="bg-midnight-950 text-slate-100 min-h-screen antialiased selection:bg-gold-400 selection:text-midnight-950 flex flex-col">
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN DASHBOARD APPLICATION (AUTHENTICATED VIEW)                           -->
+  <!-- ========================================================================= -->
+  <div id="appContainer" class="antialiased w-full relative">
+
+    <!-- Mobile Drawer Backdrop Overlay -->
+    <div id="mobileBackdrop" onclick="App.toggleMobileSidebar(false)"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="mainSidebar" class="w-full md:w-64 lg:w-72 bg-midnight-850 border-r border-mcgiblue-900/50 flex flex-col flex-shrink-0 z-30 no-print">
+      <!-- Brand Logo styled after MCGI PRODUCTIONS -->
+      <div class="p-5 flex items-center justify-between border-b border-mcgiblue-900/50 bg-midnight-900/80">
+        <div id="sidebarBrandContainer" class="flex items-center gap-3">
+          <!-- Logo Emblem -->
+          <div id="sidebarLogoBadge">
+            <div class="duty-badge-container duty-badge-mpro !w-auto !py-1 !px-2.5 shadow-inner">
+              <div class="duty-badge-brand text-lg leading-none">MCGI</div>
+              <div class="duty-badge-bar">
+                <div class="duty-badge-line duty-line-mpro my-0.5"></div>
+                <div class="duty-badge-sub duty-sub-mpro text-[6.5px]">PRODUCTIONS</div>
+                <div class="duty-badge-line duty-line-mpro my-0.5"></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <span id="sidebarSystemNamePart1" class="text-sm font-extrabold tracking-tight text-white block leading-tight">
+              PRODUCTION
+            </span>
+            <span id="sidebarSystemNamePart2" class="text-[10px] block uppercase font-mono tracking-wider text-gold-400 font-semibold">
+              MONITORING SYSTEM
+            </span>
+          </div>
+        </div>
+        <!-- Close button on mobile sidebar -->
+        <button onclick="App.toggleMobileSidebar(false)" class="md:hidden text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Live Digital Clock Widget in Sidebar -->
+      <div id="sidebarClockWidget" class="sidebar-widget mx-4 my-4 p-3.5 rounded-xl bg-midnight-800/90 border border-gold-400/20 shadow-inner">
+        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+          <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-gold-400"></i> Philippine Time</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-gold-400/10 text-gold-300 font-mono font-semibold">LIVE</span>
+        </div>
+        <div id="liveClockDisplay" class="text-xl font-extrabold font-mono text-gold-300 tracking-wider">--:--:--</div>
+        <div id="liveDateDisplay" class="text-xs text-slate-400 mt-0.5 font-medium">---, -- --- ----</div>
+      </div>
+
+      <!-- Role-Switcher Widget (Admin Only) -->
+      <div id="roleSwitcherWidget" class="sidebar-widget mx-4 mb-3 p-3 rounded-xl bg-midnight-800/90 border border-gold-400/20 hidden">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+          <i data-lucide="shield-half" class="w-3 h-3 text-gold-400"></i> View As Role
+        </p>
+        <div class="flex gap-1.5">
+          <button id="roleBtnAdmin" data-role="admin" onclick="App.switchViewRole('admin')" class="flex-1 px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all border border-gold-400/30 bg-gold-400 text-midnight-950">Admin</button>
+          <button id="roleBtnMember" data-role="member" onclick="App.switchViewRole('member')" class="flex-1 px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all border border-mcgiblue-700/50 text-slate-300 hover:bg-midnight-700">Member</button>
+          <button id="roleBtnSecretary" data-role="secretary" onclick="App.switchViewRole('secretary')" class="flex-1 px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all border border-mcgiblue-700/50 text-slate-300 hover:bg-midnight-700">Secretary</button>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <!-- Navigation Links -->
+      <nav class="flex-1 px-3 space-y-1.5 overflow-y-auto py-2">
+        <!-- ADMIN NAVIGATION GROUP (Displayed for Admins) -->
+        <div id="navGroupAdmin" class="space-y-1.5">
+          <!-- 1. DASHBOARD -->
+          <button data-tab-target="dashboard" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-gold-400 text-midnight-950 font-bold glow-gold-sm">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Dashboard</span>
+          </button>
+
+          <!-- 2. ATTENDANCE ENTRY (SINGLE RECORD ACTION) -->
+          <button data-tab-target="event-entry" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all border border-mcgiblue-500/20">
+            <i data-lucide="clipboard-pen" class="w-4 h-4 text-gold-400"></i>
+            <span>Record Attendance</span>
+          </button>
+
+
+
+          <!-- 4. ATTENDANCE SHEET -->
+          <button data-tab-target="attendance" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all">
+            <i data-lucide="calendar-check" class="w-4 h-4 text-gold-400"></i>
+            <span>Attendance Sheet</span>
+          </button>
+
+          <!-- 5. MEMBERS & ROSTER -->
+          <button data-tab-target="roster" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all">
+            <i data-lucide="users" class="w-4 h-4 text-gold-400"></i>
+            <span id="navRosterLabel">Production Members</span>
+          </button>
+
+          <!-- 6. LEAVES & EXCUSES -->
+          <button data-tab-target="leaves" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all">
+            <i data-lucide="calendar-off" class="w-4 h-4 text-gold-400"></i>
+            <span>Leave & Excuses</span>
+          </button>
+
+          <!-- 7. REPORTS -->
+          <button data-tab-target="reports" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all">
+            <i data-lucide="bar-chart-3" class="w-4 h-4 text-gold-400"></i>
+            <span>Reports & Analytics</span>
+          </button>
+
+          <!-- 8. SETTINGS -->
+          <button data-tab-target="settings" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all">
+            <i data-lucide="shield" class="w-4 h-4 text-gold-400"></i>
+            <span>Admin Settings</span>
+          </button>
+        </div>
+
+        <!-- MEMBER NAVIGATION GROUP (Displayed for Members) -->
+        <div id="navGroupMember" class="space-y-1.5 hidden">
+          <!-- 1. MY PROFILE & QR CODE -->
+          <button data-tab-target="my-profile" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all bg-gold-400 text-midnight-950 font-bold glow-gold-sm">
+            <i data-lucide="user" class="w-4 h-4"></i>
+            <span>My Profile & QR</span>
+          </button>
+
+          <!-- 2. LOG ATTENDANCE (SCAN QR) -->
+          <button data-tab-target="member-scan" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all">
+            <i data-lucide="camera" class="w-4 h-4 text-gold-400"></i>
+            <span>Scan to Log Attendance</span>
+          </button>
+
+          <!-- 3. SUBMIT LEAVE -->
+          <button data-tab-target="leaves" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all">
+            <i data-lucide="calendar-off" class="w-4 h-4 text-gold-400"></i>
+            <span>Submit Leave Request</span>
+          </button>
+        </div>
+
+        <!-- MY PROFILE LINK FOR ADMIN -->
+        <div id="navAdminProfileLink" class="pt-2 border-t border-mcgiblue-900/60">
+          <button data-tab-target="my-profile" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all">
+            <i data-lucide="user-check" class="w-4 h-4 text-gold-400"></i>
+            <span>My Profile</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Quick Stats Footer in Sidebar -->
+      <div class="p-4 border-t border-mcgiblue-900/50 bg-midnight-900/60">
+        <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+          <span>Active Duty Status</span>
+          <span id="kpiAttendanceRate" class="font-bold text-gold-300 font-mono">0%</span>
+        </div>
+        <div class="w-full bg-midnight-950 rounded-full h-2 overflow-hidden border border-mcgiblue-900/40">
+          <div id="kpiAttendanceProgressBar" class="h-full bg-gradient-to-r from-gold-500 to-gold-300 transition-all duration-500" style="width: 0%;"></div>
+        </div>
+        <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400">
+          <span class="text-mcgiblue-300 font-medium">MCGI Productions</span>
+          <span class="text-gold-400 font-medium">Naic • Calubcob • Acacia</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto max-h-screen">
+
+      <!-- Top Navigation Header with Responsive Hamburger & User Badge -->
+      <header class="min-h-[80px] sm:min-h-[88px] py-4 sm:py-5 border-b border-mcgiblue-900/60 bg-midnight-850/95 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20 no-print shadow-lg shadow-midnight-950/40">
+        <div class="flex items-center gap-3 sm:gap-4">
+          <!-- Mobile Hamburger Menu Button -->
+          <button 
+            type="button" 
+            onclick="App.toggleMobileSidebar(true)" 
+            class="md:hidden p-2.5 rounded-xl bg-midnight-800 text-gold-400 hover:text-white border border-mcgiblue-700/60 transition-all">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+
+          <div class="hidden sm:flex items-center gap-2.5 text-xs font-bold px-3.5 py-2 rounded-xl bg-midnight-800/90 text-gold-300 border border-gold-400/25 shadow-sm">
+            <i data-lucide="shield-check" class="w-4 h-4 text-mcgiblue-400"></i>
+            <span id="headerSystemTitleText" class="tracking-wide">MCGI PRODUCTION MONITORING SYSTEM</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-1"></span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <!-- Quick Action: Record Production Attendance -->
+          <button id="headerRecordAttendanceBtn" onclick="App.switchTab('event-entry')" class="gold-gradient-btn px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-2 shadow-md hover:scale-[1.02] active:scale-[0.98] transition-transform">
+            <i data-lucide="plus-circle" class="w-4 h-4 stroke-[3]"></i>
+            <span class="hidden sm:inline">Record Attendance</span>
+            <span class="sm:hidden">Record</span>
+          </button>
+
+          <!-- Active Duty Badge Indicator -->
+          <span id="headerDutyBadge" class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-bold uppercase tracking-wider bg-gold-400/15 text-gold-300 border border-gold-400/30 shadow-sm">
+            DUTY: MPRO
+          </span>
+
+          <!-- Cloud Database Sync Indicator -->
+          <span id="headerCloudSyncBadge" title="Supabase PostgreSQL Cloud Database (Singapore)" class="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10.5px] font-mono font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+            <span id="headerCloudSyncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="headerCloudSyncText">CLOUD SYNC</span>
+          </span>
+
+          <!-- Dark / Light Mode Switcher -->
+          <button 
+            id="headerThemeToggleBtn" 
+            type="button" 
+            onclick="App.toggleTheme()" 
+            class="p-2 sm:px-3 sm:py-2 rounded-xl bg-midnight-800 hover:bg-midnight-700 text-slate-300 hover:text-white border border-slate-700 transition-all text-xs flex items-center gap-1.5 font-semibold" 
+            title="Toggle Dark / Light Theme">
+            <i id="themeToggleIcon" data-lucide="sun" class="w-4 h-4 text-gold-400"></i>
+            <span id="themeToggleText" class="hidden md:inline font-mono text-[11px]">Light</span>
+          </button>
+
+          <!-- Logged In User Profile & Logout -->
+          <div class="flex items-center gap-3 pl-3 border-l border-slate-800">
+            <div id="headerUserAvatar" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gold-400 text-midnight-950 font-extrabold flex items-center justify-center text-xs sm:text-sm shadow-md ring-2 ring-gold-400/30">
+              BP
+            </div>
+            <div class="hidden lg:block text-left text-xs">
+              <span id="headerUserName" class="font-bold text-white block leading-tight text-sm">Bro. Paul</span>
+              <span id="headerUserRole" class="text-[10.5px] text-gold-400 font-mono font-semibold">MUNICIPAL PROD</span>
+            </div>
+            <button 
+              onclick="App.logout()" 
+              class="p-2 sm:px-3 sm:py-2 rounded-xl bg-midnight-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-500/40 transition-all text-xs flex items-center gap-1.5 font-semibold" 
+              title="Sign Out">
+              <i data-lucide="log-out" class="w-4 h-4"></i>
+              <span class="hidden xl:inline">Logout</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Tab Panels -->
+      <div class="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 flex-1">
+
+        <!-- ============================================== -->
+        <!-- TAB 1: DASHBOARD -->
+        <!-- ============================================== -->
+        <section id="panel-dashboard" class="tab-content-panel space-y-6">
+          <!-- Welcome Hero with MCGI Branding -->
+          <div class="glass-card p-5 sm:p-6 md:p-8 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border border-mcgiblue-500/30 glow-blue">
+            <div class="relative z-10">
+              <span class="text-xs font-bold uppercase tracking-widest text-gold-400 flex items-center gap-1.5 mb-1">
+                <i data-lucide="sparkles" class="w-4 h-4"></i> MCGI Productions Attendance & Deployment
+              </span>
+              <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                Production <span class="gold-gradient-text">Monitoring Overview</span>
+              </h1>
+              <p class="text-slate-400 text-xs sm:text-sm mt-1 max-w-xl">
+                Real-time monitoring of personnel attendance, church gatherings, special events, broadcast viewings, and indoctrination guest logs.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 relative z-10 w-full md:w-auto">
+              <button onclick="App.switchTab('event-entry')" class="flex-1 md:flex-initial gold-gradient-btn px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg">
+                <i data-lucide="clipboard-pen" class="w-4 h-4"></i>
+                <span>Log Event Attendance</span>
+              </button>
+              <button onclick="App.exportCSV()" class="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-midnight-800 hover:bg-midnight-700 text-xs font-semibold text-slate-200 border border-mcgiblue-800 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="download" class="w-4 h-4 text-gold-400"></i>
+                <span>Export CSV</span>
+              </button>
+            </div>
+
+            <!-- Decorative glow backdrop -->
+            <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-mcgiblue-600/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute right-40 -top-10 w-48 h-48 bg-gold-400/10 rounded-full blur-2xl pointer-events-none"></div>
+          </div>
+
+          <!-- Metric KPI Cards Grid (Interactive & Clickable) -->
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+            <!-- Total Personnel -->
+            <div 
+              onclick="App.showPersonnelSummaryModal('all')" 
+              role="button" 
+              tabindex="0" 
+              onkeydown="if(event.key==='Enter'||event.key===' ') App.showPersonnelSummaryModal('all')" 
+              class="glass-card p-4 glass-card-hover border-l-4 border-l-gold-400 cursor-pointer transition-all hover:scale-[1.02] hover:border-gold-400/80 hover:shadow-lg group relative" 
+              title="Click to view all registered personnel & breakdown">
+              <div class="flex items-center justify-between text-slate-400 mb-1">
+                <span class="text-xs font-medium group-hover:text-white transition-colors">Total Personnel</span>
+                <div class="flex items-center gap-1">
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-gold-400/10 text-gold-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline-block">View list &rarr;</span>
+                  <i data-lucide="users" class="w-4 h-4 text-gold-400 group-hover:scale-110 transition-transform"></i>
+                </div>
+              </div>
+              <div id="kpiTotalMembers" class="text-2xl md:text-3xl font-black text-white font-mono">0</div>
+              <span class="text-[11px] text-slate-400 mt-1 block">Registered members</span>
+            </div>
+
+            <!-- Present Today -->
+            <div 
+              onclick="App.showPersonnelSummaryModal('present')" 
+              role="button" 
+              tabindex="0" 
+              onkeydown="if(event.key==='Enter'||event.key===' ') App.showPersonnelSummaryModal('present')" 
+              class="glass-card p-4 glass-card-hover border-l-4 border-l-emerald-500 cursor-pointer transition-all hover:scale-[1.02] hover:border-emerald-400/80 hover:shadow-lg group relative" 
+              title="Click to view present personnel list">
+              <div class="flex items-center justify-between text-slate-400 mb-1">
+                <span class="text-xs font-medium group-hover:text-white transition-colors">Present Today</span>
+                <div class="flex items-center gap-1">
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline-block">View list &rarr;</span>
+                  <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform"></i>
+                </div>
+              </div>
+              <div id="kpiPresentCount" class="text-2xl md:text-3xl font-black text-emerald-400 font-mono">0</div>
+              <span class="text-[11px] text-emerald-400/80 mt-1 block font-medium">On-duty check-ins</span>
+            </div>
+
+            <!-- Late Arrivals -->
+            <div 
+              onclick="App.showPersonnelSummaryModal('late')" 
+              role="button" 
+              tabindex="0" 
+              onkeydown="if(event.key==='Enter'||event.key===' ') App.showPersonnelSummaryModal('late')" 
+              class="glass-card p-4 glass-card-hover border-l-4 border-l-gold-500 cursor-pointer transition-all hover:scale-[1.02] hover:border-gold-400/80 hover:shadow-lg group relative" 
+              title="Click to view late arrivals list">
+              <div class="flex items-center justify-between text-slate-400 mb-1">
+                <span class="text-xs font-medium group-hover:text-white transition-colors">Late Arrivals</span>
+                <div class="flex items-center gap-1">
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-gold-500/10 text-gold-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline-block">View list &rarr;</span>
+                  <i data-lucide="clock" class="w-4 h-4 text-gold-400 group-hover:scale-110 transition-transform"></i>
+                </div>
+              </div>
+              <div id="kpiLateCount" class="text-2xl md:text-3xl font-black text-gold-400 font-mono">0</div>
+              <span class="text-[11px] text-gold-300/80 mt-1 block font-medium">After call time</span>
+            </div>
+
+            <!-- Absent -->
+            <div 
+              onclick="App.showPersonnelSummaryModal('absent')" 
+              role="button" 
+              tabindex="0" 
+              onkeydown="if(event.key==='Enter'||event.key===' ') App.showPersonnelSummaryModal('absent')" 
+              class="glass-card p-4 glass-card-hover border-l-4 border-l-rose-500 cursor-pointer transition-all hover:scale-[1.02] hover:border-rose-400/80 hover:shadow-lg group relative" 
+              title="Click to view absent personnel list">
+              <div class="flex items-center justify-between text-slate-400 mb-1">
+                <span class="text-xs font-medium group-hover:text-white transition-colors">Absent</span>
+                <div class="flex items-center gap-1">
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline-block">View list &rarr;</span>
+                  <i data-lucide="x-circle" class="w-4 h-4 text-rose-400 group-hover:scale-110 transition-transform"></i>
+                </div>
+              </div>
+              <div id="kpiAbsentCount" class="text-2xl md:text-3xl font-black text-rose-400 font-mono">0</div>
+              <span class="text-[11px] text-rose-400/80 mt-1 block font-medium">Unexcused off-duty</span>
+            </div>
+
+            <!-- Excused / Leave -->
+            <div 
+              onclick="App.showPersonnelSummaryModal('excused')" 
+              role="button" 
+              tabindex="0" 
+              onkeydown="if(event.key==='Enter'||event.key===' ') App.showPersonnelSummaryModal('excused')" 
+              class="glass-card p-4 glass-card-hover border-l-4 border-l-mcgiblue-500 col-span-2 md:col-span-1 cursor-pointer transition-all hover:scale-[1.02] hover:border-mcgiblue-400/80 hover:shadow-lg group relative" 
+              title="Click to view excused personnel list">
+              <div class="flex items-center justify-between text-slate-400 mb-1">
+                <span class="text-xs font-medium group-hover:text-white transition-colors">Excused</span>
+                <div class="flex items-center gap-1">
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-mcgiblue-500/10 text-mcgiblue-300 font-bold opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline-block">View list &rarr;</span>
+                  <i data-lucide="badge-alert" class="w-4 h-4 text-mcgiblue-400 group-hover:scale-110 transition-transform"></i>
+                </div>
+              </div>
+              <div id="kpiExcusedCount" class="text-2xl md:text-3xl font-black text-mcgiblue-400 font-mono">0</div>
+              <span class="text-[11px] text-mcgiblue-300/80 mt-1 block font-medium">Authorized leaves</span>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 7-Day Trend Chart -->
+            <div class="glass-card p-5 lg:col-span-2 flex flex-col justify-between">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-gold-400"></i>
+                    7-Day Production Attendance Trend
+                  </h3>
+                  <p class="text-xs text-slate-400">Daily duty completion and attendance rate</p>
+                </div>
+                <span class="text-xs px-2.5 py-1 rounded-md bg-midnight-800 text-gold-300 border border-gold-400/20 font-mono">Past Week</span>
+              </div>
+              <div class="h-64 relative w-full">
+                <canvas id="dashboardTrendChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Status Distribution Doughnut Chart -->
+            <div class="glass-card p-5 flex flex-col justify-between">
+              <div class="flex items-center justify-between mb-2">
+                <div>
+                  <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i data-lucide="pie-chart" class="w-4 h-4 text-gold-400"></i>
+                    Today's Status Breakdown
+                  </h3>
+                  <p class="text-xs text-slate-400">Distribution across active session</p>
+                </div>
+              </div>
+              <div class="h-56 relative w-full flex items-center justify-center">
+                <canvas id="dashboardDoughnutChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Department Performance & Recent Live Activity -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Department Rate Bar Chart -->
+            <div class="glass-card p-5">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i data-lucide="award" class="w-4 h-4 text-gold-400"></i>
+                    Unit & Department Comparison
+                  </h3>
+                  <p class="text-xs text-slate-400">Attendance average by production unit</p>
+                </div>
+              </div>
+              <div class="h-60 relative w-full">
+                <canvas id="dashboardDeptChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Recent Check-In Activity Feed -->
+            <div class="glass-card p-5 flex flex-col justify-between">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i data-lucide="activity" class="w-4 h-4 text-gold-400"></i>
+                    Recent Check-In Activity
+                  </h3>
+                  <p class="text-xs text-slate-400">Real-time check-in log for selected session</p>
+                </div>
+                <button onclick="App.switchTab('attendance')" class="text-xs text-gold-400 hover:underline">View Sheet</button>
+              </div>
+              <div id="dashboardRecentCheckins" class="space-y-2.5 overflow-y-auto max-h-60 pr-1">
+                <!-- Rendered via App.renderDashboardRecentActivity() -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 2: NEW MODULE: ATTENDANCE ENTRY (BENEATH DASHBOARD) -->
+        <!-- ============================================== -->
+        <section id="panel-event-entry" class="tab-content-panel space-y-6 hidden">
+          <!-- Module Header Banner -->
+          <div class="glass-card p-5 sm:p-6 md:p-8 relative overflow-hidden border border-gold-400/30 glow-gold-sm">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-gold-400 flex items-center gap-1.5 mb-1">
+                  <i data-lucide="clipboard-edit" class="w-4 h-4 text-mcgiblue-400"></i> MCGI Production Attendance Log
+                </span>
+                <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight">
+                  Event Attendance <span class="gold-gradient-text">Entry & Recording</span>
+                </h2>
+                <p class="text-slate-400 text-xs md:text-sm mt-1 max-w-2xl">
+                  Record official attendance for members and trainees across Locales, Levels, Church Gatherings (PM, WS, PBB, SPBB), Special Missions, and Mass Indoctrination.
+                </p>
+              </div>
+
+              <!-- Quick Action Pills -->
+              <div class="flex flex-wrap items-center gap-2">
+                <button onclick="App.resetEventEntryForm()" class="px-3.5 py-2 rounded-xl bg-midnight-800 hover:bg-midnight-700 text-xs font-semibold text-slate-300 border border-slate-700/80 transition-all flex items-center gap-1.5">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-gold-400"></i> Reset Form
+                </button>
+                <button onclick="App.exportEventEntriesCSV()" class="px-3.5 py-2 rounded-xl bg-midnight-800 hover:bg-midnight-700 text-xs font-semibold text-gold-300 border border-gold-400/30 transition-all flex items-center gap-1.5">
+                  <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Export Entries CSV
+                </button>
+              </div>
+            </div>
+            <!-- Decorative glow -->
+            <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-gold-400/10 rounded-full blur-3xl pointer-events-none"></div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- QR CODE CAMERA SCANNER CARD                    -->
+          <!-- ============================================== -->
+          <div class="glass-card p-5 sm:p-6 border border-gold-400/30 glow-gold-sm space-y-4">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-extrabold text-white flex items-center gap-2">
+                  <i data-lucide="scan-line" class="w-4 h-4 text-gold-400"></i>
+                  Quick-Scan: QR Code Check-In
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">Point camera at a member's QR badge to instantly record their attendance.</p>
+              </div>
+              <span class="text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold font-mono flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> LIVE SCAN
+              </span>
+            </div>
+
+            <!-- Scanner mount + result banner -->
+            <div id="qrScannerMountPoint">
+              <!-- Injected by AttendanceLogger.attachCameraScanner() -->
+              <div class="flex flex-col items-center justify-center py-8 text-slate-500">
+                <i data-lucide="camera-off" class="w-10 h-10 mb-2"></i>
+                <p class="text-xs font-mono">Scanner initialising…</p>
+              </div>
+            </div>
+
+            <!-- Scan result flash banner -->
+            <div id="qrScanResultBanner" class="hidden p-3 rounded-xl border text-xs font-semibold flex items-center gap-2.5 transition-all">
+              <i data-lucide="check-circle" class="w-4 h-4 flex-shrink-0"></i>
+              <span id="qrScanResultText">Ready</span>
+            </div>
+          </div>
+
+          <!-- Attendance Entry Form Card -->
+          <div class="glass-card p-5 sm:p-6 md:p-8 border border-mcgiblue-500/25">
+            <form id="mcgiEventAttendanceForm" onsubmit="App.handleEventAttendanceSubmit(event)" class="space-y-6">
+              
+              <!-- Row 1: Full Name & Member Quick Selection -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <i data-lucide="user" class="w-3.5 h-3.5 text-gold-400"></i>
+                    Full Name <span class="text-gold-400">*</span>
+                  </label>
+                  <div class="relative">
+                    <input 
+                      type="text" 
+                      id="inputEventFullName" 
+                      placeholder="ex. Bro. Paul" 
+                      required 
+                      autocomplete="off"
+                      class="w-full bg-midnight-900 border-2 border-mcgiblue-800 focus:border-gold-400 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 font-medium focus:outline-none focus:ring-2 focus:ring-gold-400/20 transition-all">
+                  </div>
+                </div>
+
+                <!-- Quick Autofill Helper -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-mcgiblue-400"></i>
+                    Select Registered Member (Optional)
+                  </label>
+                  <select 
+                    id="selectRosterQuickPick" 
+                    onchange="App.handleRosterQuickSelect(this.value)"
+                    class="w-full bg-midnight-900 border-2 border-mcgiblue-800 focus:border-gold-400 rounded-xl px-3 py-3 text-xs text-slate-200 focus:outline-none cursor-pointer">
+                    <option value="">-- Choose Member --</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Row 2: Locale & Level Checkboxes -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-slate-800/80">
+                <!-- Locale Checkboxes -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gold-400"></i>
+                    Locale <span class="text-gold-400">*</span>
+                    <span class="text-[10px] text-slate-400 lowercase font-normal">(select assigned locale)</span>
+                  </label>
+                  <div class="flex flex-wrap gap-2.5" id="localeCheckboxGroup">
+                    <label class="custom-pill-checkbox">
+                      <input type="checkbox" name="eventLocale" value="Naic" checked>
+                      <span class="custom-pill-box">
+                        <span class="custom-pill-indicator">
+                          <i data-lucide="check" class="w-3 h-3 text-midnight-950 stroke-[3]"></i>
+                        </span>
+                        <span>Naic</span>
+                      </span>
+                    </label>
+                    <label class="custom-pill-checkbox">
+                      <input type="checkbox" name="eventLocale" value="Calubcob">
+                      <span class="custom-pill-box">
+                        <span class="custom-pill-indicator">
+                          <i data-lucide="check" class="w-3 h-3 text-midnight-950 stroke-[3]"></i>
+                        </span>
+                        <span>Calubcob</span>
+                      </span>
+                    </label>
+                    <label class="custom-pill-checkbox">
+                      <input type="checkbox" name="eventLocale" value="Acacia">
+                      <span class="custom-pill-box">
+                        <span class="custom-pill-indicator">
+                          <i data-lucide="check" class="w-3 h-3 text-midnight-950 stroke-[3]"></i>
+                        </span>
+                        <span>Acacia</span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Level Checkboxes -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                    <i data-lucide="layers" class="w-3.5 h-3.5 text-gold-400"></i>
+                    Level <span class="text-gold-400">*</span>
+                    <span class="text-[10px] text-slate-400 lowercase font-normal">(select membership level)</span>
+                  </label>
+                  <div class="flex flex-wrap gap-2.5" id="levelCheckboxGroup">
+                    <label class="custom-pill-checkbox">
+                      <input type="checkbox" name="eventLevel" value="MUNICIPAL PROD">
+                      <span class="custom-pill-box">
+                        <span class="custom-pill-indicator">
+                          <i data-lucide="check" class="w-3 h-3 text-midnight-950 stroke-[3]"></i>
+                        </span>
+                        <span>MUNICIPAL PROD</span>
+                      </span>
+                    </label>
+                    <label class="custom-pill-checkbox">
+                      <input type="checkbox" name="eventLevel" value="LOCALE PROD" checked>
+                      <span class="custom-pill-box">
+                        <span class="custom-pill-indicator">
+                          <i data-lucide="check" class="w-3 h-3 text-midnight-950 stroke-[3]"></i>
+                        </span>
+                        <span>LOCALE PROD</span>
+                      </span>
+                    </label>
+                    <label class="custom-pill-checkbox">
+                      <input type="checkbox" name="eventLevel" value="TRAINEE">
+                      <span class="custom-pill-box">
+                        <span class="custom-pill-indicator">
+                          <i data-lucide="check" class="w-3 h-3 text-midnight-950 stroke-[3]"></i>
+                        </span>
+                        <span>TRAINEE</span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Row 3: Event Date & Event Dropdown Menu -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-slate-800/80">
+                <!-- Event Date -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-gold-400"></i>
+                    Event Date <span class="text-gold-400">*</span>
+                  </label>
+                  <div class="relative">
+                    <input 
+                      type="date" 
+                      id="inputEventDate" 
+                      required 
+                      class="w-full bg-midnight-900 border-2 border-mcgiblue-800 focus:border-gold-400 rounded-xl px-4 py-3 text-sm text-white font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-gold-400/20 transition-all cursor-pointer">
+                  </div>
+                </div>
+
+                <!-- Event Dropdown Menu -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <i data-lucide="calendar-heart" class="w-3.5 h-3.5 text-gold-400"></i>
+                    Event <span class="text-gold-400">*</span>
+                  </label>
+                  <select 
+                    id="selectEventType" 
+                    required 
+                    onchange="App.handleEventDropdownChange(this.value)"
+                    class="w-full bg-midnight-900 border-2 border-mcgiblue-800 focus:border-gold-400 rounded-xl px-4 py-3 text-sm text-gold-300 font-bold focus:outline-none focus:ring-2 focus:ring-gold-400/20 transition-all cursor-pointer">
+                    <option value="PM">PM (Prayer Meeting)</option>
+                    <option value="WS">WS (Worship Service)</option>
+                    <option value="PBB">PBB (Pasalamat ng Buong Bayan)</option>
+                    <option value="COMBINED PM/WS">COMBINED PM/WS</option>
+                    <option value="SPBB">SPBB (Special Pasalamat ng Buong Bayan)</option>
+                    <option value="MASS INDOCTRINATION">MASS INDOCTRINATION</option>
+                    <option value="SERBISYONG KAPATIRAN">SERBISYONG KAPATIRAN</option>
+                    <option value="CHRISTIAN NEW YEAR">CHRISTIAN NEW YEAR</option>
+                    <option value="LORD'S SUPPER">LORD'S SUPPER</option>
+                    <option value="SENIOR'S DAY">SENIOR'S DAY</option>
+                    <option value="OPLAN DALAW TUPA (HARANA SA KAPATID)">OPLAN DALAW TUPA (HARANA SA KAPATID)</option>
+                    <option value="MASS ORIENTATION">MASS ORIENTATION</option>
+                    <option value="MEDICAL MISSION">MEDICAL MISSION</option>
+                    <option value="BIBLE STUDY">BIBLE STUDY</option>
+                    <option value="GENERAL ASSEMBLY">GENERAL ASSEMBLY</option>
+                    <option value="FEEDING PROGRAM">FEEDING PROGRAM</option>
+                    <option value="MEETING">MEETING</option>
+                    <option value="OTHER EVENT">OTHER EVENT</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- ============================================== -->
+              <!-- DYNAMIC CONDITIONAL SUB-SECTIONS CONTAINER -->
+              <!-- ============================================== -->
+              <div id="dynamicEventFieldsContainer" class="p-4 sm:p-5 rounded-2xl bg-midnight-900/90 border border-mcgiblue-500/30 transition-all">
+                <!-- Dynamically populated based on selected event -->
+              </div>
+
+              <!-- Remarks / Notes Input (Optional) -->
+              <div>
+                <label class="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <i data-lucide="file-text" class="w-3.5 h-3.5 text-mcgiblue-400"></i>
+                  Additional Notes / Duty Assignment (Optional)
+                </label>
+                <input 
+                  type="text" 
+                  id="inputEventRemarks" 
+                  placeholder="e.g. Camera Operator 1, Audio Tech, Livestream Monitor, Viewing Coordinator..." 
+                  class="w-full bg-midnight-900 border border-slate-700/80 focus:border-gold-400 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none">
+              </div>
+
+              <!-- Submit Action Toolbar -->
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-800">
+                <div class="flex items-center gap-2 text-xs text-slate-400">
+                  <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                  <span>Data persists automatically to local database and exports to CSV.</span>
+                </div>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                  <button 
+                    type="button" 
+                    onclick="App.resetEventEntryForm()" 
+                    class="flex-1 sm:flex-initial px-5 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-midnight-800 hover:bg-midnight-700 transition-all border border-slate-700">
+                    Clear
+                  </button>
+                  <button 
+                    type="submit" 
+                    class="flex-1 sm:flex-initial gold-gradient-btn px-7 py-3 rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 shadow-xl glow-gold-sm">
+                    <i data-lucide="check-circle" class="w-4 h-4 stroke-[3]"></i>
+                    <span>Record Attendance</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- panel-attendance-logger removed – all content merged into panel-attendance -->
+        <section id="panel-attendance-logger" class="tab-content-panel hidden" aria-hidden="true" style="display:none!important"></section>
+
+        <!-- ============================================== -->
+        <!-- TAB 3: ATTENDANCE SHEET (unified with logs)    -->
+        <!-- ============================================== -->
+        <section id="panel-attendance" class="tab-content-panel space-y-6 hidden">
+
+          <!-- ── Header & Action Toolbar ─────────────────── -->
+          <div class="glass-card p-5 sm:p-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border border-mcgiblue-500/30 glow-blue">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-widest text-gold-400 flex items-center gap-1.5 mb-1">
+                <i data-lucide="calendar-check" class="w-4 h-4"></i> MCGI Production · Attendance
+              </span>
+              <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                <i data-lucide="clipboard-list" class="w-5 h-5 text-gold-400"></i>
+                Attendance Sheet &amp; <span class="gold-gradient-text ml-1">Event Log</span>
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Mark daily status and view all event attendance records in one place.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+              <!-- Date Picker -->
+              <div class="flex items-center gap-2 bg-midnight-800 border border-slate-700/80 rounded-xl px-3 py-1.5">
+                <i data-lucide="calendar" class="w-4 h-4 text-gold-400"></i>
+                <input type="date" id="attendanceDatePicker" class="bg-transparent text-xs text-slate-200 focus:outline-none cursor-pointer font-mono font-semibold">
+              </div>
+              <!-- Department Filter -->
+              <select class="app-dept-filter bg-midnight-800 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-gold-400 cursor-pointer">
+                <!-- populated dynamically -->
+              </select>
+              <!-- Sheet Search -->
+              <div class="relative flex-1 sm:w-48">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
+                <input type="text" placeholder="Search personnel..." class="app-search-input w-full bg-midnight-800 border border-slate-700/80 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-gold-400">
+              </div>
+              <!-- Export Logs CSV -->
+              <button onclick="AttendanceLogger.exportLogsCSV()" class="gold-gradient-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> Export Logs
+              </button>
+            </div>
+          </div>
+
+          <!-- ── Bulk Action Buttons Toolbar ──────────────── -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-midnight-850 p-4 rounded-xl border border-mcgiblue-900/50">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-400">Bulk Actions:</span>
+              <button onclick="App.markAllStatus('present')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-midnight-950 border border-emerald-500/40 transition-all flex items-center gap-1.5">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i> Mark All Present
+              </button>
+              <button onclick="App.markAllStatus('absent')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/40 transition-all flex items-center gap-1.5">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i> Mark All Absent
+              </button>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="App.exportCSV()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-midnight-800 hover:bg-midnight-700 text-slate-300 border border-slate-700 transition-all flex items-center gap-1.5">
+                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-gold-400"></i> Export Sheet
+              </button>
+              <button onclick="window.print()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-midnight-800 hover:bg-midnight-700 text-slate-300 border border-slate-700 transition-all flex items-center gap-1.5">
+                <i data-lucide="printer" class="w-3.5 h-3.5 text-gold-400"></i> Print View
+              </button>
+            </div>
+          </div>
+
+          <!-- ── Daily Attendance Marking Sheet ───────────── -->
+          <div class="glass-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-midnight-900 text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-mcgiblue-900/60">
+                  <tr>
+                    <th class="px-4 py-3.5 w-12">#</th>
+                    <th class="px-4 py-3.5">Personnel / Member</th>
+                    <th class="px-4 py-3.5">Unit / Department</th>
+                    <th class="px-4 py-3.5">Time Log</th>
+                    <th class="px-4 py-3.5">Attendance Status</th>
+                    <th class="px-4 py-3.5">Remarks / Action</th>
+                  </tr>
+                </thead>
+                <tbody id="attendanceTableBody" class="divide-y divide-slate-800/50">
+                  <!-- Rendered via App.renderAttendanceTable() -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════════ -->
+          <!--  EVENT LOG RECORDS (merged from Logs module)   -->
+          <!-- ═══════════════════════════════════════════════ -->
+
+          <!-- Summary Metrics Strip -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="glass-card p-3.5 border-l-4 border-l-gold-400 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] uppercase font-semibold text-slate-400">Total Recorded</span>
+                <div id="metricEventTotalCount" class="text-xl font-extrabold text-white font-mono">0</div>
+              </div>
+              <i data-lucide="database" class="w-5 h-5 text-gold-400"></i>
+            </div>
+            <div class="glass-card p-3.5 border-l-4 border-l-mcgiblue-400 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] uppercase font-semibold text-slate-400">Indoctrination Guests</span>
+                <div id="metricEventGuestsCount" class="text-xl font-extrabold text-mcgiblue-300 font-mono">0</div>
+              </div>
+              <i data-lucide="user-plus" class="w-5 h-5 text-mcgiblue-400"></i>
+            </div>
+            <div class="glass-card p-3.5 border-l-4 border-l-emerald-400 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] uppercase font-semibold text-slate-400">Municipal Prod</span>
+                <div id="metricEventMunicipalCount" class="text-xl font-extrabold text-emerald-400 font-mono">0</div>
+              </div>
+              <i data-lucide="award" class="w-5 h-5 text-emerald-400"></i>
+            </div>
+            <div class="glass-card p-3.5 border-l-4 border-l-amber-500 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] uppercase font-semibold text-slate-400">Trainees</span>
+                <div id="metricEventTraineeCount" class="text-xl font-extrabold text-amber-300 font-mono">0</div>
+              </div>
+              <i data-lucide="graduation-cap" class="w-5 h-5 text-amber-400"></i>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar -->
+          <div class="glass-card p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="list" class="w-4 h-4 text-gold-400"></i>
+                Event Log Records
+              </h3>
+              <span id="eventLogFilterCount" class="text-[11px] px-2 py-0.5 rounded bg-midnight-800 text-gold-300 font-mono border border-gold-400/20">0 Entries</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+              <!-- Search -->
+              <div class="relative flex-1 sm:w-44">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
+                <input type="text" id="searchEventLogsInput" placeholder="Search name/event..." oninput="AttendanceLogger.renderAttendanceLogsTable()" class="w-full bg-midnight-900 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:border-gold-400 focus:outline-none">
+              </div>
+              <!-- Filter by Event -->
+              <select id="filterEventLogsType" onchange="AttendanceLogger.renderAttendanceLogsTable()" class="bg-midnight-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:border-gold-400 focus:outline-none cursor-pointer">
+                <option value="all">All Events</option>
+                <option value="PM">PM</option>
+                <option value="WS">WS</option>
+                <option value="PBB">PBB</option>
+                <option value="COMBINED PM/WS">COMBINED PM/WS</option>
+                <option value="SPBB">SPBB</option>
+                <option value="MASS INDOCTRINATION">MASS INDOCTRINATION</option>
+                <option value="SERBISYONG KAPATIRAN">SERBISYONG KAPATIRAN</option>
+                <option value="QR ATTENDANCE SCAN">QR ATTENDANCE SCAN</option>
+                <option value="CHRISTIAN NEW YEAR">CHRISTIAN NEW YEAR</option>
+                <option value="LORD'S SUPPER">LORD'S SUPPER</option>
+                <option value="SENIOR'S DAY">SENIOR'S DAY</option>
+                <option value="OPLAN DALAW TUPA (HARANA SA KAPATID)">OPLAN DALAW TUPA</option>
+                <option value="MASS ORIENTATION">MASS ORIENTATION</option>
+                <option value="MEDICAL MISSION">MEDICAL MISSION</option>
+                <option value="BIBLE STUDY">BIBLE STUDY</option>
+                <option value="GENERAL ASSEMBLY">GENERAL ASSEMBLY</option>
+                <option value="FEEDING PROGRAM">FEEDING PROGRAM</option>
+                <option value="MEETING">MEETING</option>
+                <option value="OTHER EVENT">OTHER EVENT</option>
+              </select>
+              <!-- Filter by Locale -->
+              <select id="filterEventLogsLocale" onchange="AttendanceLogger.renderAttendanceLogsTable()" class="bg-midnight-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:border-gold-400 focus:outline-none cursor-pointer">
+                <option value="all">All Locales</option>
+                <option value="Naic">Naic</option>
+                <option value="Calubcob">Calubcob</option>
+                <option value="Acacia">Acacia</option>
+              </select>
+              <!-- Filter by Level -->
+              <select id="filterEventLogsLevel" onchange="AttendanceLogger.renderAttendanceLogsTable()" class="bg-midnight-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:border-gold-400 focus:outline-none cursor-pointer">
+                <option value="all">All Levels</option>
+                <option value="MUNICIPAL PROD">MUNICIPAL PROD</option>
+                <option value="LOCALE PROD">LOCALE PROD</option>
+                <option value="TRAINEE">TRAINEE</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Event Log Records Table -->
+          <div class="glass-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-midnight-900 text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-mcgiblue-900/60">
+                  <tr>
+                    <th class="px-4 py-3.5 w-10">#</th>
+                    <th class="px-4 py-3.5">Full Name</th>
+                    <th class="px-4 py-3.5">Locale &amp; Level</th>
+                    <th class="px-4 py-3.5">Event &amp; Date</th>
+                    <th class="px-4 py-3.5">Details / Schedule / Guests</th>
+                    <th class="px-4 py-3.5">Remarks</th>
+                    <th class="px-4 py-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="eventAttendanceTableBody" class="divide-y divide-slate-800/60">
+                  <!-- Rendered dynamically via AttendanceLogger.renderAttendanceLogsTable() -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 4: MEMBERS & ROSTER -->
+        <!-- ============================================== -->
+        <section id="panel-roster" class="tab-content-panel space-y-6 hidden">
+          <!-- Roster Header -->
+          <div class="glass-card p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                <i data-lucide="users" class="w-5 h-5 text-gold-400"></i>
+                Production Member Directory
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Manage production personnel, roles, locales, and inspect individual records</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+              <!-- Search -->
+              <div class="relative flex-1 sm:w-48">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
+                <input type="text" placeholder="Filter members..." class="app-search-input w-full bg-midnight-800 border border-slate-700/80 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-gold-400">
+              </div>
+
+              <!-- Department Filter -->
+              <select class="app-dept-filter bg-midnight-800 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-gold-400">
+                <!-- populated dynamically -->
+              </select>
+
+              <!-- Admin Member Credentials Directory Button -->
+              <button id="btnAdminCredentialsDirectory" onclick="App.openAdminCredentialsModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-midnight-800 hover:bg-midnight-700 text-gold-300 border border-gold-400/40 transition-all flex items-center gap-2 shadow-sm hidden" title="View Member Usernames & Passwords">
+                <i data-lucide="key" class="w-4 h-4 text-gold-400"></i>
+                <span>Credentials Directory</span>
+              </button>
+
+              <!-- Add Member CTA -->
+              <button onclick="App.openAddMemberModal()" class="gold-gradient-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md">
+                <i data-lucide="user-plus" class="w-4 h-4 stroke-[2.5]"></i>
+                <span>Add Member</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Total Count Badge -->
+          <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+            <span id="rosterCountDisplay">Loading members...</span>
+            <span class="text-gold-400 font-semibold">Click on any card to view detailed history</span>
+          </div>
+
+          <!-- Roster Cards Grid -->
+          <div id="rosterCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <!-- Rendered via App.renderRoster() -->
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 6: LEAVE & EXCUSES -->
+        <!-- ============================================== -->
+        <section id="panel-leaves" class="tab-content-panel space-y-6 hidden">
+          <div class="glass-card p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                <i data-lucide="calendar-off" class="w-5 h-5 text-gold-400"></i>
+                Leave & Excuse Requests
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Manage official excuse requests, medical notes, and scheduled leaves</p>
+            </div>
+
+            <button onclick="App.openSubmitLeaveModal()" class="gold-gradient-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md">
+              <i data-lucide="plus" class="w-4 h-4 stroke-[3]"></i>
+              <span>Submit Leave Request</span>
+            </button>
+          </div>
+
+          <!-- Leaves Table -->
+          <div class="glass-card overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-midnight-900 text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-mcgiblue-900/60">
+                  <tr>
+                    <th class="px-4 py-3.5">Request ID</th>
+                    <th class="px-4 py-3.5">Personnel / Member</th>
+                    <th class="px-4 py-3.5">Leave Date</th>
+                    <th class="px-4 py-3.5">Type & Reason</th>
+                    <th class="px-4 py-3.5">Status</th>
+                    <th class="px-4 py-3.5">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="leavesListBody" class="divide-y divide-slate-800/50">
+                  <!-- Rendered via App.renderLeaves() -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 7: REPORTS & ANALYTICS -->
+        <!-- ============================================== -->
+        <section id="panel-reports" class="tab-content-panel space-y-6 hidden">
+          <div class="glass-card p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                <i data-lucide="bar-chart-2" class="w-5 h-5 text-gold-400"></i>
+                Attendance Reports & Cumulative Analytics
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Aggregate performance metrics, event summaries, and attendance rate flags</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button onclick="App.exportCSV()" class="gold-gradient-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>Download CSV</span>
+              </button>
+              <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-midnight-800 hover:bg-midnight-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-all flex items-center gap-2">
+                <i data-lucide="printer" class="w-4 h-4 text-gold-400"></i>
+                <span>Print Report</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Summary Table -->
+          <div class="glass-card overflow-hidden">
+            <div class="p-4 bg-midnight-900 border-b border-mcgiblue-900/60 flex items-center justify-between text-xs text-slate-300">
+              <span class="font-semibold text-white">Cumulative Production Attendance by Personnel</span>
+              <span class="text-gold-400 font-mono">Alert Threshold: &lt; 75%</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-midnight-900 text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-mcgiblue-900/60">
+                  <tr>
+                    <th class="px-4 py-3.5 w-12">#</th>
+                    <th class="px-4 py-3.5">Personnel / Member</th>
+                    <th class="px-4 py-3.5">Unit</th>
+                    <th class="px-4 py-3.5">Present</th>
+                    <th class="px-4 py-3.5">Late</th>
+                    <th class="px-4 py-3.5">Absent</th>
+                    <th class="px-4 py-3.5">Excused</th>
+                    <th class="px-4 py-3.5">Attendance Rate</th>
+                    <th class="px-4 py-3.5">Risk Status</th>
+                  </tr>
+                </thead>
+                <tbody id="reportsSummaryTableBody" class="divide-y divide-slate-800/50">
+                  <!-- Rendered via App.renderReports() -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- TAB 8: SETTINGS -->
+        <!-- ============================================== -->
+        <section id="panel-settings" class="tab-content-panel space-y-6 hidden">
+          <div class="glass-card p-6">
+            <h2 class="text-xl font-extrabold text-white flex items-center gap-2 mb-1">
+              <i data-lucide="sliders" class="w-5 h-5 text-gold-400"></i>
+              System Preferences & Data Management
+            </h2>
+            <p class="text-xs text-slate-400">Configure organization policies, call time cutoff thresholds, and manage data backups</p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- General Configurations -->
+            <div class="glass-card p-6">
+              <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+                <i data-lucide="settings" class="w-4 h-4 text-gold-400"></i>
+                Attendance Policies
+              </h3>
+              <form onsubmit="App.saveSettings(event)" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Organization / Division Name</label>
+                  <input type="text" id="settingOrgName" class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Late Check-In Cutoff Time (24h format)</label>
+                  <input type="time" id="settingCutoffTime" class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none font-mono">
+                  <span class="text-[11px] text-slate-500 mt-1 block">Check-ins logged after this time will automatically be categorized as Late.</span>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Low Attendance Alert Threshold (%)</label>
+                  <input type="number" min="1" max="100" id="settingAlertThreshold" class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none font-mono">
+                  <span class="text-[11px] text-slate-500 mt-1 block">Personnel below this percentage will be flagged with an "At Risk" badge.</span>
+                </div>
+
+
+                <div class="pt-2">
+                  <button type="submit" class="gold-gradient-btn px-5 py-2.5 rounded-xl text-xs font-bold shadow-md">
+                    Save Policy Settings
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Data Backup & Reset -->
+            <div class="glass-card p-6 space-y-6">
+              <div>
+                <h3 class="text-base font-bold text-white mb-2 flex items-center gap-2">
+                  <i data-lucide="database" class="w-4 h-4 text-gold-400"></i>
+                  Backup & Restore System Data
+                </h3>
+                <p class="text-xs text-slate-400 mb-4">Export or import your complete attendance & event database as a JSON snapshot.</p>
+                
+                <div class="flex flex-wrap gap-3">
+                  <button onclick="App.exportBackupJSON()" class="px-4 py-2.5 rounded-xl bg-midnight-800 hover:bg-midnight-700 text-xs font-semibold text-gold-300 border border-gold-400/30 flex items-center gap-2 transition-all">
+                    <i data-lucide="download-cloud" class="w-4 h-4"></i> Export JSON Backup
+                  </button>
+
+                  <label class="px-4 py-2.5 rounded-xl bg-midnight-800 hover:bg-midnight-700 text-xs font-semibold text-slate-200 border border-slate-700 flex items-center gap-2 cursor-pointer transition-all">
+                    <i data-lucide="upload-cloud" class="w-4 h-4 text-gold-400"></i> Import JSON
+                    <input type="file" accept=".json" onchange="App.importBackupJSON(event)" class="hidden">
+                  </label>
+                </div>
+
+                <!-- Live Cloud Database Sync Section -->
+                <div class="pt-5 border-t border-mcgiblue-900/60 mt-5 space-y-3">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
+                        <i data-lucide="cloud" class="w-4 h-4 text-emerald-400"></i> Supabase PostgreSQL Cloud Sync
+                      </h4>
+                      <p class="text-[11px] text-slate-400 mt-0.5">Synchronize local browser data with the central cloud database in Singapore.</p>
+                    </div>
+                    <span id="settingsCloudStatusPill" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">ONLINE</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2.5 pt-1">
+                    <button type="button" onclick="App.syncLocalDataToCloud()" class="px-4 py-2.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 text-xs font-bold text-emerald-300 border border-emerald-500/40 flex items-center gap-2 transition-all shadow-sm">
+                      <i data-lucide="upload-cloud" class="w-4 h-4"></i> Upload Local Data to Cloud
+                    </button>
+                    <button type="button" onclick="App.refreshFromCloud()" class="px-3.5 py-2.5 rounded-xl bg-midnight-800 hover:bg-midnight-700 text-xs font-semibold text-slate-300 border border-mcgiblue-700/60 flex items-center gap-1.5 transition-all">
+                      <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-gold-400"></i> Refresh from Cloud
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-6 border-t border-slate-800">
+                <h3 class="text-base font-bold text-rose-400 mb-2 flex items-center gap-2">
+                  <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                  Reset to Demo Defaults
+                </h3>
+                <p class="text-xs text-slate-400 mb-3">Restore the pre-populated roster, sample leaves, event attendance records, and past 7 days of attendance.</p>
+                
+                <button onclick="AppState.resetDefaults()" class="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition-all flex items-center gap-2">
+                  <i data-lucide="refresh-cw" class="w-4 h-4"></i> Reset All Data to Defaults
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- PERSONAL PROFILE & STORED QR CODE              -->
+        <!-- ============================================== -->
+        <section id="panel-my-profile" class="tab-content-panel space-y-6 hidden">
+          <div class="glass-card p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-mcgiblue-500/30">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-widest text-gold-400 flex items-center gap-1.5 mb-1">
+                <i data-lucide="user" class="w-4 h-4"></i> Personal Account Profile
+              </span>
+              <h1 class="text-2xl font-extrabold text-white">
+                My <span class="gold-gradient-text">Profile & Credentials</span>
+              </h1>
+              <p class="text-slate-400 text-xs sm:text-sm mt-0.5">Manage personal information, security credentials, and view your stored QR code</p>
+            </div>
+            <div id="profileRoleBadge" class="px-3.5 py-1.5 rounded-full bg-gold-400/20 border border-gold-400/40 text-gold-300 font-mono text-xs font-bold">
+              ROLE: MEMBER
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left: Personal Stored QR Code -->
+            <div class="glass-card p-6 flex flex-col items-center text-center justify-center border border-gold-400/30 glow-gold">
+              <div class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-1 flex items-center gap-1.5">
+                <i data-lucide="qr-code" class="w-4 h-4 text-gold-400"></i>
+                <span>Stored Account QR Code</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mb-3 text-center">Cryptographically signed internal QR code linked to your profile</p>
+              
+              <div class="p-4 bg-white rounded-2xl shadow-2xl my-2 flex items-center justify-center border-4 border-gold-400/50">
+                <div id="myProfileQrContainer"></div>
+              </div>
+              
+              <div class="text-xs font-mono font-bold text-gold-300 mt-3" id="profileQrCodeDisplay">PROD-ID</div>
+              <p class="text-[11px] text-slate-400 mt-2 max-w-xs text-center">
+                Scan this QR code with the attendance camera scanner to log your arrival.
+              </p>
+            </div>
+
+            <!-- Right: Details & Credential Management Form -->
+            <div class="glass-card p-6 lg:col-span-2 space-y-6">
+              <h3 class="text-base font-bold text-white flex items-center gap-2 border-b border-mcgiblue-900/60 pb-3">
+                <i data-lucide="shield-check" class="w-4 h-4 text-gold-400"></i>
+                <span>Personal Information & Account Security</span>
+              </h3>
+
+              <form onsubmit="App.saveProfileCredentials(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Full Name</label>
+                    <input type="text" id="profFullName" class="w-full bg-midnight-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white" required>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Email Address</label>
+                    <input type="email" id="profEmail" class="w-full bg-midnight-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white" required>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Locale / Unit</label>
+                    <input type="text" id="profLocale" class="w-full bg-midnight-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-400 font-mono" readonly>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Level / Rank</label>
+                    <input type="text" id="profLevel" class="w-full bg-midnight-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-400 font-mono" readonly>
+                  </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-800">
+                  <h4 class="text-xs font-bold text-gold-400 uppercase tracking-wider mb-3">Credential Management</h4>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-300 mb-1.5">Username / Login ID</label>
+                      <input type="text" id="profUsername" class="w-full bg-midnight-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono" required>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-slate-300 mb-1.5">Change Password (leave blank to keep current)</label>
+                      <input type="password" id="profNewPassword" placeholder="••••••••" class="w-full bg-midnight-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-3 flex justify-end">
+                  <button type="submit" class="gold-gradient-btn px-6 py-2.5 rounded-xl text-xs font-extrabold shadow-md">
+                    Update Profile & Credentials
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- MEMBER ATTENDANCE QR SCANNER                   -->
+        <!-- ============================================== -->
+        <section id="panel-member-scan" class="tab-content-panel space-y-6 hidden">
+          <div class="glass-card p-5 sm:p-6 border border-gold-400/30 glow-gold">
+            <span class="text-xs font-bold uppercase tracking-widest text-gold-400 flex items-center gap-1.5 mb-1">
+              <i data-lucide="camera" class="w-4 h-4"></i> Touchless Camera Scan
+            </span>
+            <h2 class="text-xl font-black text-white">Log Attendance via Camera</h2>
+            <p class="text-xs text-slate-400 mt-1">Point your camera at your personal member QR code or gathering attendance code to register attendance.</p>
+          </div>
+
+          <div id="memberCameraScanWrapper" class="max-w-xl mx-auto">
+            <!-- Injected via AttendanceLogger.attachCameraScanner -->
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD / EDIT MEMBER -->
+  <!-- ============================================== -->
+  <div id="memberModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="glass-card bg-midnight-850 p-6 rounded-2xl w-full max-w-lg border border-gold-400/40 shadow-2xl relative animate-fade-in">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-mcgiblue-900/60">
+        <h3 id="memberModalTitle" class="text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-gold-400"></i>
+          Add New Production Member
+        </h3>
+        <button onclick="App.closeMemberModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="memberForm" onsubmit="App.saveMemberForm(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Full Name *</label>
+          <input type="text" id="inputMemberName" placeholder="e.g. Bro. Paul" required class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Member / Roll ID *</label>
+            <input type="text" id="inputMemberRoll" placeholder="e.g. PROD001" required class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:border-gold-400 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Role / Level</label>
+            <select id="inputMemberRole" class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none">
+              <option value="MUNICIPAL PROD">MUNICIPAL PROD</option>
+              <option value="LOCALE PROD">LOCALE PROD</option>
+              <option value="TRAINEE">TRAINEE</option>
+              <option value="Production Head">Production Head</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Locale / Unit *</label>
+          <select id="inputMemberDept" class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none">
+            <option value="Naic">Naic</option>
+            <option value="Calubcob">Calubcob</option>
+            <option value="Acacia">Acacia</option>
+            <option value="Municipal Core">Municipal Core</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Email / Contact</label>
+          <input type="email" id="inputMemberEmail" placeholder="paul@mcgiprod.org" class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none">
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <button type="button" onclick="App.closeMemberModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-midnight-800 hover:bg-midnight-700">Cancel</button>
+          <button type="submit" class="gold-gradient-btn px-5 py-2 rounded-xl text-xs font-bold shadow-md">Save Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: MEMBER PROFILE & ATTENDANCE HISTORY -->
+  <!-- ============================================== -->
+  <div id="memberProfileModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="glass-card bg-midnight-850 p-6 rounded-2xl w-full max-w-2xl border border-gold-400/40 shadow-2xl relative animate-fade-in max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-mcgiblue-900/60">
+        <div class="flex items-center gap-3">
+          <div id="profileModalAvatar" class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-midnight-950 text-base shadow-md bg-gold-400">
+            --
+          </div>
+          <div>
+            <h3 id="profileModalName" class="text-lg font-bold text-white">Personnel Name</h3>
+            <p class="text-xs text-gold-300 font-mono"><span id="profileModalRoll">PROD-0000</span> • <span id="profileModalDept" class="text-slate-400">Locale Naic</span></p>
+            <p id="profileModalEmail" class="text-[11px] text-slate-500">contact@mcgiprod.org</p>
+          </div>
+        </div>
+        <button onclick="App.closeMemberProfile()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="grid grid-cols-5 gap-2 my-4 p-3 bg-midnight-900 rounded-xl border border-mcgiblue-900/60 text-center">
+        <div>
+          <div class="text-[10px] uppercase text-slate-400 font-semibold">Rate</div>
+          <div id="profileRateDisplay" class="text-base font-black text-gold-300 font-mono">0%</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase text-slate-400 font-semibold">Present</div>
+          <div id="profilePresentDisplay" class="text-base font-bold text-emerald-400 font-mono">0</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase text-slate-400 font-semibold">Late</div>
+          <div id="profileLateDisplay" class="text-base font-bold text-gold-400 font-mono">0</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase text-slate-400 font-semibold">Absent</div>
+          <div id="profileAbsentDisplay" class="text-base font-bold text-rose-400 font-mono">0</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase text-slate-400 font-semibold">Excused</div>
+          <div id="profileExcusedDisplay" class="text-base font-bold text-mcgiblue-400 font-mono">0</div>
+        </div>
+      </div>
+
+      <!-- Admin Credentials Section (Visible only to Admin / Bro. Paul) -->
+      <div id="profileModalAdminCredentials" class="mb-4 p-3.5 rounded-xl bg-midnight-900/90 border border-gold-400/30 shadow-inner hidden">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-gold-400 flex items-center gap-1.5">
+            <i data-lucide="key" class="w-3.5 h-3.5 text-gold-400"></i>
+            Member Login Credentials (Admin Only)
+          </span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-gold-400/15 text-gold-300 font-mono font-bold">CONFIDENTIAL</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+          <!-- Username -->
+          <div class="p-2.5 rounded-lg bg-midnight-800/80 border border-mcgiblue-800 flex items-center justify-between">
+            <div class="min-w-0 pr-2">
+              <span class="text-[10px] text-slate-400 uppercase block font-semibold">Username</span>
+              <span id="profileModalUsername" class="font-mono font-bold text-white text-xs select-all truncate block">--</span>
+            </div>
+            <button type="button" onclick="App.copyMemberCredential('username')" class="p-1.5 rounded-md hover:bg-midnight-700 text-slate-400 hover:text-gold-300 transition-colors" title="Copy Username">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <!-- Password -->
+          <div class="p-2.5 rounded-lg bg-midnight-800/80 border border-mcgiblue-800 flex items-center justify-between">
+            <div class="min-w-0 pr-2">
+              <span class="text-[10px] text-slate-400 uppercase block font-semibold">Password</span>
+              <div class="flex items-center gap-1.5">
+                <span id="profileModalPassword" class="font-mono font-bold text-gold-300 text-xs select-all truncate block">••••••••</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1">
+              <button type="button" id="profileModalPasswordEyeBtn" onclick="App.toggleProfilePasswordVisibility()" class="p-1.5 rounded-md hover:bg-midnight-700 text-slate-400 hover:text-gold-300 transition-colors" title="Show / Hide Password">
+                <i id="profileModalPasswordEyeIcon" data-lucide="eye" class="w-3.5 h-3.5"></i>
+              </button>
+              <button type="button" onclick="App.copyMemberCredential('password')" class="p-1.5 rounded-md hover:bg-midnight-700 text-slate-400 hover:text-gold-300 transition-colors" title="Copy Password">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History List -->
+      <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Historical Attendance Records</h4>
+      <div id="profileHistoryList" class="flex-1 overflow-y-auto space-y-2 pr-1 max-h-72">
+        <!-- populated dynamically -->
+      </div>
+
+      <div class="pt-4 mt-3 border-t border-slate-800 flex justify-end">
+        <button onclick="App.closeMemberProfile()" class="px-5 py-2 rounded-xl text-xs font-bold bg-midnight-800 hover:bg-midnight-700 text-white">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: SUBMIT LEAVE REQUEST -->
+  <!-- ============================================== -->
+  <div id="leaveModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="glass-card bg-midnight-850 p-6 rounded-2xl w-full max-w-lg border border-gold-400/40 shadow-2xl relative animate-fade-in">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-mcgiblue-900/60">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i data-lucide="file-plus-2" class="w-5 h-5 text-gold-400"></i>
+          Submit Leave / Excuse Request
+        </h3>
+        <button onclick="App.closeSubmitLeaveModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="App.saveLeaveForm(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Select Member / Personnel *</label>
+          <select id="leaveMemberSelect" class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none">
+            <!-- populated dynamically -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Leave Date *</label>
+            <input type="date" id="leaveDatePicker" required class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:border-gold-400 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Leave Category</label>
+            <select id="leaveTypeSelect" class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none">
+              <option value="Medical">Medical / Health</option>
+              <option value="Family/Personal">Family / Personal</option>
+              <option value="Work Conflict">Work / Shift Conflict</option>
+              <option value="Official Duty">Official Church Duty</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Reason / Explanation *</label>
+          <textarea id="leaveReasonInput" rows="3" required placeholder="Provide reason or context for absence/excuse..." class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <button type="button" onclick="App.closeSubmitLeaveModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-midnight-800 hover:bg-midnight-700">Cancel</button>
+          <button type="submit" class="gold-gradient-btn px-5 py-2 rounded-xl text-xs font-bold shadow-md">Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+  <!-- ============================================== -->
+  <!-- MODAL: PERSONNEL SUMMARY & STATUS BREAKDOWN    -->
+  <!-- ============================================== -->
+  <div id="personnelSummaryModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop hidden">
+    <div class="glass-card bg-midnight-850 p-5 sm:p-6 rounded-2xl w-full max-w-4xl border border-gold-400/40 shadow-2xl relative animate-fade-in max-h-[92vh] flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-mcgiblue-900/60">
+        <div class="flex items-center gap-3">
+          <div id="summaryModalIconBox" class="w-11 h-11 rounded-xl flex items-center justify-center shadow-lg text-midnight-950 font-black">
+            <i id="summaryModalIcon" data-lucide="users" class="w-6 h-6 stroke-[2.5]"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 id="summaryModalTitle" class="text-lg sm:text-xl font-black text-white">Present Personnel</h3>
+              <span id="summaryModalCountBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold font-mono">0</span>
+            </div>
+            <p id="summaryModalSubtitle" class="text-xs text-slate-400 mt-0.5">Summary and personnel list for today</p>
+          </div>
+        </div>
+        <button onclick="App.closePersonnelSummaryModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-midnight-800 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Quick Metrics Breakdown Strip -->
+      <div id="summaryModalKpisRow" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-3.5">
+        <!-- populated dynamically -->
+      </div>
+
+      <!-- Search & Locale Quick Filter -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 mb-3">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
+          <input 
+            type="text" 
+            id="summarySearchInput" 
+            oninput="App.filterPersonnelSummaryList()" 
+            placeholder="Search by name, ID, or remarks..." 
+            class="w-full bg-midnight-900 border border-mcgiblue-800 focus:border-gold-400 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none">
+        </div>
+        
+        <div class="flex items-center gap-1 bg-midnight-900 p-1 rounded-xl border border-mcgiblue-900/80">
+          <button onclick="App.setPersonnelSummaryDeptFilter('')" id="summaryDeptBtnAll" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-gold-400 text-midnight-950 transition-all">All</button>
+          <button onclick="App.setPersonnelSummaryDeptFilter('Naic')" id="summaryDeptBtnNaic" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">Naic</button>
+          <button onclick="App.setPersonnelSummaryDeptFilter('Calubcob')" id="summaryDeptBtnCalubcob" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">Calubcob</button>
+          <button onclick="App.setPersonnelSummaryDeptFilter('Acacia')" id="summaryDeptBtnAcacia" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">Acacia</button>
+        </div>
+      </div>
+
+      <!-- Personnel Cards / Table List (Scrollable) -->
+      <div id="summaryModalListContainer" class="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[48vh] min-h-[160px] custom-scrollbar">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Modal Footer with Export & Close -->
+      <div class="pt-3.5 mt-3 border-t border-mcgiblue-900/60 flex items-center justify-between">
+        <span id="summaryModalListFooterCount" class="text-xs text-slate-400">Showing 0 of 0 personnel</span>
+        <div class="flex items-center gap-2">
+          <button onclick="App.exportPersonnelSummaryCSV()" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 bg-midnight-900 hover:bg-midnight-800 border border-mcgiblue-800 flex items-center gap-1.5 transition-all">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-gold-400"></i>
+            <span>Export List (CSV)</span>
+          </button>
+          <button onclick="App.closePersonnelSummaryModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-midnight-800 hover:bg-midnight-700 text-white transition-all">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADMIN CREDENTIALS DIRECTORY             -->
+  <!-- ============================================== -->
+  <div id="adminCredentialsModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop hidden">
+    <div class="glass-card bg-midnight-850 p-5 sm:p-6 rounded-2xl w-full max-w-4xl border border-gold-400/40 shadow-2xl relative animate-fade-in max-h-[92vh] flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-mcgiblue-900/60">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gold-400 text-midnight-950 flex items-center justify-center font-bold shadow-md">
+            <i data-lucide="shield-check" class="w-5 h-5 stroke-[2.5]"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg sm:text-xl font-black text-white">Member Credentials Directory</h3>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-gold-400/20 text-gold-300 border border-gold-400/30">ADMIN CONFIDENTIAL</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">View and manage member usernames and passwords across the active ministry</p>
+          </div>
+        </div>
+        <button onclick="App.closeAdminCredentialsModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-midnight-800 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Search & Controls -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 my-3.5">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5"></i>
+          <input 
+            type="text" 
+            id="adminCredsSearchInput" 
+            oninput="App.filterAdminCredentialsTable()" 
+            placeholder="Search credentials by name, username, roll number..." 
+            class="w-full bg-midnight-900 border border-mcgiblue-800 focus:border-gold-400 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none">
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="App.toggleAllCredentialsVisibility()" id="btnToggleAllCreds" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-midnight-800 hover:bg-midnight-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-all">
+            <i id="iconToggleAllCreds" data-lucide="eye" class="w-3.5 h-3.5 text-gold-400"></i>
+            <span id="textToggleAllCreds">Show All Passwords</span>
+          </button>
+          <button onclick="App.exportCredentialsCSV()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-midnight-800 hover:bg-midnight-700 text-gold-300 border border-gold-400/30 flex items-center gap-1.5 transition-all">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Export CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Credentials Table -->
+      <div class="flex-1 overflow-y-auto pr-1 max-h-[55vh] min-h-[180px] custom-scrollbar border border-mcgiblue-900/60 rounded-xl">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-midnight-900 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-mcgiblue-900/60 sticky top-0 z-10">
+            <tr>
+              <th class="px-3.5 py-2.5">Personnel Name</th>
+              <th class="px-3.5 py-2.5">Locale & Level</th>
+              <th class="px-3.5 py-2.5">Username</th>
+              <th class="px-3.5 py-2.5">Password</th>
+              <th class="px-3.5 py-2.5 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminCredentialsTableBody" class="divide-y divide-slate-800/60 font-sans">
+            <!-- populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3.5 mt-3 border-t border-mcgiblue-900/60 flex items-center justify-between">
+        <span id="adminCredsFooterCount" class="text-xs text-slate-400">Showing 0 member credentials</span>
+        <button onclick="App.closeAdminCredentialsModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-midnight-800 hover:bg-midnight-700 text-white transition-all">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase_client.js"></script>
+  <script src="js/attendance_logger.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/charts.js"></script>
+</body>
+</html>
