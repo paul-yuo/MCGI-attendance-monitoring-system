@@ -1,5 +1,5 @@
 """
-MCGI PRODUCTION MONITORING SYSTEM - Local Server Launcher
+MCGI Attendance Monitoring System - Local Server Launcher
 Starts a simple HTTP server with no-cache headers to serve the monitoring system on a local port.
 """
 import http.server
@@ -20,12 +20,13 @@ def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     
     port = PORT
+    server_cls = getattr(http.server, 'ThreadingHTTPServer', socketserver.ThreadingTCPServer)
     for attempt in range(10):
         try:
-            with socketserver.TCPServer(("", port), Handler) as httpd:
+            with server_cls(("", port), Handler) as httpd:
                 url = f"http://localhost:{port}"
                 print("=" * 60)
-                print(f" MCGI PRODUCTION MONITORING SYSTEM")
+                print(f" MCGI ATTENDANCE MONITORING SYSTEM")
                 print(f" Theme: Metallic Blue & Golden Amber (MCGI Productions)")
                 print(f" Serving at: {url}")
                 print("=" * 60)

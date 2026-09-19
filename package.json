@@ -1,7 +1,7 @@
 {
   "name": "mcgi-production-monitoring-system",
   "version": "2.5.0",
-  "description": "MCGI Production Attendance & Monitoring System - Native Desktop Application",
+  "description": "MCGI Attendance Monitoring System - Native Desktop Application",
   "main": "electron_main.js",
   "scripts": {
     "start": "electron .",

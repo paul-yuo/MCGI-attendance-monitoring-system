@@ -1,5 +1,5 @@
 """
-MCGI PRODUCTION MONITORING SYSTEM - Native Desktop Application Launcher
+MCGI Attendance Monitoring System - Native Desktop Application Launcher
 Starts the local server and launches the app in standalone native app mode.
 Sets the Windows taskbar icon explicitly so it matches app_icon.ico (not the browser favicon).
 """
@@ -17,7 +17,7 @@ import socketserver
 PORT        = 8080
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 ICON_PATH   = os.path.join(PROJECT_DIR, 'app_icon.ico')
-APP_ID      = 'MCGI.Production.Attendance.System.1.0'
+APP_ID      = 'MCGI.Attendance.Monitoring.System.1.0'
 
 # ─── HTTP Server ─────────────────────────────────────────────────────────────
 
@@ -39,7 +39,8 @@ def is_port_in_use(port):
         return s.connect_ex(('127.0.0.1', port)) == 0
 
 def start_server(port):
-    with socketserver.TCPServer(('127.0.0.1', port), NoCacheHTTPHandler) as httpd:
+    server = getattr(http.server, 'ThreadingHTTPServer', socketserver.ThreadingTCPServer)
+    with server(('127.0.0.1', port), NoCacheHTTPHandler) as httpd:
         httpd.serve_forever()
 
 # ─── Browser Finder ──────────────────────────────────────────────────────────

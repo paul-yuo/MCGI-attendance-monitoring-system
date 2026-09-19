@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <title>Sign In - MCGI PRODUCTION MONITORING SYSTEM</title>
+  <title>Sign In - MCGI Attendance Monitoring System</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="logo-32.png">
   <link rel="icon" type="image/png" sizes="192x192" href="logo-192.png">
@@ -34,15 +34,20 @@
   </script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="css/custom.css">
+  <script src="js/carousel_data.js"></script>
+  <script src="js/carousel_background.js"></script>
   <script src="js/neat-gradient.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase_client.js"></script>
   <script src="js/attendance_logger.js"></script>
 </head>
-<body class="login-page bg-slate-50 text-slate-100 antialiased selection:bg-gold-400 selection:text-midnight-950 relative min-h-screen overflow-x-hidden">
+<body class="login-page bg-midnight-950 text-slate-100 antialiased selection:bg-gold-400 selection:text-midnight-950 relative min-h-screen overflow-x-hidden">
 
-  <!-- Seamless 3D WebGL Fluid Wave Gradient Animation (Cycles Blue and White on Duty Selection) -->
-  <canvas id="loginNeatCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+  <!-- 3-Row Background Carousel Animation (MPRO, GCOS, TK) -->
+  <div id="carouselBackground" class="carousel-bg-container" aria-hidden="true"></div>
+
+  <!-- Fallback WebGL Canvas (hidden) -->
+  <canvas id="loginNeatCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-0 hidden"></canvas>
 
   <div id="toastContainer" class="fixed top-5 right-5 z-[200] flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
@@ -52,8 +57,8 @@
   <section id="dutySelectorScreen" class="duty-selector-screen" role="region" aria-label="Duty Assignment Selection">
     <div class="w-full max-w-5xl mx-auto flex flex-col items-center justify-center my-auto py-6">
 
-      <!-- Three Duty Cards: Centered, Responsive (Side-by-side on wide, stacked on narrow) -->
-      <div role="radiogroup" aria-label="Select duty type" class="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 w-full max-w-4xl mx-auto items-stretch">
+      <!-- Three Duty Cards: Centered, Responsive with reduced gap between them -->
+      <div role="radiogroup" aria-label="Select duty type" class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-3.5 mx-auto">
 
         <!-- Card 1: MCGI PRODUCTION (MPRO) -->
         <button id="dutyCardMpro" class="duty-card duty-card-mpro" role="radio" aria-checked="false"
@@ -118,16 +123,19 @@
         <!-- Brand Header -->
         <div class="p-5 pb-3 text-center border-b border-mcgiblue-900/50 bg-midnight-900/70 flex flex-col items-center justify-center relative">
           
+          <!-- Prominent High-Contrast Back to Duty Selection Button -->
+          <button type="button" onclick="DutySelection.backToDutySelection()" id="loginTopBackButton"
+            class="login-back-btn absolute top-3.5 left-3.5 z-10 flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all group cursor-pointer"
+            title="Back to Duty Selection" aria-label="Back to Duty Selection">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1"></i>
+            <span>Back</span>
+          </button>
+
           <div class="w-full flex items-center justify-center mb-2">
-            <!-- Duty indicator strip (Clickable to switch duty) -->
-            <div id="dutyIndicatorStrip" class="duty-indicator-strip duty-strip-mpro hidden"
-              role="button" tabindex="0" aria-label="Change duty assignment"
-              onclick="DutySelection.backToDutySelection()"
-              onkeydown="if(event.key==='Enter'){DutySelection.backToDutySelection();}">
+            <!-- Duty indicator strip (Status pill without "change" button) -->
+            <div id="dutyIndicatorStrip" class="duty-indicator-strip duty-strip-mpro hidden" aria-label="Active duty assignment">
               <span class="duty-pulse-dot duty-pulse-mpro" id="dutyPulseDot"></span>
               <span id="dutyIndicatorLabel">MPRO - Production</span>
-              <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 3a2.85 2.85 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-              <span class="text-[9px] opacity-60">change</span>
             </div>
           </div>
 
@@ -141,7 +149,7 @@
               </div>
             </div>
           </div>
-          <h1 id="loginHeaderSystemName" class="text-[11px] font-bold uppercase tracking-widest text-gold-300 font-mono">MCGI PRODUCTION MONITORING SYSTEM</h1>
+          <h1 id="loginHeaderSystemName" class="text-[11px] font-bold uppercase tracking-widest text-gold-300 font-mono">MCGI ATTENDANCE MONITORING SYSTEM</h1>
           <p id="loginHeaderSystemSubtitle" class="text-[10.5px] text-slate-400 mt-0.5">Broadcast &amp; Production Crew Attendance Suite</p>
         </div>
 
@@ -238,6 +246,11 @@
                     Register Profile
                   </button>
                 </p>
+                <button type="button" onclick="DutySelection.backToDutySelection()"
+                  class="login-bottom-back-btn mt-3.5 text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors">
+                  <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                  <span>Back to Duty Selection (MPRO / GCOS / TK)</span>
+                </button>
               </div>
             </div>
 
@@ -329,6 +342,11 @@
                     Sign In
                   </button>
                 </p>
+                <button type="button" onclick="DutySelection.backToDutySelection()"
+                  class="login-bottom-back-btn mt-3.5 text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors">
+                  <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                  <span>Back to Duty Selection (MPRO / GCOS / TK)</span>
+                </button>
               </div>
             </div>
 
@@ -510,6 +528,7 @@
       backToDutySelection() {
         // Returns user to duty-selection screen while ensuring all three cards return to identical default state
         this.resetCards();
+        document.title = 'Sign In - MCGI Attendance Monitoring System';
         if (LoginAuth.neatGradient) {
           LoginAuth.neatGradient.setColors(this.DUTY_SELECTION_COLORS);
         }
@@ -525,6 +544,9 @@
         const l = document.getElementById('authLoginWrapper');
         if (s) { s.classList.add('ds-hidden'); s.setAttribute('aria-hidden', 'true'); }
         if (l) { l.classList.remove('hidden'); }
+        if (window.lucide) {
+          lucide.createIcons();
+        }
       },
 
       _showSelector() {
@@ -592,6 +614,7 @@
         if (!t) return;
         this.clearError();
         v === 'register' ? t.classList.add('slide-to-register') : t.classList.remove('slide-to-register');
+        if (window.lucide) lucide.createIcons();
       },
 
       togglePasswordVisibility(id, btn) {

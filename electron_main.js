@@ -10,7 +10,7 @@ function createWindow() {
     height: 900,
     minWidth: 1024,
     minHeight: 700,
-    title: "MCGI Production Monitoring System",
+    title: "MCGI Attendance Monitoring System",
     backgroundColor: "#050507",
     autoHideMenuBar: true,
     show: false, // Prevents white/blank flash before showing

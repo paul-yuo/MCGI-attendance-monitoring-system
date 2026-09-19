@@ -639,7 +639,7 @@ body.login-page {
 /* DUTY SELECTION SCREEN & CARDS                                             */
 /* ========================================================================= */
 
-/* Container allowing the Neat 3D fluid wave gradient to shine through cleanly */
+/* Container allowing the 3-row background carousel to shine through cleanly */
 .duty-selector-screen {
   position: fixed;
   inset: 0;
@@ -650,7 +650,7 @@ body.login-page {
   justify-content: center;
   padding: 2.5rem 1.25rem;
   overflow-y: auto;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.12) 0%, rgba(224, 238, 255, 0.38) 100%);
+  background: transparent;
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -661,163 +661,169 @@ body.login-page {
   pointer-events: none;
 }
 
-/* Base duty card with distinct solid elevated background box */
+/* ========================================================================= */
+/* 3-ROW BACKGROUND CAROUSEL ANIMATION (MPRO, GCOS, TK)                      */
+/* ========================================================================= */
+.carousel-bg-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: #06070a;
+  user-select: none;
+}
+
+.carousel-bg-row {
+  flex: 1 1 0;
+  height: calc(100% / 3);
+  min-height: 0;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+}
+
+.carousel-track {
+  display: flex;
+  height: 100%;
+  width: max-content;
+  will-change: transform;
+  align-items: stretch;
+}
+
+/* Row 1 & 3: Right to Left infinite loop (reduced, calm ambient speed) */
+.carousel-track-rtl {
+  animation: carouselScrollRTL 360s linear infinite;
+}
+
+/* Row 2: Left to Right infinite loop (reduced, calm ambient speed) */
+.carousel-track-ltr {
+  animation: carouselScrollLTR 360s linear infinite;
+}
+
+.carousel-group {
+  display: flex;
+  height: 100%;
+  gap: 8px;
+  padding-right: 8px;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+.carousel-bg-image {
+  height: 100%;
+  width: auto;
+  max-width: none;
+  object-fit: cover;
+  object-position: center 15%;
+  flex-shrink: 0;
+  opacity: 0.7; /* 70% opacity requested by user */
+  filter: brightness(0.92) contrast(1.05);
+  border-radius: 6px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  backface-visibility: hidden;
+  background-color: transparent;
+}
+
+@keyframes carouselScrollRTL {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes carouselScrollLTR {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Ambient overlay for high-contrast duty cards readability */
+.carousel-bg-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(5, 5, 8, 0.25) 0%, rgba(5, 5, 8, 0.55) 100%),
+              linear-gradient(to bottom, rgba(5, 5, 8, 0.4) 0%, transparent 15%, transparent 85%, rgba(5, 5, 8, 0.55) 100%);
+}
+
+/* Base duty card: transparent wrapper around the sleek glowing badge (outer blocking boxes removed) */
 .duty-card {
   position: relative;
-  border-radius: 1.5rem;
-  padding: 2.25rem 1.5rem 1.85rem;
-  cursor: pointer;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   outline: none;
-  border: 2px solid transparent;
+  cursor: pointer;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 220px;
-  padding: 2.25rem 1.5rem;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  padding: 0 !important;
+  min-height: auto !important;
   transform: none;
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.28s ease,
-              border-color 0.25s ease;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .duty-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
+  display: none !important;
 }
 
-/* Hover effect active only on explicit pointer hover */
+/* Hover and active micro-interactions directly on the floating badge */
 .duty-card:hover {
-  transform: translateY(-8px) scale(1.025);
+  transform: translateY(-6px) scale(1.05);
+}
+
+.duty-card:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .duty-card:focus-visible {
-  outline: 3px solid #3b82f6;
-  outline-offset: 4px;
-}
-
-.duty-card:focus:not(:focus-visible) {
   outline: none;
 }
 
-/* Selected or returned state must strictly remain at default scale and dimensions */
+.duty-card:focus-visible .duty-badge-container {
+  outline: 2px solid #fbbf24;
+  outline-offset: 4px;
+}
+
 .duty-card.duty-selected {
   transform: none;
 }
 
-/* ── 1. MPRO Card – Black Background, Yellow/Gold Accents ───────────────── */
-.duty-card-mpro {
-  background: linear-gradient(160deg, rgba(16, 17, 24, 0.96) 0%, rgba(8, 8, 12, 0.98) 100%) !important;
-  border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
-  color: #fbbf24 !important;
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.85),
-              inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
-}
-.duty-card-mpro:hover {
-  border-color: #fbbf24 !important;
-  box-shadow: 0 25px 55px -10px rgba(0, 0, 0, 0.9),
-              inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
-}
-.duty-card-mpro::before {
-  background: radial-gradient(circle at 50% 120%, rgba(251, 191, 36, 0.18) 0%, transparent 70%);
-}
-.duty-card-mpro:hover::before { opacity: 1; }
-.duty-card-mpro .duty-title  { color: #ffffff !important; }
-.duty-card-mpro .duty-sub    { color: #cbd5e1 !important; }
-.duty-card-mpro .duty-code-badge {
-  background: linear-gradient(135deg, #fbbf24, #d97706) !important;
-  color: #050507 !important;
-  font-weight: 900;
-}
-.duty-card-mpro .duty-select-btn {
-  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
-  color: #050507 !important;
-  font-weight: 800;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-}
-.duty-card-mpro .duty-select-btn:hover {
-  background: linear-gradient(135deg, #fde047 0%, #f59e0b 100%) !important;
-  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.45);
-}
-
-/* ── 2. GCOS Card – White Background, Black Text ────────────────────────── */
-.duty-card-gcos {
-  background: #ffffff !important;
-  border: 1.5px solid #000000 !important;
-  color: #000000 !important;
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.25),
-              inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
-}
-.duty-card-gcos:hover {
-  border-color: #000000 !important;
-  box-shadow: 0 25px 55px -10px rgba(0, 0, 0, 0.35),
-              0 0 0 1px #000000 !important;
-}
-.duty-card-gcos::before {
-  background: radial-gradient(circle at 50% 120%, rgba(0, 0, 0, 0.05) 0%, transparent 70%);
-}
-.duty-card-gcos:hover::before { opacity: 1; }
-.duty-card-gcos .duty-title  { color: #000000 !important; }
-.duty-card-gcos .duty-sub    { color: #1e293b !important; }
-.duty-card-gcos .duty-code-badge {
-  background: #000000 !important;
-  color: #ffffff !important;
-  font-weight: 900;
-}
-.duty-card-gcos .duty-select-btn {
-  background: #000000 !important;
-  color: #ffffff !important;
-  font-weight: 800;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-.duty-card-gcos .duty-select-btn:hover {
-  background: #1e293b !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-}
-
-/* ── 3. TK Card – Pink Background, White Text ───────────────────────────── */
+/* Ensure no outer card box styling blocks the carousel */
+.duty-card-mpro,
+.duty-card-gcos,
 .duty-card-tk {
-  background: linear-gradient(155deg, #be185d 0%, #9d174d 55%, #831843 100%) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
-  color: #ffffff !important;
-  box-shadow: 0 20px 45px -10px rgba(131, 24, 67, 0.5),
-              inset 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
+
+.duty-card-mpro:hover,
+.duty-card-gcos:hover,
 .duty-card-tk:hover {
-  border-color: #ffffff !important;
-  box-shadow: 0 25px 55px -10px rgba(131, 24, 67, 0.65),
-              0 0 0 1px #ffffff !important;
-}
-.duty-card-tk::before {
-  background: radial-gradient(circle at 50% 120%, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
-}
-.duty-card-tk:hover::before { opacity: 1; }
-.duty-card-tk .duty-title  { color: #ffffff !important; }
-.duty-card-tk .duty-sub    { color: #fdf2f8 !important; }
-.duty-card-tk .duty-code-badge {
-  background: #ffffff !important;
-  color: #be185d !important;
-  font-weight: 900;
-}
-.duty-card-tk .duty-select-btn {
-  background: #ffffff !important;
-  color: #be185d !important;
-  font-weight: 800;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-.duty-card-tk .duty-select-btn:hover {
-  background: #fdf2f8 !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* ========================================================================= */
@@ -842,6 +848,20 @@ body.login-page {
   box-sizing: border-box;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
+
+/* Substantial height & proportions specifically for the duty selection cards */
+.duty-card .duty-badge-container {
+  width: 220px;
+  min-height: 126px;
+  padding: 1.4rem 1.2rem 1.3rem;
+  border-radius: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+
 .duty-card:hover .duty-badge-container {
   transform: scale(1.05);
 }
@@ -852,6 +872,19 @@ body.login-page {
   font-weight: 900;
   line-height: 1.05;
   letter-spacing: 0.08em;
+}
+
+.duty-card .duty-badge-brand {
+  font-size: 2.15rem;
+  line-height: 1;
+}
+
+.duty-card .duty-badge-bar {
+  margin-top: 4px;
+}
+
+.duty-card .duty-badge-line {
+  margin: 3px 0;
 }
 
 .duty-badge-bar {
@@ -1043,28 +1076,128 @@ body.login-page {
 .auth-theme-tk .auth-glass-box .bg-midnight-900 { background: #fdf2f8 !important; border-color: #f9a8d4 !important; }
 .auth-theme-tk .auth-glass-box .hover\:bg-midnight-800:hover { background: #fce7f3 !important; }
 
-/* Duty indicator strip */
+/* ========================================================================= */
+/* HIGH-CONTRAST BACK BUTTONS FOR ALL THREE DUTY THEMES                     */
+/* ========================================================================= */
+
+/* 1. MPRO Theme (Default: Obsidian & Gold) */
+.login-back-btn {
+  background: rgba(14, 16, 24, 0.94) !important;
+  color: #fbbf24 !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.65) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+}
+.login-back-btn:hover {
+  background: #f59e0b !important;
+  color: #050508 !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.5) !important;
+}
+.login-back-btn i,
+.login-back-btn svg {
+  color: #fbbf24 !important;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.login-back-btn:hover i,
+.login-back-btn:hover svg {
+  color: #050508 !important;
+}
+
+.login-bottom-back-btn {
+  color: #fbbf24 !important;
+  font-weight: 700 !important;
+}
+.login-bottom-back-btn:hover {
+  color: #fde047 !important;
+  text-decoration: underline !important;
+}
+.login-bottom-back-btn i,
+.login-bottom-back-btn svg {
+  color: #f59e0b !important;
+}
+
+/* 2. GCOS Theme (Crisp White Card: Solid Black High-Contrast Buttons) */
+.auth-theme-gcos .login-back-btn {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #000000 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+}
+.auth-theme-gcos .login-back-btn:hover {
+  background: #27272a !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+}
+.auth-theme-gcos .login-back-btn i,
+.auth-theme-gcos .login-back-btn svg {
+  color: #ffffff !important;
+}
+
+.auth-theme-gcos .login-bottom-back-btn {
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+.auth-theme-gcos .login-bottom-back-btn:hover {
+  color: #3f3f46 !important;
+  text-decoration: underline !important;
+}
+.auth-theme-gcos .login-bottom-back-btn i,
+.auth-theme-gcos .login-bottom-back-btn svg {
+  color: #000000 !important;
+}
+
+/* 3. TK Theme (Soft Pink Card: Vivid Berry Rose High-Contrast Buttons) */
+.auth-theme-tk .login-back-btn {
+  background: #be185d !important;
+  color: #ffffff !important;
+  border: 1.5px solid #9d174d !important;
+  box-shadow: 0 4px 14px rgba(190, 24, 93, 0.35) !important;
+}
+.auth-theme-tk .login-back-btn:hover {
+  background: #9d174d !important;
+  color: #ffffff !important;
+  border-color: #831843 !important;
+  box-shadow: 0 4px 18px rgba(157, 23, 77, 0.45) !important;
+}
+.auth-theme-tk .login-back-btn i,
+.auth-theme-tk .login-back-btn svg {
+  color: #ffffff !important;
+}
+
+.auth-theme-tk .login-bottom-back-btn {
+  color: #9d174d !important;
+  font-weight: 800 !important;
+}
+.auth-theme-tk .login-bottom-back-btn:hover {
+  color: #700730 !important;
+  text-decoration: underline !important;
+}
+.auth-theme-tk .login-bottom-back-btn i,
+.auth-theme-tk .login-bottom-back-btn svg {
+  color: #be185d !important;
+}
+
+/* Duty indicator strip (Clean status badge) */
 .duty-indicator-strip {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.3rem 0.9rem;
+  gap: 0.5rem;
+  padding: 0.32rem 0.95rem;
   border-radius: 9999px;
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 800;
   font-family: 'JetBrains Mono', monospace;
-  letter-spacing: 0.07em;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  letter-spacing: 0.08em;
+  cursor: default;
   margin-top: 0.45rem;
   text-decoration: none;
   user-select: none;
 }
-.duty-indicator-strip:hover { opacity: 0.78; }
 
-.duty-strip-mpro  { background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.4); color: #fbbf24; }
-.duty-strip-gcos  { background: rgba(0, 0, 0, 0.1); border: 1px solid rgba(0, 0, 0, 0.5); color: #000000; font-weight: 800; }
-.duty-strip-tk    { background: rgba(236, 72, 153, 0.15); border: 1px solid rgba(236, 72, 153, 0.45); color: #be185d; }
+.duty-strip-mpro  { background: rgba(251, 191, 36, 0.15); border: 1.2px solid rgba(251, 191, 36, 0.5); color: #fbbf24; }
+.duty-strip-gcos  { background: rgba(0, 0, 0, 0.08); border: 1.2px solid rgba(0, 0, 0, 0.6); color: #000000; font-weight: 800; }
+.duty-strip-tk    { background: rgba(236, 72, 153, 0.15); border: 1.2px solid rgba(236, 72, 153, 0.5); color: #9d174d; font-weight: 800; }
 
 .duty-pulse-dot {
   width: 6px; height: 6px;
@@ -1073,8 +1206,8 @@ body.login-page {
   flex-shrink: 0;
 }
 .duty-pulse-mpro { background-color: #fbbf24; }
-.duty-pulse-gcos { background-color: #ffffff; }
-.duty-pulse-tk   { background-color: #ec4899; }
+.duty-pulse-gcos { background-color: #000000; }
+.duty-pulse-tk   { background-color: #be185d; }
 
 /* ========================================================================= */
 /* MAIN PORTAL THEMES (INDEX.HTML) - DARK & LIGHT COMPREHENSIVE ARCHITECTURE  */
