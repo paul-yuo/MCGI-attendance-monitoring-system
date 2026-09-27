@@ -419,6 +419,10 @@ body.login-page {
   transition: all 0.2s ease;
 }
 
+.custom-pill-checkbox input[type="radio"] + .custom-pill-box .custom-pill-indicator {
+  border-radius: 9999px;
+}
+
 .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator {
   background-color: #f59e0b;
   border-color: #fbbf24;
@@ -430,6 +434,26 @@ body.login-page {
 .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator svg {
   color: #09090b !important;
   stroke: #09090b !important;
+}
+
+/* Responsive Pill Wrapping & Grid Alignment */
+.custom-pill-checkbox {
+  display: inline-flex;
+  cursor: pointer;
+  user-select: none;
+  max-width: 100%;
+}
+
+.grid .custom-pill-checkbox {
+  width: 100%;
+}
+
+.grid .custom-pill-checkbox .custom-pill-box {
+  width: 100%;
+}
+
+.custom-pill-box {
+  word-break: break-word;
 }
 
 
@@ -1088,8 +1112,8 @@ body.login-page {
 .auth-theme-gcos .auth-glass-box h1,
 .auth-theme-gcos .auth-glass-box h2,
 .auth-theme-gcos .auth-glass-box p,
-.auth-theme-gcos .auth-glass-box span,
 .auth-theme-gcos .auth-glass-box label { color: #000000 !important; }
+.auth-theme-gcos .auth-glass-box span:not(.gold-gradient-btn *):not(.login-back-btn *) { color: #000000 !important; }
 .auth-theme-gcos .auth-glass-box .text-slate-400,
 .auth-theme-gcos .auth-glass-box .text-slate-500 { color: #475569 !important; }
 .auth-theme-gcos .auth-glass-box .text-gold-300,
@@ -1099,8 +1123,28 @@ body.login-page {
 .auth-theme-gcos .auth-glass-box input:focus,
 .auth-theme-gcos .auth-glass-box select:focus { border-color: #000000 !important; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2) !important; }
 .auth-theme-gcos .auth-glass-box input::placeholder { color: #64748b !important; }
-.auth-theme-gcos .auth-glass-box .gold-gradient-btn { background: #000000 !important; color: #ffffff !important; border: 1px solid #000000 !important; }
-.auth-theme-gcos .auth-glass-box .gold-gradient-btn:hover { background: #18181b !important; color: #ffffff !important; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important; }
+
+/* GCOS Primary Action Buttons: Solid Black Background with Crisp Pure White Text & Icons */
+.auth-theme-gcos .auth-glass-box .gold-gradient-btn,
+.auth-theme-gcos .auth-glass-box .gold-gradient-btn *,
+.auth-theme-gcos .auth-glass-box .gold-gradient-btn span,
+.auth-theme-gcos .auth-glass-box .gold-gradient-btn i,
+.auth-theme-gcos .auth-glass-box .gold-gradient-btn svg {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+  fill: none !important;
+}
+.auth-theme-gcos .auth-glass-box .gold-gradient-btn:hover,
+.auth-theme-gcos .auth-glass-box .gold-gradient-btn:hover *,
+.auth-theme-gcos .auth-glass-box .gold-gradient-btn:hover span,
+.auth-theme-gcos .auth-glass-box .gold-gradient-btn:hover i,
+.auth-theme-gcos .auth-glass-box .gold-gradient-btn:hover svg {
+  background: #18181b !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+}
+
 .auth-theme-gcos .auth-glass-box .border-b,
 .auth-theme-gcos .auth-glass-box .border-slate-800\/80 { border-color: rgba(0, 0, 0, 0.15) !important; }
 .auth-theme-gcos .auth-glass-box .bg-midnight-900\/70 { background: rgba(248, 250, 252, 0.95) !important; }
@@ -1116,8 +1160,8 @@ body.login-page {
 .auth-theme-tk .auth-glass-box h1 { color: #500724 !important; }
 .auth-theme-tk .auth-glass-box h2 { color: #9d174d !important; }
 .auth-theme-tk .auth-glass-box p  { color: #be185d !important; }
-.auth-theme-tk .auth-glass-box label,
-.auth-theme-tk .auth-glass-box span { color: #500724 !important; }
+.auth-theme-tk .auth-glass-box label { color: #500724 !important; }
+.auth-theme-tk .auth-glass-box span:not(.gold-gradient-btn *):not(.login-back-btn *) { color: #500724 !important; }
 .auth-theme-tk .auth-glass-box .text-slate-400,
 .auth-theme-tk .auth-glass-box .text-slate-500 { color: #9d174d !important; }
 .auth-theme-tk .auth-glass-box .text-gold-300,
@@ -1127,8 +1171,25 @@ body.login-page {
 .auth-theme-tk .auth-glass-box input:focus,
 .auth-theme-tk .auth-glass-box select:focus { border-color: #be185d !important; outline: none !important; box-shadow: none !important; }
 .auth-theme-tk .auth-glass-box input::placeholder { color: #f472b6 !important; }
-.auth-theme-tk .auth-glass-box .gold-gradient-btn { background: linear-gradient(135deg, #be185d 0%, #ec4899 100%) !important; color: #ffffff !important; }
-.auth-theme-tk .auth-glass-box .gold-gradient-btn:hover { background: linear-gradient(135deg, #9d174d 0%, #db2777 100%) !important; box-shadow: 0 4px 14px rgba(190, 24, 93, 0.35) !important; }
+
+/* TK Primary Action Buttons: Pure White Text & Icons */
+.auth-theme-tk .auth-glass-box .gold-gradient-btn,
+.auth-theme-tk .auth-glass-box .gold-gradient-btn *,
+.auth-theme-tk .auth-glass-box .gold-gradient-btn span,
+.auth-theme-tk .auth-glass-box .gold-gradient-btn i,
+.auth-theme-tk .auth-glass-box .gold-gradient-btn svg {
+  background: linear-gradient(135deg, #be185d 0%, #ec4899 100%) !important;
+  color: #ffffff !important;
+}
+.auth-theme-tk .auth-glass-box .gold-gradient-btn:hover,
+.auth-theme-tk .auth-glass-box .gold-gradient-btn:hover *,
+.auth-theme-tk .auth-glass-box .gold-gradient-btn:hover span,
+.auth-theme-tk .auth-glass-box .gold-gradient-btn:hover i,
+.auth-theme-tk .auth-glass-box .gold-gradient-btn:hover svg {
+  background: linear-gradient(135deg, #9d174d 0%, #db2777 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(190, 24, 93, 0.35) !important;
+}
 .auth-theme-tk .auth-glass-box .border-b,
 .auth-theme-tk .auth-glass-box .border-slate-800\/80 { border-color: rgba(190, 24, 93, 0.2) !important; }
 .auth-theme-tk .auth-glass-box .bg-midnight-900\/70 { background: rgba(253, 242, 248, 0.95) !important; }
@@ -1140,26 +1201,27 @@ body.login-page {
 /* ========================================================================= */
 
 /* 1. MPRO Theme (Default: Obsidian & Gold) */
+.login-back-btn,
+.login-back-btn * {
+  color: #fbbf24 !important;
+}
 .login-back-btn {
   background: rgba(14, 16, 24, 0.94) !important;
-  color: #fbbf24 !important;
   border: 1.5px solid rgba(245, 158, 11, 0.65) !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
 }
-.login-back-btn:hover {
+.login-back-btn:hover,
+.login-back-btn:hover * {
   background: #f59e0b !important;
   color: #050508 !important;
+}
+.login-back-btn:hover {
   border-color: #f59e0b !important;
   box-shadow: 0 4px 18px rgba(245, 158, 11, 0.5) !important;
 }
 .login-back-btn i,
 .login-back-btn svg {
-  color: #fbbf24 !important;
   transition: transform 0.2s ease, color 0.2s ease;
-}
-.login-back-btn:hover i,
-.login-back-btn:hover svg {
-  color: #050508 !important;
 }
 
 .login-bottom-back-btn {
@@ -1175,22 +1237,29 @@ body.login-page {
   color: #f59e0b !important;
 }
 
-/* 2. GCOS Theme (Crisp White Card: Solid Black High-Contrast Buttons) */
-.auth-theme-gcos .login-back-btn {
+/* 2. GCOS Theme (Crisp White Card: Solid Black High-Contrast Buttons with Pure White Text & Icons) */
+.auth-theme-gcos .login-back-btn,
+.auth-theme-gcos .login-back-btn *,
+.auth-theme-gcos .login-back-btn span,
+.auth-theme-gcos .login-back-btn i,
+.auth-theme-gcos .login-back-btn svg {
   background: #000000 !important;
   color: #ffffff !important;
+  border-color: #000000 !important;
+}
+.auth-theme-gcos .login-back-btn {
   border: 1.5px solid #000000 !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
 }
-.auth-theme-gcos .login-back-btn:hover {
+.auth-theme-gcos .login-back-btn:hover,
+.auth-theme-gcos .login-back-btn:hover *,
+.auth-theme-gcos .login-back-btn:hover span,
+.auth-theme-gcos .login-back-btn:hover i,
+.auth-theme-gcos .login-back-btn:hover svg {
   background: #27272a !important;
   color: #ffffff !important;
   border-color: #000000 !important;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
-}
-.auth-theme-gcos .login-back-btn i,
-.auth-theme-gcos .login-back-btn svg {
-  color: #ffffff !important;
 }
 
 .auth-theme-gcos .login-bottom-back-btn {
@@ -1206,22 +1275,28 @@ body.login-page {
   color: #000000 !important;
 }
 
-/* 3. TK Theme (Soft Pink Card: Vivid Berry Rose High-Contrast Buttons) */
-.auth-theme-tk .login-back-btn {
+/* 3. TK Theme (Soft Pink Card: Vivid Berry Rose High-Contrast Buttons with Pure White Text & Icons) */
+.auth-theme-tk .login-back-btn,
+.auth-theme-tk .login-back-btn *,
+.auth-theme-tk .login-back-btn span,
+.auth-theme-tk .login-back-btn i,
+.auth-theme-tk .login-back-btn svg {
   background: #be185d !important;
   color: #ffffff !important;
+}
+.auth-theme-tk .login-back-btn {
   border: 1.5px solid #9d174d !important;
   box-shadow: 0 4px 14px rgba(190, 24, 93, 0.35) !important;
 }
-.auth-theme-tk .login-back-btn:hover {
+.auth-theme-tk .login-back-btn:hover,
+.auth-theme-tk .login-back-btn:hover *,
+.auth-theme-tk .login-back-btn:hover span,
+.auth-theme-tk .login-back-btn:hover i,
+.auth-theme-tk .login-back-btn:hover svg {
   background: #9d174d !important;
   color: #ffffff !important;
   border-color: #831843 !important;
   box-shadow: 0 4px 18px rgba(157, 23, 77, 0.45) !important;
-}
-.auth-theme-tk .login-back-btn i,
-.auth-theme-tk .login-back-btn svg {
-  color: #ffffff !important;
 }
 
 .auth-theme-tk .login-bottom-back-btn {
@@ -1323,6 +1398,9 @@ html:not(.light-mode) .portal-theme-gcos .glass-card.glow-blue {
 }
 
 /* 2. Primary & Secondary Buttons */
+html:not(.light-mode).portal-theme-gcos #headerRecordAttendanceBtn,
+html:not(.light-mode) .portal-theme-gcos #headerRecordAttendanceBtn,
+html:not(.light-mode).portal-theme-gcos .gold-gradient-btn,
 html:not(.light-mode) .portal-theme-gcos .gold-gradient-btn {
   background: #ffffff !important;
   color: #000000 !important;
@@ -1330,14 +1408,27 @@ html:not(.light-mode) .portal-theme-gcos .gold-gradient-btn {
   border: 1px solid var(--border-accent) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
 }
+html:not(.light-mode).portal-theme-gcos #headerRecordAttendanceBtn:hover,
+html:not(.light-mode) .portal-theme-gcos #headerRecordAttendanceBtn:hover,
+html:not(.light-mode).portal-theme-gcos .gold-gradient-btn:hover,
 html:not(.light-mode) .portal-theme-gcos .gold-gradient-btn:hover {
   background: #e4e4e7 !important;
   color: #000000 !important;
   border-color: var(--border-focus) !important;
   box-shadow: var(--glow-active) !important;
 }
+html:not(.light-mode).portal-theme-gcos #headerRecordAttendanceBtn i,
+html:not(.light-mode).portal-theme-gcos #headerRecordAttendanceBtn [data-lucide],
+html:not(.light-mode).portal-theme-gcos #headerRecordAttendanceBtn svg,
+html:not(.light-mode) .portal-theme-gcos #headerRecordAttendanceBtn i,
+html:not(.light-mode) .portal-theme-gcos #headerRecordAttendanceBtn [data-lucide],
+html:not(.light-mode) .portal-theme-gcos #headerRecordAttendanceBtn svg,
+html:not(.light-mode).portal-theme-gcos .gold-gradient-btn i,
+html:not(.light-mode).portal-theme-gcos .gold-gradient-btn [data-lucide],
+html:not(.light-mode).portal-theme-gcos .gold-gradient-btn svg,
 html:not(.light-mode) .portal-theme-gcos .gold-gradient-btn i,
-html:not(.light-mode) .portal-theme-gcos .gold-gradient-btn [data-lucide] {
+html:not(.light-mode) .portal-theme-gcos .gold-gradient-btn [data-lucide],
+html:not(.light-mode) .portal-theme-gcos .gold-gradient-btn svg {
   color: #000000 !important;
   stroke: #000000 !important;
 }
@@ -1640,21 +1731,36 @@ html:not(.light-mode) .portal-theme-tk .glass-card.glow-blue {
 }
 
 /* 2. Primary & Secondary Buttons */
+html:not(.light-mode).portal-theme-tk #headerRecordAttendanceBtn,
+html:not(.light-mode) .portal-theme-tk #headerRecordAttendanceBtn,
+html:not(.light-mode).portal-theme-tk .gold-gradient-btn,
 html:not(.light-mode) .portal-theme-tk .gold-gradient-btn {
-  background: linear-gradient(135deg, #831843 0%, #be185d 100%) !important;
+  background: linear-gradient(135deg, #ec4899 0%, #be185d 100%) !important;
   color: #ffffff !important;
   font-weight: 700 !important;
-  border: 1px solid var(--border-accent) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid #f472b6 !important;
+  box-shadow: 0 2px 10px rgba(236, 72, 153, 0.35) !important;
 }
+html:not(.light-mode).portal-theme-tk #headerRecordAttendanceBtn:hover,
+html:not(.light-mode) .portal-theme-tk #headerRecordAttendanceBtn:hover,
+html:not(.light-mode).portal-theme-tk .gold-gradient-btn:hover,
 html:not(.light-mode) .portal-theme-tk .gold-gradient-btn:hover {
-  background: linear-gradient(135deg, #9d174d 0%, #db2777 100%) !important;
-  color: #ffffff !important;
-  border-color: var(--border-focus) !important;
-  box-shadow: var(--glow-active) !important;
+  background: linear-gradient(135deg, #f472b6 0%, #db2777 100%) !important;
+  border-color: #fbcfe8 !important;
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.45) !important;
 }
+html:not(.light-mode).portal-theme-tk #headerRecordAttendanceBtn i,
+html:not(.light-mode).portal-theme-tk #headerRecordAttendanceBtn [data-lucide],
+html:not(.light-mode).portal-theme-tk #headerRecordAttendanceBtn svg,
+html:not(.light-mode) .portal-theme-tk #headerRecordAttendanceBtn i,
+html:not(.light-mode) .portal-theme-tk #headerRecordAttendanceBtn [data-lucide],
+html:not(.light-mode) .portal-theme-tk #headerRecordAttendanceBtn svg,
+html:not(.light-mode).portal-theme-tk .gold-gradient-btn i,
+html:not(.light-mode).portal-theme-tk .gold-gradient-btn [data-lucide],
+html:not(.light-mode).portal-theme-tk .gold-gradient-btn svg,
 html:not(.light-mode) .portal-theme-tk .gold-gradient-btn i,
-html:not(.light-mode) .portal-theme-tk .gold-gradient-btn [data-lucide] {
+html:not(.light-mode) .portal-theme-tk .gold-gradient-btn [data-lucide],
+html:not(.light-mode) .portal-theme-tk .gold-gradient-btn svg {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }
@@ -2236,20 +2342,164 @@ html.light-mode #headerUserName {
   font-weight: 800 !important;
 }
 
+/* High-Contrast Typography & Accessibility in Light Mode */
+html.light-mode label {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+html.light-mode label span.text-slate-400,
+html.light-mode label span.text-slate-500 {
+  color: #475569 !important;
+}
+
+html.light-mode .text-gold-400,
+html.light-mode [class*="text-gold-400"] {
+  color: #b45309 !important;
+}
+
+html.light-mode .text-gold-300,
+html.light-mode [class*="text-gold-300"] {
+  color: #92400e !important;
+}
+
+html.light-mode [data-lucide].text-gold-400,
+html.light-mode i.text-gold-400,
+html.light-mode svg.text-gold-400 {
+  color: #d97706 !important;
+  stroke: #d97706 !important;
+}
+
+html.light-mode [data-lucide].text-mcgiblue-400,
+html.light-mode i.text-mcgiblue-400,
+html.light-mode svg.text-mcgiblue-400 {
+  color: #0284c7 !important;
+  stroke: #0284c7 !important;
+}
+
+html.light-mode #dynamicEventFieldsContainer {
+  background-color: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+}
+
+html.light-mode #dynamicEventFieldsContainer label,
+html.light-mode #dynamicEventFieldsContainer .text-gold-300 {
+  color: #92400e !important;
+  font-weight: 700 !important;
+}
+
+html.light-mode #dynamicEventFieldsContainer [data-lucide].text-gold-400,
+html.light-mode #dynamicEventFieldsContainer i.text-gold-400 {
+  color: #d97706 !important;
+  stroke: #d97706 !important;
+}
+
+html.light-mode button[onclick="App.resetEventEntryForm()"],
+html.light-mode form button[type="button"] {
+  background-color: #f1f5f9 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+html.light-mode button[onclick="App.resetEventEntryForm()"]:hover,
+html.light-mode form button[type="button"]:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light-mode form .text-slate-400 {
+  color: #475569 !important;
+}
+
+html.light-mode form .text-emerald-400 {
+  color: #059669 !important;
+  stroke: #059669 !important;
+}
+
+/* Checkbox & Radio Selection Pills in Light Mode (Base / Unchecked) */
+html.light-mode .custom-pill-box {
+  background-color: #f8fafc !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #1e293b !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+
+html.light-mode .custom-pill-checkbox:hover .custom-pill-box {
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+  background-color: #f1f5f9 !important;
+}
+
+html.light-mode .custom-pill-indicator {
+  border: 1.5px solid #94a3b8 !important;
+  background-color: #ffffff !important;
+}
+
+/* Header Action & Badge Consistency (Responsive, Sleek, Proportional) */
+#headerRecordAttendanceBtn {
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  padding: 0 12px !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  border-radius: 8px !important;
+  line-height: 1 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+}
+
+#headerDutyBadge,
+#headerCloudSyncBadge,
+#headerThemeToggleBtn,
+header button[title="Sign Out"] {
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+@media (max-width: 639px) {
+  #headerRecordAttendanceBtn {
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    padding: 0 8px !important;
+    font-size: 11px !important;
+  }
+  #headerCloudSyncBadge,
+  #headerThemeToggleBtn {
+    height: 30px !important;
+    min-height: 30px !important;
+    max-height: 30px !important;
+    padding: 0 8px !important;
+  }
+}
+
 /* ------------------------------------------------------------------------- */
-/* 1. MPRO (PRODUCTION) SPECIFICS IN LIGHT MODE                              */
+/* 1. MPRO (PRODUCTION) SPECIFICS IN LIGHT MODE - GOLD & AMBER              */
 /* ------------------------------------------------------------------------- */
+html.light-mode.portal-theme-mpro #headerSystemTitleText,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #headerSystemTitleText,
+html.light-mode.portal-theme-mpro .top-header .text-gold-300,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .top-header .text-gold-300 {
   color: #92400e !important;
 }
 
+html.light-mode.portal-theme-mpro header > div > div:has(#headerSystemTitleText),
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) header > div > div:has(#headerSystemTitleText) {
   background-color: #fef3c7 !important;
   border: 1px solid #fde68a !important;
   color: #92400e !important;
 }
 
+html.light-mode.portal-theme-mpro #headerDutyBadge,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #headerDutyBadge {
   background-color: #fef3c7 !important;
   border: 1.5px solid #f59e0b !important;
@@ -2257,17 +2507,22 @@ html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #headerDutyBadge {
   font-weight: 800 !important;
 }
 
+html.light-mode.portal-theme-mpro #headerUserRole,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #headerUserRole {
   color: #b45309 !important;
   font-weight: 700 !important;
 }
 
+html.light-mode.portal-theme-mpro #headerUserAvatar,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #headerUserAvatar {
   background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
   color: #0f172a !important;
   font-weight: 800 !important;
 }
 
+html.light-mode.portal-theme-mpro #headerRecordAttendanceBtn,
+html.light-mode.portal-theme-mpro .gold-gradient-btn,
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #headerRecordAttendanceBtn,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .gold-gradient-btn {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
   color: #ffffff !important;
@@ -2275,34 +2530,56 @@ html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .gold-gradient-btn
   border: 1px solid #d97706 !important;
   box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25) !important;
 }
+html.light-mode.portal-theme-mpro #headerRecordAttendanceBtn:hover,
+html.light-mode.portal-theme-mpro .gold-gradient-btn:hover,
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #headerRecordAttendanceBtn:hover,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .gold-gradient-btn:hover {
   background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
   box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35) !important;
 }
+html.light-mode.portal-theme-mpro #headerRecordAttendanceBtn i,
+html.light-mode.portal-theme-mpro #headerRecordAttendanceBtn [data-lucide],
+html.light-mode.portal-theme-mpro #headerRecordAttendanceBtn svg,
+html.light-mode.portal-theme-mpro .gold-gradient-btn i,
+html.light-mode.portal-theme-mpro .gold-gradient-btn [data-lucide],
+html.light-mode.portal-theme-mpro .gold-gradient-btn svg,
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #headerRecordAttendanceBtn i,
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #headerRecordAttendanceBtn [data-lucide],
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #headerRecordAttendanceBtn svg,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .gold-gradient-btn i,
-html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .gold-gradient-btn [data-lucide] {
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .gold-gradient-btn [data-lucide],
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .gold-gradient-btn svg {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }
 
+html.light-mode.portal-theme-mpro .gold-gradient-text,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .gold-gradient-text {
   background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #b45309 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
 }
 
+html.light-mode.portal-theme-mpro nav button[data-tab-target],
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-tab-target] {
   color: #475569 !important;
 }
+html.light-mode.portal-theme-mpro nav button[data-tab-target]:hover,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-tab-target]:hover {
   background-color: #f1f5f9 !important;
   color: #0f172a !important;
 }
+html.light-mode.portal-theme-mpro nav button[data-tab-target] i,
+html.light-mode.portal-theme-mpro nav button[data-tab-target] [data-lucide],
+html.light-mode.portal-theme-mpro nav button[data-tab-target] svg,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-tab-target] i,
-html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-tab-target] [data-lucide] {
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-tab-target] [data-lucide],
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-tab-target] svg {
   color: #b45309 !important;
 }
 
+html.light-mode.portal-theme-mpro nav button[data-tab-target].active,
+html.light-mode.portal-theme-mpro nav button[data-tab-target].bg-gold-400,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-tab-target].active,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-tab-target].bg-gold-400 {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
@@ -2310,6 +2587,10 @@ html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-ta
   font-weight: 700 !important;
   box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25) !important;
 }
+html.light-mode.portal-theme-mpro nav button[data-tab-target].active i,
+html.light-mode.portal-theme-mpro nav button[data-tab-target].active [data-lucide],
+html.light-mode.portal-theme-mpro nav button[data-tab-target].bg-gold-400 i,
+html.light-mode.portal-theme-mpro nav button[data-tab-target].bg-gold-400 [data-lucide],
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-tab-target].active i,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-tab-target].active [data-lucide],
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-tab-target].bg-gold-400 i,
@@ -2318,50 +2599,88 @@ html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) nav button[data-ta
   stroke: #ffffff !important;
 }
 
+html.light-mode.portal-theme-mpro #liveClockDisplay,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #liveClockDisplay {
   color: #b45309 !important;
 }
+html.light-mode.portal-theme-mpro #roleBtnAdmin.bg-gold-400,
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #roleBtnAdmin.bg-gold-400 {
   background-color: #d97706 !important;
   color: #ffffff !important;
   border-color: #b45309 !important;
 }
+html.light-mode.portal-theme-mpro #roleSwitcherWidget button:not(#roleBtnAdmin),
 html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) #roleSwitcherWidget button:not(#roleBtnAdmin) {
   background-color: #ffffff !important;
   color: #475569 !important;
   border: 1px solid #cbd5e1 !important;
 }
 
+/* MPRO Checked Pills (Amber / Golden Glow) in Light Mode */
+html.light-mode.portal-theme-mpro .custom-pill-checkbox input:checked + .custom-pill-box,
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .custom-pill-checkbox input:checked + .custom-pill-box {
+  background: #fef3c7 !important;
+  border: 1.5px solid #d97706 !important;
+  color: #78350f !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 4px rgba(217, 119, 6, 0.2) !important;
+}
+
+html.light-mode.portal-theme-mpro .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator,
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator {
+  background-color: #d97706 !important;
+  border-color: #b45309 !important;
+}
+
+html.light-mode.portal-theme-mpro .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator i,
+html.light-mode.portal-theme-mpro .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator [data-lucide],
+html.light-mode.portal-theme-mpro .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator svg,
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator i,
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator [data-lucide],
+html.light-mode:not(.portal-theme-gcos):not(.portal-theme-tk) .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
 /* ------------------------------------------------------------------------- */
-/* 2. GCOS (GUEST COORDINATORS) SPECIFICS IN LIGHT MODE                      */
+/* 2. GCOS (GUEST COORDINATORS) SPECIFICS IN LIGHT MODE - BLACK & WHITE      */
 /* ------------------------------------------------------------------------- */
+html.light-mode.portal-theme-gcos,
+html.light-mode.portal-theme-gcos body,
 html.light-mode .portal-theme-gcos,
 html.light-mode #appContainer.portal-theme-gcos,
 html.light-mode body.portal-theme-gcos {
-  background-color: #f1f5f9 !important;
+  background-color: #f8fafc !important;
   color: #0f172a !important;
 }
 
+html.light-mode.portal-theme-gcos #mainSidebar,
+html.light-mode.portal-theme-gcos aside,
 html.light-mode .portal-theme-gcos #mainSidebar,
 html.light-mode .portal-theme-gcos aside {
   background-color: #ffffff !important;
   border-color: #e2e8f0 !important;
 }
 
+html.light-mode.portal-theme-gcos header,
 html.light-mode .portal-theme-gcos header {
-  background-color: rgba(255, 255, 255, 0.96) !important;
+  background-color: rgba(255, 255, 255, 0.98) !important;
   border-color: #e2e8f0 !important;
 }
 
+html.light-mode.portal-theme-gcos header > div > div:has(#headerSystemTitleText),
 html.light-mode .portal-theme-gcos header > div > div:has(#headerSystemTitleText) {
   background-color: #f1f5f9 !important;
   border: 1px solid #cbd5e1 !important;
   color: #0f172a !important;
 }
+
+html.light-mode.portal-theme-gcos #headerSystemTitleText,
 html.light-mode .portal-theme-gcos #headerSystemTitleText {
   color: #0f172a !important;
 }
 
+html.light-mode.portal-theme-gcos #headerDutyBadge,
 html.light-mode .portal-theme-gcos #headerDutyBadge {
   background-color: #0f172a !important;
   border: 1.5px solid #0f172a !important;
@@ -2369,53 +2688,74 @@ html.light-mode .portal-theme-gcos #headerDutyBadge {
   font-weight: 800 !important;
 }
 
+html.light-mode.portal-theme-gcos #headerUserRole,
 html.light-mode .portal-theme-gcos #headerUserRole {
   color: #475569 !important;
   font-weight: 700 !important;
 }
 
+html.light-mode.portal-theme-gcos #headerUserAvatar,
 html.light-mode .portal-theme-gcos #headerUserAvatar {
   background-color: #0f172a !important;
   color: #ffffff !important;
-  border-color: #0f172a !important;
+  border: 1.5px solid #0f172a !important;
   font-weight: 800 !important;
 }
 
+html.light-mode.portal-theme-gcos #headerRecordAttendanceBtn,
+html.light-mode.portal-theme-gcos .gold-gradient-btn,
+html.light-mode .portal-theme-gcos #headerRecordAttendanceBtn,
 html.light-mode .portal-theme-gcos .gold-gradient-btn {
-  background-color: #0f172a !important;
+  background: #0f172a !important;
   color: #ffffff !important;
   font-weight: 800 !important;
   border: 1px solid #0f172a !important;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25) !important;
 }
+
+html.light-mode.portal-theme-gcos #headerRecordAttendanceBtn:hover,
+html.light-mode.portal-theme-gcos .gold-gradient-btn:hover,
+html.light-mode .portal-theme-gcos #headerRecordAttendanceBtn:hover,
 html.light-mode .portal-theme-gcos .gold-gradient-btn:hover {
-  background-color: #1e293b !important;
+  background: #1e293b !important;
   color: #ffffff !important;
 }
+
+html.light-mode.portal-theme-gcos #headerRecordAttendanceBtn i,
+html.light-mode.portal-theme-gcos #headerRecordAttendanceBtn [data-lucide],
+html.light-mode.portal-theme-gcos #headerRecordAttendanceBtn svg,
+html.light-mode.portal-theme-gcos .gold-gradient-btn i,
+html.light-mode.portal-theme-gcos .gold-gradient-btn [data-lucide],
+html.light-mode.portal-theme-gcos .gold-gradient-btn svg,
+html.light-mode .portal-theme-gcos #headerRecordAttendanceBtn i,
+html.light-mode .portal-theme-gcos #headerRecordAttendanceBtn [data-lucide],
+html.light-mode .portal-theme-gcos #headerRecordAttendanceBtn svg,
 html.light-mode .portal-theme-gcos .gold-gradient-btn i,
-html.light-mode .portal-theme-gcos .gold-gradient-btn [data-lucide] {
+html.light-mode .portal-theme-gcos .gold-gradient-btn [data-lucide],
+html.light-mode .portal-theme-gcos .gold-gradient-btn svg {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }
 
+html.light-mode.portal-theme-gcos .gold-gradient-text,
 html.light-mode .portal-theme-gcos .gold-gradient-text {
   background: linear-gradient(135deg, #0f172a 0%, #334155 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
 }
 
+html.light-mode.portal-theme-gcos nav button[data-tab-target],
 html.light-mode .portal-theme-gcos nav button[data-tab-target] {
   color: #475569 !important;
 }
+html.light-mode.portal-theme-gcos nav button[data-tab-target]:hover,
 html.light-mode .portal-theme-gcos nav button[data-tab-target]:hover {
   background-color: #f1f5f9 !important;
   color: #0f172a !important;
 }
-html.light-mode .portal-theme-gcos nav button[data-tab-target] i,
-html.light-mode .portal-theme-gcos nav button[data-tab-target] [data-lucide] {
-  color: #475569 !important;
-}
 
+html.light-mode.portal-theme-gcos nav button[data-tab-target].active,
+html.light-mode.portal-theme-gcos nav button[data-tab-target].bg-gold-400,
 html.light-mode .portal-theme-gcos nav button[data-tab-target].active,
 html.light-mode .portal-theme-gcos nav button[data-tab-target].bg-gold-400 {
   background-color: #0f172a !important;
@@ -2423,39 +2763,108 @@ html.light-mode .portal-theme-gcos nav button[data-tab-target].bg-gold-400 {
   font-weight: 800 !important;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25) !important;
 }
+
+html.light-mode.portal-theme-gcos nav button[data-tab-target].active i,
+html.light-mode.portal-theme-gcos nav button[data-tab-target].active [data-lucide],
+html.light-mode.portal-theme-gcos nav button[data-tab-target].active svg,
+html.light-mode.portal-theme-gcos nav button[data-tab-target].bg-gold-400 i,
+html.light-mode.portal-theme-gcos nav button[data-tab-target].bg-gold-400 [data-lucide],
+html.light-mode.portal-theme-gcos nav button[data-tab-target].bg-gold-400 svg,
 html.light-mode .portal-theme-gcos nav button[data-tab-target].active i,
 html.light-mode .portal-theme-gcos nav button[data-tab-target].active [data-lucide],
+html.light-mode .portal-theme-gcos nav button[data-tab-target].active svg,
 html.light-mode .portal-theme-gcos nav button[data-tab-target].bg-gold-400 i,
-html.light-mode .portal-theme-gcos nav button[data-tab-target].bg-gold-400 [data-lucide] {
+html.light-mode .portal-theme-gcos nav button[data-tab-target].bg-gold-400 [data-lucide],
+html.light-mode .portal-theme-gcos nav button[data-tab-target].bg-gold-400 svg {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }
 
+html.light-mode.portal-theme-gcos #liveClockDisplay,
 html.light-mode .portal-theme-gcos #liveClockDisplay {
   color: #0f172a !important;
 }
 
+html.light-mode.portal-theme-gcos #roleBtnAdmin.bg-gold-400,
 html.light-mode .portal-theme-gcos #roleBtnAdmin.bg-gold-400 {
   background-color: #0f172a !important;
   color: #ffffff !important;
   border-color: #0f172a !important;
 }
+html.light-mode.portal-theme-gcos #roleSwitcherWidget button:not(#roleBtnAdmin),
 html.light-mode .portal-theme-gcos #roleSwitcherWidget button:not(#roleBtnAdmin) {
   background-color: #ffffff !important;
   color: #475569 !important;
   border: 1px solid #cbd5e1 !important;
 }
 
+html.light-mode.portal-theme-gcos #kpiAttendanceProgressBar,
 html.light-mode .portal-theme-gcos #kpiAttendanceProgressBar {
   background-color: #0f172a !important;
 }
+html.light-mode.portal-theme-gcos #kpiAttendanceRate,
 html.light-mode .portal-theme-gcos #kpiAttendanceRate {
   color: #0f172a !important;
 }
 
+/* GCOS Checked Pills in Light Mode */
+html.light-mode.portal-theme-gcos .custom-pill-checkbox input:checked + .custom-pill-box,
+html.light-mode .portal-theme-gcos .custom-pill-checkbox input:checked + .custom-pill-box {
+  background: #0f172a !important;
+  border: 1.5px solid #0f172a !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.25) !important;
+}
+
+html.light-mode.portal-theme-gcos .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator,
+html.light-mode .portal-theme-gcos .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+html.light-mode.portal-theme-gcos .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator i,
+html.light-mode.portal-theme-gcos .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator [data-lucide],
+html.light-mode.portal-theme-gcos .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator svg,
+html.light-mode .portal-theme-gcos .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator i,
+html.light-mode .portal-theme-gcos .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator [data-lucide],
+html.light-mode .portal-theme-gcos .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator svg {
+  color: #0f172a !important;
+  stroke: #0f172a !important;
+}
+
+/* GCOS Borders, Icons, Asterisks in Light Mode */
+html.light-mode.portal-theme-gcos .border-gold-400,
+html.light-mode.portal-theme-gcos [class*="border-gold-"],
+html.light-mode .portal-theme-gcos .border-gold-400,
+html.light-mode .portal-theme-gcos [class*="border-gold-"] {
+  border-color: #cbd5e1 !important;
+}
+html.light-mode.portal-theme-gcos .glow-gold-sm,
+html.light-mode .portal-theme-gcos .glow-gold-sm {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+html.light-mode.portal-theme-gcos .text-gold-400,
+html.light-mode.portal-theme-gcos .text-gold-300,
+html.light-mode .portal-theme-gcos .text-gold-400,
+html.light-mode .portal-theme-gcos .text-gold-300 {
+  color: #0f172a !important;
+}
+html.light-mode.portal-theme-gcos [data-lucide].text-gold-400,
+html.light-mode.portal-theme-gcos i.text-gold-400,
+html.light-mode.portal-theme-gcos svg.text-gold-400,
+html.light-mode .portal-theme-gcos [data-lucide].text-gold-400,
+html.light-mode .portal-theme-gcos i.text-gold-400,
+html.light-mode .portal-theme-gcos svg.text-gold-400 {
+  color: #0f172a !important;
+  stroke: #0f172a !important;
+}
+
 /* ------------------------------------------------------------------------- */
-/* 3. TK (TEATRO KRISTIANO) SPECIFICS IN LIGHT MODE                          */
+/* 3. TK (TEATRO KRISTIANO) SPECIFICS IN LIGHT MODE - PINK & BLACK (ROSE)    */
 /* ------------------------------------------------------------------------- */
+html.light-mode.portal-theme-tk,
+html.light-mode.portal-theme-tk body,
 html.light-mode .portal-theme-tk,
 html.light-mode #appContainer.portal-theme-tk,
 html.light-mode body.portal-theme-tk {
@@ -2463,26 +2872,33 @@ html.light-mode body.portal-theme-tk {
   color: #1e101a !important;
 }
 
+html.light-mode.portal-theme-tk #mainSidebar,
+html.light-mode.portal-theme-tk aside,
 html.light-mode .portal-theme-tk #mainSidebar,
 html.light-mode .portal-theme-tk aside {
   background-color: #ffffff !important;
   border-color: rgba(244, 114, 182, 0.25) !important;
 }
 
+html.light-mode.portal-theme-tk header,
 html.light-mode .portal-theme-tk header {
-  background-color: rgba(255, 255, 255, 0.96) !important;
+  background-color: rgba(255, 255, 255, 0.98) !important;
   border-color: rgba(244, 114, 182, 0.22) !important;
 }
 
+html.light-mode.portal-theme-tk header > div > div:has(#headerSystemTitleText),
 html.light-mode .portal-theme-tk header > div > div:has(#headerSystemTitleText) {
   background-color: #fdf2f8 !important;
   border: 1px solid #fbcfe8 !important;
   color: #9d174d !important;
 }
+
+html.light-mode.portal-theme-tk #headerSystemTitleText,
 html.light-mode .portal-theme-tk #headerSystemTitleText {
   color: #9d174d !important;
 }
 
+html.light-mode.portal-theme-tk #headerDutyBadge,
 html.light-mode .portal-theme-tk #headerDutyBadge {
   background-color: #fdf2f8 !important;
   border: 1.5px solid #db2777 !important;
@@ -2490,18 +2906,23 @@ html.light-mode .portal-theme-tk #headerDutyBadge {
   font-weight: 800 !important;
 }
 
+html.light-mode.portal-theme-tk #headerUserRole,
 html.light-mode .portal-theme-tk #headerUserRole {
   color: #be185d !important;
   font-weight: 700 !important;
 }
 
+html.light-mode.portal-theme-tk #headerUserAvatar,
 html.light-mode .portal-theme-tk #headerUserAvatar {
   background: linear-gradient(135deg, #db2777 0%, #be185d 100%) !important;
   color: #ffffff !important;
-  border-color: #db2777 !important;
+  border: 1.5px solid #db2777 !important;
   font-weight: 800 !important;
 }
 
+html.light-mode.portal-theme-tk #headerRecordAttendanceBtn,
+html.light-mode.portal-theme-tk .gold-gradient-btn,
+html.light-mode .portal-theme-tk #headerRecordAttendanceBtn,
 html.light-mode .portal-theme-tk .gold-gradient-btn {
   background: linear-gradient(135deg, #db2777 0%, #be185d 100%) !important;
   color: #ffffff !important;
@@ -2509,34 +2930,50 @@ html.light-mode .portal-theme-tk .gold-gradient-btn {
   border: 1px solid #be185d !important;
   box-shadow: 0 2px 8px rgba(190, 24, 93, 0.28) !important;
 }
+
+html.light-mode.portal-theme-tk #headerRecordAttendanceBtn:hover,
+html.light-mode.portal-theme-tk .gold-gradient-btn:hover,
+html.light-mode .portal-theme-tk #headerRecordAttendanceBtn:hover,
 html.light-mode .portal-theme-tk .gold-gradient-btn:hover {
   background: linear-gradient(135deg, #be185d 0%, #9d174d 100%) !important;
   box-shadow: 0 4px 12px rgba(190, 24, 93, 0.35) !important;
 }
+
+html.light-mode.portal-theme-tk #headerRecordAttendanceBtn i,
+html.light-mode.portal-theme-tk #headerRecordAttendanceBtn [data-lucide],
+html.light-mode.portal-theme-tk #headerRecordAttendanceBtn svg,
+html.light-mode.portal-theme-tk .gold-gradient-btn i,
+html.light-mode.portal-theme-tk .gold-gradient-btn [data-lucide],
+html.light-mode.portal-theme-tk .gold-gradient-btn svg,
+html.light-mode .portal-theme-tk #headerRecordAttendanceBtn i,
+html.light-mode .portal-theme-tk #headerRecordAttendanceBtn [data-lucide],
+html.light-mode .portal-theme-tk #headerRecordAttendanceBtn svg,
 html.light-mode .portal-theme-tk .gold-gradient-btn i,
-html.light-mode .portal-theme-tk .gold-gradient-btn [data-lucide] {
+html.light-mode .portal-theme-tk .gold-gradient-btn [data-lucide],
+html.light-mode .portal-theme-tk .gold-gradient-btn svg {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }
 
+html.light-mode.portal-theme-tk .gold-gradient-text,
 html.light-mode .portal-theme-tk .gold-gradient-text {
   background: linear-gradient(135deg, #be185d 0%, #9d174d 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
 }
 
+html.light-mode.portal-theme-tk nav button[data-tab-target],
 html.light-mode .portal-theme-tk nav button[data-tab-target] {
   color: #4b5563 !important;
 }
+html.light-mode.portal-theme-tk nav button[data-tab-target]:hover,
 html.light-mode .portal-theme-tk nav button[data-tab-target]:hover {
   background-color: #fdf2f8 !important;
   color: #be185d !important;
 }
-html.light-mode .portal-theme-tk nav button[data-tab-target] i,
-html.light-mode .portal-theme-tk nav button[data-tab-target] [data-lucide] {
-  color: #be185d !important;
-}
 
+html.light-mode.portal-theme-tk nav button[data-tab-target].active,
+html.light-mode.portal-theme-tk nav button[data-tab-target].bg-gold-400,
 html.light-mode .portal-theme-tk nav button[data-tab-target].active,
 html.light-mode .portal-theme-tk nav button[data-tab-target].bg-gold-400 {
   background: linear-gradient(135deg, #db2777 0%, #be185d 100%) !important;
@@ -2544,39 +2981,107 @@ html.light-mode .portal-theme-tk nav button[data-tab-target].bg-gold-400 {
   font-weight: 700 !important;
   box-shadow: 0 2px 8px rgba(190, 24, 93, 0.28) !important;
 }
+
+html.light-mode.portal-theme-tk nav button[data-tab-target].active i,
+html.light-mode.portal-theme-tk nav button[data-tab-target].active [data-lucide],
+html.light-mode.portal-theme-tk nav button[data-tab-target].active svg,
+html.light-mode.portal-theme-tk nav button[data-tab-target].bg-gold-400 i,
+html.light-mode.portal-theme-tk nav button[data-tab-target].bg-gold-400 [data-lucide],
+html.light-mode.portal-theme-tk nav button[data-tab-target].bg-gold-400 svg,
 html.light-mode .portal-theme-tk nav button[data-tab-target].active i,
 html.light-mode .portal-theme-tk nav button[data-tab-target].active [data-lucide],
+html.light-mode .portal-theme-tk nav button[data-tab-target].active svg,
 html.light-mode .portal-theme-tk nav button[data-tab-target].bg-gold-400 i,
-html.light-mode .portal-theme-tk nav button[data-tab-target].bg-gold-400 [data-lucide] {
+html.light-mode .portal-theme-tk nav button[data-tab-target].bg-gold-400 [data-lucide],
+html.light-mode .portal-theme-tk nav button[data-tab-target].bg-gold-400 svg {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }
 
+html.light-mode.portal-theme-tk #sidebarClockWidget,
 html.light-mode .portal-theme-tk #sidebarClockWidget {
   background-color: #fdf2f8 !important;
   border-color: #fbcfe8 !important;
 }
+html.light-mode.portal-theme-tk #liveClockDisplay,
 html.light-mode .portal-theme-tk #liveClockDisplay {
   color: #be185d !important;
   font-weight: 800 !important;
 }
 
+html.light-mode.portal-theme-tk #roleBtnAdmin.bg-gold-400,
 html.light-mode .portal-theme-tk #roleBtnAdmin.bg-gold-400 {
   background-color: #be185d !important;
   color: #ffffff !important;
   border-color: #9d174d !important;
 }
+html.light-mode.portal-theme-tk #roleSwitcherWidget button:not(#roleBtnAdmin),
 html.light-mode .portal-theme-tk #roleSwitcherWidget button:not(#roleBtnAdmin) {
   background-color: #ffffff !important;
   color: #4b5563 !important;
   border: 1px solid #fbcfe8 !important;
 }
 
+html.light-mode.portal-theme-tk #kpiAttendanceProgressBar,
 html.light-mode .portal-theme-tk #kpiAttendanceProgressBar {
   background: linear-gradient(90deg, #db2777, #be185d) !important;
 }
+html.light-mode.portal-theme-tk #kpiAttendanceRate,
 html.light-mode .portal-theme-tk #kpiAttendanceRate {
   color: #be185d !important;
+}
+
+/* TK Checked Pills in Light Mode */
+html.light-mode.portal-theme-tk .custom-pill-checkbox input:checked + .custom-pill-box,
+html.light-mode .portal-theme-tk .custom-pill-checkbox input:checked + .custom-pill-box {
+  background: #fdf2f8 !important;
+  border: 1.5px solid #db2777 !important;
+  color: #831843 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 4px rgba(219, 39, 119, 0.2) !important;
+}
+
+html.light-mode.portal-theme-tk .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator,
+html.light-mode .portal-theme-tk .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator {
+  background-color: #db2777 !important;
+  border-color: #be185d !important;
+}
+
+html.light-mode.portal-theme-tk .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator i,
+html.light-mode.portal-theme-tk .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator [data-lucide],
+html.light-mode.portal-theme-tk .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator svg,
+html.light-mode .portal-theme-tk .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator i,
+html.light-mode .portal-theme-tk .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator [data-lucide],
+html.light-mode .portal-theme-tk .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* TK Borders, Icons, Asterisks in Light Mode */
+html.light-mode.portal-theme-tk .border-gold-400,
+html.light-mode.portal-theme-tk [class*="border-gold-"],
+html.light-mode .portal-theme-tk .border-gold-400,
+html.light-mode .portal-theme-tk [class*="border-gold-"] {
+  border-color: rgba(244, 114, 182, 0.35) !important;
+}
+html.light-mode.portal-theme-tk .glow-gold-sm,
+html.light-mode .portal-theme-tk .glow-gold-sm {
+  box-shadow: 0 0 10px rgba(244, 114, 182, 0.15) !important;
+}
+html.light-mode.portal-theme-tk .text-gold-400,
+html.light-mode.portal-theme-tk .text-gold-300,
+html.light-mode .portal-theme-tk .text-gold-400,
+html.light-mode .portal-theme-tk .text-gold-300 {
+  color: #db2777 !important;
+}
+html.light-mode.portal-theme-tk [data-lucide].text-gold-400,
+html.light-mode.portal-theme-tk i.text-gold-400,
+html.light-mode.portal-theme-tk svg.text-gold-400,
+html.light-mode .portal-theme-tk [data-lucide].text-gold-400,
+html.light-mode .portal-theme-tk i.text-gold-400,
+html.light-mode .portal-theme-tk svg.text-gold-400 {
+  color: #db2777 !important;
+  stroke: #db2777 !important;
 }
 
 /* Smooth Table Scrolling on Touch Devices */

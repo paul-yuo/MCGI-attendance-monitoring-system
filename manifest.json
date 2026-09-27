@@ -1,12 +1,15 @@
 {
+  "id": "mcgi-attendance-monitoring-system",
   "name": "MCGI Attendance Management System",
   "short_name": "MCGI Attendance",
-  "description": "MCGI Attendance & Monitoring System",
+  "description": "MCGI Attendance & Monitoring System (Offline Capable)",
   "lang": "en",
   "dir": "ltr",
-  "start_url": "/login.html",
+  "start_url": "./login.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "orientation": "any",
+  "background_color": "#09090b",
   "theme_color": "#09090b",
   "icons": [
     {

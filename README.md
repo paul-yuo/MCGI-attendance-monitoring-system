@@ -56,10 +56,8 @@ The system was developed under a disciplined, iterative software engineering met
 ## 🎯 2. Phase 1: Requirements Engineering & Operational Context
 
 ### 2.1 The Operational Problem
-MCGI Productions operates continuously across multiple church gatherings, live broadcasts, satellite viewing sessions, and community outreaches. Personnel are deployed across various locales:
+MCGI Productions operates continuously across multiple church gatherings, live broadcasts, satellite viewing sessions, and community outreaches. Personnel are deployed across locales:
 - **Naic**
-- **Calubcob**
-- **Acacia**
 
 Prior workflows faced challenges:
 - Fragmented attendance tracking across manual paper sheets or disparate chat groups.
@@ -140,7 +138,7 @@ The system supports three native execution modes:
 - **Single-Card Sliding Track**: Smooth transition between **Sign In** and **Create Account** forms utilizing `transform: translateX(...)` with `cubic-bezier(0.16, 1, 0.3, 1)`.
 - **Demo Quick-Login**: 1-click button to authenticate as *Bro. Paul (`paul` / `123!`)*.
 - **Validation**: Strict password confirmation, minimum length checks, and shake-animated error alerts.
-- **Registration**: Allows onboarding new personnel with Full Name, assigned Locale (`Naic`, `Calubcob`, `Acacia`), and Level (`MUNICIPAL PROD`, `LOCALE PROD`, `TRAINEE`).
+- **Registration**: Allows onboarding new personnel with Full Name, assigned Locale (`Naic`), and Level (`MUNICIPAL PROD`, `LOCALE PROD`, `TRAINEE`).
 
 ### 4.2 Live Dashboard & Production KPIs (`panel-dashboard`)
 - **Live Digital Clock**: Real-time 12-hour/24-hour Philippine Time display with animated live pulsing indicator.

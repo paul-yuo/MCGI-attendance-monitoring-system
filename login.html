@@ -51,6 +51,12 @@
 
   <div id="toastContainer" class="fixed top-5 right-5 z-[200] flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
+  <!-- Offline Status Indicator Pill -->
+  <div id="offlineIndicatorLogin" class="fixed top-3 left-1/2 -translate-x-1/2 z-[210] hidden items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 backdrop-blur-md shadow-lg pointer-events-none">
+    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+    <span>OFFLINE MODE · Local Storage Active</span>
+  </div>
+
   <!-- ================================================================ -->
   <!-- PHASE 1: DUTY SELECTION SCREEN (ALWAYS SHOWN FIRST ON LAUNCH)    -->
   <!-- ================================================================ -->
@@ -265,8 +271,6 @@
                     <select id="inputRegLocale"
                       class="w-full px-2.5 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-gold-400">
                       <option value="Naic">Naic</option>
-                      <option value="Calubcob">Calubcob</option>
-                      <option value="Acacia">Acacia</option>
                       <option value="Cavite City">Cavite City</option>
                       <option value="Dasmarinas">Dasmarinas</option>
                       <option value="Imus">Imus</option>
@@ -979,12 +983,34 @@
       }
     });
 
-    window.addEventListener('popstate', () => {
-      if (typeof DutySelection !== 'undefined') {
-        DutySelection.resetCards();
-        DutySelection.backToDutySelection();
+    // Offline indicator state updater
+    function updateOnlineIndicator() {
+      const ind = document.getElementById('offlineIndicatorLogin');
+      if (!ind) return;
+      if (!navigator.onLine) {
+        ind.classList.remove('hidden');
+        ind.classList.add('flex');
+      } else {
+        ind.classList.add('hidden');
+        ind.classList.remove('flex');
       }
-    });
+    }
+    window.addEventListener('online', updateOnlineIndicator);
+    window.addEventListener('offline', updateOnlineIndicator);
+    document.addEventListener('DOMContentLoaded', updateOnlineIndicator);
+
+    // Register Service Worker for Complete Offline Functionality on Mobile & Desktop
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js', { scope: './' })
+          .then((reg) => {
+            console.log('[SW] Service Worker registered for offline capability:', reg.scope);
+          })
+          .catch((err) => {
+            console.warn('[SW] Service Worker registration failed:', err);
+          });
+      });
+    }
   </script>
 </body>
 </html>

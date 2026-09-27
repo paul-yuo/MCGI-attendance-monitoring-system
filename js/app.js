@@ -3,20 +3,20 @@
  * Core Application Controller, Auth & State Engine
  */
 
-// Initial Default Dataset customized for MCGI Productions (Locales: Naic, Calubcob, Acacia)
+// Initial Default Dataset customized for MCGI Productions (Locale: Naic)
 const DEFAULT_MEMBERS = [
   { id: 'PROD001', name: 'Bro. Paul', rollNo: 'PROD-NAIC-01', department: 'Naic', role: 'MUNICIPAL PROD', email: 'paul@mcgiprod.org', avatarColor: '#fbbf24' },
   { id: 'PROD002', name: 'Sis. Maria Santos', rollNo: 'PROD-NAIC-02', department: 'Naic', role: 'LOCALE PROD', email: 'maria.s@mcgiprod.org', avatarColor: '#38bdf8' },
-  { id: 'PROD003', name: 'Bro. Daniel Cruz', rollNo: 'PROD-CAL-01', department: 'Calubcob', role: 'MUNICIPAL PROD', email: 'daniel.cruz@mcgiprod.org', avatarColor: '#a855f7' },
-  { id: 'PROD004', name: 'Bro. Joshua Reyes', rollNo: 'PROD-CAL-02', department: 'Calubcob', role: 'LOCALE PROD', email: 'joshua.r@mcgiprod.org', avatarColor: '#34d399' },
-  { id: 'PROD005', name: 'Sis. Sarah Dela Cruz', rollNo: 'PROD-ACA-01', department: 'Acacia', role: 'MUNICIPAL PROD', email: 'sarah.dc@mcgiprod.org', avatarColor: '#f43f5e' },
-  { id: 'PROD006', name: 'Bro. Kenneth Ramos', rollNo: 'PROD-ACA-02', department: 'Acacia', role: 'TRAINEE', email: 'kenneth.r@mcgiprod.org', avatarColor: '#fb923c' },
-  { id: 'PROD007', name: 'Bro. Mark Anthony Flores', rollNo: 'PROD-NAIC-03', department: 'Naic', role: 'TRAINEE', email: 'mark.flores@mcgiprod.org', avatarColor: '#eab308' },
-  { id: 'PROD008', name: 'Sis. Rachel Gomez', rollNo: 'PROD-CAL-03', department: 'Calubcob', role: 'TRAINEE', email: 'rachel.g@mcgiprod.org', avatarColor: '#ec4899' },
-  { id: 'PROD009', name: 'Bro. Joseph Bautista', rollNo: 'PROD-ACA-03', department: 'Acacia', role: 'LOCALE PROD', email: 'joseph.b@mcgiprod.org', avatarColor: '#06b6d4' },
-  { id: 'PROD010', name: 'Bro. Timothy Villanueva', rollNo: 'PROD-NAIC-04', department: 'Naic', role: 'LOCALE PROD', email: 'timothy.v@mcgiprod.org', avatarColor: '#8b5cf6' },
-  { id: 'PROD011', name: 'Sis. Hannah Mendoza', rollNo: 'PROD-CAL-04', department: 'Calubcob', role: 'LOCALE PROD', email: 'hannah.m@mcgiprod.org', avatarColor: '#84cc16' },
-  { id: 'PROD012', name: 'Bro. Gabriel Soriano', rollNo: 'PROD-ACA-04', department: 'Acacia', role: 'TRAINEE', email: 'gabriel.s@mcgiprod.org', avatarColor: '#f97316' }
+  { id: 'PROD003', name: 'Bro. Daniel Cruz', rollNo: 'PROD-NAIC-03', department: 'Naic', role: 'MUNICIPAL PROD', email: 'daniel.cruz@mcgiprod.org', avatarColor: '#a855f7' },
+  { id: 'PROD004', name: 'Bro. Joshua Reyes', rollNo: 'PROD-NAIC-04', department: 'Naic', role: 'LOCALE PROD', email: 'joshua.r@mcgiprod.org', avatarColor: '#34d399' },
+  { id: 'PROD005', name: 'Sis. Sarah Dela Cruz', rollNo: 'PROD-NAIC-05', department: 'Naic', role: 'MUNICIPAL PROD', email: 'sarah.dc@mcgiprod.org', avatarColor: '#f43f5e' },
+  { id: 'PROD006', name: 'Bro. Kenneth Ramos', rollNo: 'PROD-NAIC-06', department: 'Naic', role: 'TRAINEE', email: 'kenneth.r@mcgiprod.org', avatarColor: '#fb923c' },
+  { id: 'PROD007', name: 'Bro. Mark Anthony Flores', rollNo: 'PROD-NAIC-07', department: 'Naic', role: 'TRAINEE', email: 'mark.flores@mcgiprod.org', avatarColor: '#eab308' },
+  { id: 'PROD008', name: 'Sis. Rachel Gomez', rollNo: 'PROD-NAIC-08', department: 'Naic', role: 'TRAINEE', email: 'rachel.g@mcgiprod.org', avatarColor: '#ec4899' },
+  { id: 'PROD009', name: 'Bro. Joseph Bautista', rollNo: 'PROD-NAIC-09', department: 'Naic', role: 'LOCALE PROD', email: 'joseph.b@mcgiprod.org', avatarColor: '#06b6d4' },
+  { id: 'PROD010', name: 'Bro. Timothy Villanueva', rollNo: 'PROD-NAIC-10', department: 'Naic', role: 'LOCALE PROD', email: 'timothy.v@mcgiprod.org', avatarColor: '#8b5cf6' },
+  { id: 'PROD011', name: 'Sis. Hannah Mendoza', rollNo: 'PROD-NAIC-11', department: 'Naic', role: 'LOCALE PROD', email: 'hannah.m@mcgiprod.org', avatarColor: '#84cc16' },
+  { id: 'PROD012', name: 'Bro. Gabriel Soriano', rollNo: 'PROD-NAIC-12', department: 'Naic', role: 'TRAINEE', email: 'gabriel.s@mcgiprod.org', avatarColor: '#f97316' }
 ];
 
 // Initial Auth User Accounts
@@ -147,7 +147,7 @@ const DEFAULT_EVENT_ENTRIES = [
   {
     id: 'EVT-1003',
     fullName: 'Bro. Daniel Cruz',
-    locale: ['Calubcob'],
+    locale: ['Naic'],
     level: ['MUNICIPAL PROD'],
     eventDate: getPastDateString(1),
     event: 'SERBISYONG KAPATIRAN',
@@ -163,7 +163,7 @@ const DEFAULT_EVENT_ENTRIES = [
   {
     id: 'EVT-1004',
     fullName: 'Bro. Joshua Reyes',
-    locale: ['Calubcob'],
+    locale: ['Naic'],
     level: ['LOCALE PROD'],
     eventDate: getPastDateString(1),
     event: 'WS',
@@ -179,7 +179,7 @@ const DEFAULT_EVENT_ENTRIES = [
   {
     id: 'EVT-1005',
     fullName: 'Bro. Kenneth Ramos',
-    locale: ['Acacia'],
+    locale: ['Naic'],
     level: ['TRAINEE'],
     eventDate: getPastDateString(2),
     event: 'SPBB',
@@ -195,8 +195,8 @@ const DEFAULT_EVENT_ENTRIES = [
 ];
 
 const DEFAULT_LEAVES = [
-  { id: 'LV-101', memberId: 'PROD006', memberName: 'Bro. Kenneth Ramos', department: 'Acacia', date: getPastDateString(1), type: 'Medical', reason: 'Flu symptoms and fever.', status: 'approved', submittedAt: getPastDateString(2) },
-  { id: 'LV-102', memberId: 'PROD008', memberName: 'Sis. Rachel Gomez', department: 'Calubcob', date: getPastDateString(0), type: 'Family/Personal', reason: 'Family gathering obligation.', status: 'approved', submittedAt: getPastDateString(1) }
+  { id: 'LV-101', memberId: 'PROD006', memberName: 'Bro. Kenneth Ramos', department: 'Naic', date: getPastDateString(1), type: 'Medical', reason: 'Flu symptoms and fever.', status: 'approved', submittedAt: getPastDateString(2) },
+  { id: 'LV-102', memberId: 'PROD008', memberName: 'Sis. Rachel Gomez', department: 'Naic', date: getPastDateString(0), type: 'Family/Personal', reason: 'Family gathering obligation.', status: 'approved', submittedAt: getPastDateString(1) }
 ];
 
 const DEFAULT_SETTINGS = {
@@ -212,12 +212,12 @@ const DEFAULT_SETTINGS = {
 const DEFAULT_MEMBERS_GCOS = [
   { id: 'GCOS001', name: 'Bro. Rodel Mangahas', rollNo: 'GCOS-NAIC-01', department: 'Naic', role: 'COORDINATOR HEAD', email: 'rodel.m@mcgigcos.org', avatarColor: '#3b82f6' },
   { id: 'GCOS002', name: 'Sis. Elena Cruz', rollNo: 'GCOS-NAIC-02', department: 'Naic', role: 'GUEST RECEPTIONIST', email: 'elena.c@mcgigcos.org', avatarColor: '#64748b' },
-  { id: 'GCOS003', name: 'Bro. Gary Santos', rollNo: 'GCOS-CAL-01', department: 'Calubcob', role: 'INDOCTRINATION SUPPORT', email: 'gary.s@mcgigcos.org', avatarColor: '#0ea5e9' },
-  { id: 'GCOS004', name: 'Sis. Michelle Ramos', rollNo: 'GCOS-CAL-02', department: 'Calubcob', role: 'LOCALE COORDINATOR', email: 'michelle.r@mcgigcos.org', avatarColor: '#10b981' },
-  { id: 'GCOS005', name: 'Bro. Christian De Leon', rollNo: 'GCOS-ACA-01', department: 'Acacia', role: 'INDOCTRINATION SUPPORT', email: 'christian.dl@mcgigcos.org', avatarColor: '#6366f1' },
-  { id: 'GCOS006', name: 'Sis. Jocelyn Flores', rollNo: 'GCOS-ACA-02', department: 'Acacia', role: 'GUEST RECEPTIONIST', email: 'jocelyn.f@mcgigcos.org', avatarColor: '#8b5cf6' },
-  { id: 'GCOS007', name: 'Bro. Richard Reyes', rollNo: 'GCOS-NAIC-03', department: 'Naic', role: 'TRAINEE', email: 'richard.r@mcgigcos.org', avatarColor: '#94a3b8' },
-  { id: 'GCOS008', name: 'Sis. Bernadette Gomez', rollNo: 'GCOS-CAL-03', department: 'Calubcob', role: 'TRAINEE', email: 'bernadette.g@mcgigcos.org', avatarColor: '#475569' }
+  { id: 'GCOS003', name: 'Bro. Gary Santos', rollNo: 'GCOS-NAIC-03', department: 'Naic', role: 'INDOCTRINATION SUPPORT', email: 'gary.s@mcgigcos.org', avatarColor: '#0ea5e9' },
+  { id: 'GCOS004', name: 'Sis. Michelle Ramos', rollNo: 'GCOS-NAIC-04', department: 'Naic', role: 'LOCALE COORDINATOR', email: 'michelle.r@mcgigcos.org', avatarColor: '#10b981' },
+  { id: 'GCOS005', name: 'Bro. Christian De Leon', rollNo: 'GCOS-NAIC-05', department: 'Naic', role: 'INDOCTRINATION SUPPORT', email: 'christian.dl@mcgigcos.org', avatarColor: '#6366f1' },
+  { id: 'GCOS006', name: 'Sis. Jocelyn Flores', rollNo: 'GCOS-NAIC-06', department: 'Naic', role: 'GUEST RECEPTIONIST', email: 'jocelyn.f@mcgigcos.org', avatarColor: '#8b5cf6' },
+  { id: 'GCOS007', name: 'Bro. Richard Reyes', rollNo: 'GCOS-NAIC-07', department: 'Naic', role: 'TRAINEE', email: 'richard.r@mcgigcos.org', avatarColor: '#94a3b8' },
+  { id: 'GCOS008', name: 'Sis. Bernadette Gomez', rollNo: 'GCOS-NAIC-08', department: 'Naic', role: 'TRAINEE', email: 'bernadette.g@mcgigcos.org', avatarColor: '#475569' }
 ];
 
 const DEFAULT_AUTH_USERS_GCOS = [
@@ -285,7 +285,7 @@ const DEFAULT_EVENT_ENTRIES_GCOS = [
   {
     id: 'EVT-GCOS-1003',
     fullName: 'Bro. Gary Santos',
-    locale: ['Calubcob'],
+    locale: ['Naic'],
     level: ['INDOCTRINATION SUPPORT'],
     eventDate: getPastDateString(1),
     event: 'BAPTISM',
@@ -317,12 +317,12 @@ const DEFAULT_SETTINGS_GCOS = {
 const DEFAULT_MEMBERS_TK = [
   { id: 'TK001', name: 'Bro. Christian Perez', rollNo: 'TK-NAIC-01', department: 'Naic', role: 'TK DIRECTOR', email: 'christian.p@mcgitk.org', avatarColor: '#ec4899' },
   { id: 'TK002', name: 'Sis. Joy Bautista', rollNo: 'TK-NAIC-02', department: 'Naic', role: 'SENIOR PERFORMER', email: 'joy.b@mcgitk.org', avatarColor: '#f43f5e' },
-  { id: 'TK003', name: 'Bro. Nathan Rivera', rollNo: 'TK-CAL-01', department: 'Calubcob', role: 'CHOREOGRAPHER', email: 'nathan.r@mcgitk.org', avatarColor: '#d946ef' },
-  { id: 'TK004', name: 'Sis. Bea Villanueva', rollNo: 'TK-CAL-02', department: 'Calubcob', role: 'LOCALE PERFORMER', email: 'bea.v@mcgitk.org', avatarColor: '#db2777' },
-  { id: 'TK005', name: 'Bro. Lance Soriano', rollNo: 'TK-ACA-01', department: 'Acacia', role: 'BACKSTAGE & PROPS', email: 'lance.s@mcgitk.org', avatarColor: '#be185d' },
-  { id: 'TK006', name: 'Sis. Chloe Mendoza', rollNo: 'TK-ACA-02', department: 'Acacia', role: 'LOCALE PERFORMER', email: 'chloe.m@mcgitk.org', avatarColor: '#e11d48' },
-  { id: 'TK007', name: 'Bro. Justin Castro', rollNo: 'TK-NAIC-03', department: 'Naic', role: 'TRAINEE', email: 'justin.c@mcgitk.org', avatarColor: '#f472b6' },
-  { id: 'TK008', name: 'Sis. Nicole Santos', rollNo: 'TK-CAL-03', department: 'Calubcob', role: 'TRAINEE', email: 'nicole.s@mcgitk.org', avatarColor: '#fb7185' }
+  { id: 'TK003', name: 'Bro. Nathan Rivera', rollNo: 'TK-NAIC-03', department: 'Naic', role: 'CHOREOGRAPHER', email: 'nathan.r@mcgitk.org', avatarColor: '#d946ef' },
+  { id: 'TK004', name: 'Sis. Bea Villanueva', rollNo: 'TK-NAIC-04', department: 'Naic', role: 'LOCALE PERFORMER', email: 'bea.v@mcgitk.org', avatarColor: '#db2777' },
+  { id: 'TK005', name: 'Bro. Lance Soriano', rollNo: 'TK-NAIC-05', department: 'Naic', role: 'BACKSTAGE & PROPS', email: 'lance.s@mcgitk.org', avatarColor: '#be185d' },
+  { id: 'TK006', name: 'Sis. Chloe Mendoza', rollNo: 'TK-NAIC-06', department: 'Naic', role: 'LOCALE PERFORMER', email: 'chloe.m@mcgitk.org', avatarColor: '#e11d48' },
+  { id: 'TK007', name: 'Bro. Justin Castro', rollNo: 'TK-NAIC-07', department: 'Naic', role: 'TRAINEE', email: 'justin.c@mcgitk.org', avatarColor: '#f472b6' },
+  { id: 'TK008', name: 'Sis. Nicole Santos', rollNo: 'TK-NAIC-08', department: 'Naic', role: 'TRAINEE', email: 'nicole.s@mcgitk.org', avatarColor: '#fb7185' }
 ];
 
 const DEFAULT_AUTH_USERS_TK = [
@@ -390,7 +390,7 @@ const DEFAULT_EVENT_ENTRIES_TK = [
   {
     id: 'EVT-TK-1003',
     fullName: 'Bro. Nathan Rivera',
-    locale: ['Calubcob'],
+    locale: ['Naic'],
     level: ['CHOREOGRAPHER'],
     eventDate: getPastDateString(1),
     event: 'THANKSGIVING',
@@ -509,18 +509,89 @@ function applySystemIdentity(systemCode) {
   const navRoster = document.getElementById('navRosterLabel');
   if (navRoster) navRoster.textContent = meta.rosterLabel;
 
-  // 5. Portal Theme on #appContainer & document.body
+  // 5. Portal Theme on document.documentElement, #appContainer & document.body
+  const activeThemeClass = meta.themeClass || 'portal-theme-mpro';
+  const root = document.documentElement;
+  root.classList.remove('portal-theme-gcos', 'portal-theme-tk', 'portal-theme-mpro');
+  root.classList.add(activeThemeClass);
+
   const container = document.getElementById('appContainer');
   if (container) {
-    container.classList.remove('portal-theme-gcos', 'portal-theme-tk');
-    if (meta.themeClass) {
-      container.classList.add(meta.themeClass);
+    container.classList.remove('portal-theme-gcos', 'portal-theme-tk', 'portal-theme-mpro');
+    container.classList.add(activeThemeClass);
+  }
+  document.body.classList.remove('portal-theme-gcos', 'portal-theme-tk', 'portal-theme-mpro');
+  document.body.classList.add(activeThemeClass);
+
+  // 6. Contextual Module Subtitles & Branding
+  const bannerSub = document.getElementById('eventEntryBannerSubText');
+  if (bannerSub) {
+    if (sys === 'GCOS') {
+      bannerSub.textContent = 'MCGI Guest Coordinators Attendance Log';
+    } else if (sys === 'TK') {
+      bannerSub.textContent = 'MCGI Teatro Kristiano Attendance Log';
+    } else {
+      bannerSub.textContent = 'MCGI Production Attendance Log';
     }
   }
-  document.body.classList.remove('portal-theme-gcos', 'portal-theme-tk');
-  if (meta.themeClass) {
-    document.body.classList.add(meta.themeClass);
+  const heroSub = document.getElementById('dashboardHeroBannerSubText');
+  if (heroSub) {
+    if (sys === 'GCOS') {
+      heroSub.textContent = 'MCGI Guest Coordinators Attendance & Deployment';
+    } else if (sys === 'TK') {
+      heroSub.textContent = 'MCGI Teatro Kristiano Attendance & Deployment';
+    } else {
+      heroSub.textContent = 'MCGI Productions Attendance & Deployment';
+    }
   }
+
+  // 7. Duty-Specific Level / Role Radio Options in Attendance Entry Form (Single-Select)
+  renderDutyLevelOptions(sys);
+}
+
+// Render dynamic duty-scoped levels for Attendance Form (Single-select radio pills)
+function renderDutyLevelOptions(systemCode) {
+  const container = document.getElementById('levelCheckboxGroup');
+  if (!container) return;
+
+  const sys = (systemCode || getActiveDutyScope()).toUpperCase();
+  const levelsMap = {
+    MPRO: [
+      { label: 'MUNICIPAL PROD', value: 'MUNICIPAL PROD' },
+      { label: 'LOCALE PROD', value: 'LOCALE PROD', isDefault: true },
+      { label: 'TRAINEE', value: 'TRAINEE' }
+    ],
+    GCOS: [
+      { label: 'COORDINATOR HEAD', value: 'COORDINATOR HEAD' },
+      { label: 'LOCALE COORDINATOR', value: 'LOCALE COORDINATOR', isDefault: true },
+      { label: 'GUEST RECEPTIONIST', value: 'GUEST RECEPTIONIST' },
+      { label: 'INDOCTRINATION SUPPORT', value: 'INDOCTRINATION SUPPORT' },
+      { label: 'TRAINEE', value: 'TRAINEE' }
+    ],
+    TK: [
+      { label: 'TK DIRECTOR', value: 'TK DIRECTOR' },
+      { label: 'SENIOR PERFORMER', value: 'SENIOR PERFORMER' },
+      { label: 'CHOREOGRAPHER', value: 'CHOREOGRAPHER' },
+      { label: 'LOCALE PERFORMER', value: 'LOCALE PERFORMER', isDefault: true },
+      { label: 'BACKSTAGE & PROPS', value: 'BACKSTAGE & PROPS' },
+      { label: 'TRAINEE', value: 'TRAINEE' }
+    ]
+  };
+
+  const list = levelsMap[sys] || levelsMap.MPRO;
+  container.innerHTML = list.map(item => `
+    <label class="custom-pill-checkbox">
+      <input type="radio" name="eventLevel" value="${item.value}" ${item.isDefault ? 'checked' : ''}>
+      <span class="custom-pill-box">
+        <span class="custom-pill-indicator">
+          <i data-lucide="check" class="w-3 h-3 text-midnight-950 stroke-[3]"></i>
+        </span>
+        <span>${item.label}</span>
+      </span>
+    </label>
+  `).join('');
+
+  if (window.lucide) lucide.createIcons();
 }
 
 // Defensive Storage Parser Helper
@@ -620,6 +691,30 @@ function ensureMemberQrsAndRoles() {
     }
     localStorage.setItem('mcgi_current_user', JSON.stringify(AppState.currentUser));
   }
+  // Sanitize any legacy stored 'Calubcob' or 'Acacia' to 'Naic'
+  (AppState.members || []).forEach(m => {
+    if (m.department === 'Calubcob' || m.department === 'Acacia') m.department = 'Naic';
+    if (m.rollNo) m.rollNo = m.rollNo.replace('-CAL-', '-NAIC-').replace('-ACA-', '-NAIC-');
+  });
+  (AppState.authUsers || []).forEach(u => {
+    if (u.locale === 'Calubcob' || u.locale === 'Acacia') u.locale = 'Naic';
+    if (u.rollNo) u.rollNo = u.rollNo.replace('-CAL-', '-NAIC-').replace('-ACA-', '-NAIC-');
+  });
+  if (AppState.currentUser) {
+    if (AppState.currentUser.locale === 'Calubcob' || AppState.currentUser.locale === 'Acacia') AppState.currentUser.locale = 'Naic';
+    if (AppState.currentUser.department === 'Calubcob' || AppState.currentUser.department === 'Acacia') AppState.currentUser.department = 'Naic';
+  }
+  (AppState.eventEntries || []).forEach(e => {
+    if (Array.isArray(e.locale)) {
+      e.locale = e.locale.map(l => (l === 'Calubcob' || l === 'Acacia' ? 'Naic' : l));
+    } else if (e.locale === 'Calubcob' || e.locale === 'Acacia') {
+      e.locale = ['Naic'];
+    }
+  });
+  (AppState.leaves || []).forEach(l => {
+    if (l.department === 'Calubcob' || l.department === 'Acacia') l.department = 'Naic';
+  });
+
   AppState.save();
 }
 
@@ -960,7 +1055,11 @@ const App = {
 
     window.addEventListener('offline', () => {
       this.updateCloudStatusBadge(false);
-      showToast('Internet offline. Check-ins will queue locally on this device.', 'warning');
+      showToast('Internet offline. Check-ins will queue locally in storage.', 'warning');
+    });
+
+    window.addEventListener('mcgi_sync_queue_updated', () => {
+      this.updateCloudStatusBadge(SupabaseClient.isOnline());
     });
 
     if (!isOnline) return;
@@ -1022,25 +1121,73 @@ const App = {
     const badge = document.getElementById('headerCloudSyncBadge');
     const dot = document.getElementById('headerCloudSyncDot');
     const text = document.getElementById('headerCloudSyncText');
+    const pendingPill = document.getElementById('headerCloudPendingBadge');
     const pill = document.getElementById('settingsCloudStatusPill');
+
+    const pendingCount = (window.SupabaseClient && typeof SupabaseClient.getPendingQueue === 'function')
+      ? SupabaseClient.getPendingQueue().length
+      : 0;
 
     if (badge && dot && text) {
       if (isOnline) {
         dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
         text.textContent = 'CLOUD SYNC';
-        badge.className = 'hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10.5px] font-mono font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30';
-        badge.title = 'Supabase PostgreSQL Cloud Database Connected (Singapore)';
+        badge.className = 'inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[10.5px] font-mono font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 transition-all hover:bg-emerald-500/20 active:scale-95 cursor-pointer';
+        badge.title = 'Supabase PostgreSQL Cloud Database Connected. Click to sync.';
       } else {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400';
-        text.textContent = 'OFFLINE QUEUE';
-        badge.className = 'hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10.5px] font-mono font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30';
-        badge.title = 'Offline mode. Check-ins are stored on this device and will sync upon reconnect.';
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse';
+        text.textContent = 'OFFLINE';
+        badge.className = 'inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[10.5px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/40 transition-all hover:bg-amber-500/25 active:scale-95 cursor-pointer';
+        badge.title = 'Offline mode. Check-ins are stored in this device\'s local storage. Click to retry sync.';
+      }
+
+      if (pendingPill) {
+        if (pendingCount > 0) {
+          pendingPill.textContent = `${pendingCount} queued`;
+          pendingPill.classList.remove('hidden');
+        } else {
+          pendingPill.classList.add('hidden');
+        }
       }
     }
 
     if (pill) {
-      pill.textContent = isOnline ? 'ONLINE' : 'OFFLINE';
+      pill.textContent = isOnline ? (pendingCount > 0 ? `ONLINE (${pendingCount} queued)` : 'ONLINE') : `OFFLINE (${pendingCount} queued)`;
       pill.className = `text-[10px] font-mono font-bold px-2 py-0.5 rounded ${isOnline ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`;
+    }
+  },
+
+  async triggerManualCloudSync() {
+    if (!window.SupabaseClient) {
+      showToast('Cloud client unavailable.', 'warning');
+      return;
+    }
+    const isOnline = SupabaseClient.isOnline();
+    const pendingCount = SupabaseClient.getPendingQueue().length;
+
+    if (!isOnline) {
+      showToast(`Device is offline. ${pendingCount} check-in${pendingCount === 1 ? '' : 's'} stored in local storage.`, 'warning');
+      this.updateCloudStatusBadge(false);
+      return;
+    }
+
+    if (pendingCount === 0) {
+      showToast('All local records are fully synchronized with the cloud database!', 'success');
+      this.updateCloudStatusBadge(true);
+      return;
+    }
+
+    showToast(`Synchronizing ${pendingCount} offline records to cloud database...`, 'info');
+    try {
+      const res = await SupabaseClient.syncPendingQueue();
+      if (res && res.synced > 0) {
+        showToast(`Successfully synchronized ${res.synced} offline check-in${res.synced === 1 ? '' : 's'} to cloud database!`, 'success');
+      } else if (res && res.pending > 0) {
+        showToast(`Could not sync ${res.pending} records. Retaining in local storage queue.`, 'warning');
+      }
+      this.updateCloudStatusBadge(true);
+    } catch (e) {
+      showToast('Sync attempt encountered an issue. Records remain safe in local storage.', 'warning');
     }
   },
 
@@ -1176,44 +1323,53 @@ const App = {
     this.render();
   },
 
+  getEffectiveRole() {
+    const user = AppState.currentUser;
+    if (!user) return 'admin';
+    if (user.viewRole) return user.viewRole.toLowerCase();
+    if (user.role) return user.role.toLowerCase();
+    if (user.isAdmin === true) return 'admin';
+    const uname = (user.username || '').toLowerCase();
+    const uid = (user.id || '').toLowerCase();
+    if (uname === 'paul' || uname === 'rodel' || uname === 'christian' || uid === 'prod001' || uid === 'gcos001' || uid === 'tk001') {
+      return 'admin';
+    }
+    const lvl = (user.level || '').toUpperCase();
+    if (lvl.includes('MUNICIPAL') || lvl.includes('COORDINATOR HEAD') || lvl.includes('DIRECTOR')) {
+      return 'admin';
+    }
+    return 'member';
+  },
+
+  isRealAdminUser() {
+    const user = AppState.currentUser;
+    if (!user) return false;
+    if (user._realIsAdmin !== undefined) return user._realIsAdmin;
+    const uname = (user.username || '').toLowerCase();
+    const uid = (user.id || '').toLowerCase();
+    const lvl = (user.level || '').toUpperCase();
+    const isSpecial = uname === 'paul' || uname === 'rodel' || uname === 'christian' || uid === 'prod001' || uid === 'gcos001' || uid === 'tk001' || lvl.includes('MUNICIPAL') || lvl.includes('COORDINATOR HEAD') || lvl.includes('DIRECTOR');
+    user._realIsAdmin = !!(user.isAdmin === true || user.role === 'admin' || isSpecial);
+    return user._realIsAdmin;
+  },
+
   updateRoleBasedUI() {
     const user = AppState.currentUser;
-    const isSpecialAdmin = u => !!(u && (
-      u.isAdmin === true || 
-      u.role === 'admin' || 
-      u.username === 'paul' || 
-      u.username === 'rodel' || 
-      u.username === 'christian' ||
-      u.id === 'PROD001' || 
-      u.id === 'GCOS001' || 
-      u.id === 'TK001' ||
-      (u.level && u.level.toUpperCase().includes('MUNICIPAL')) ||
-      (u.level && u.level.toUpperCase().includes('COORDINATOR HEAD')) ||
-      (u.level && u.level.toUpperCase().includes('DIRECTOR'))
-    ));
+    if (!user) return;
 
-    // The 'real' admin check – never affected by view-role override.
-    const realAdmin = !!(user && (user._realIsAdmin === true || isSpecialAdmin(user)));
-    // The effective (possibly overridden) admin check for rendering.
-    const isAdmin = !!(user && (user.isAdmin === true || user.role === 'admin' || isSpecialAdmin(user)));
-
-    const adminNav = document.getElementById('navGroupAdmin');
-    const memberNav = document.getElementById('navGroupMember');
-    const adminProfileLink = document.getElementById('navAdminProfileLink');
-    const headerRecordBtn = document.getElementById('headerRecordAttendanceBtn');
-    const roleSwitcher = document.getElementById('roleSwitcherWidget');
+    const realAdmin = this.isRealAdminUser();
+    const role = this.getEffectiveRole(); // 'admin' | 'secretary' | 'member'
 
     // Show / hide the role-switcher only for real admins
+    const roleSwitcher = document.getElementById('roleSwitcherWidget');
     if (roleSwitcher) {
       if (realAdmin) {
         roleSwitcher.classList.remove('hidden');
-        // Highlight the active button
-        const activeRole = user.role === 'admin' || user.isAdmin ? 'admin' : (user.role || 'member');
         document.querySelectorAll('#roleSwitcherWidget [data-role]').forEach(btn => {
-          const isActive = btn.dataset.role === activeRole;
+          const isActive = btn.dataset.role === role;
           btn.className = `flex-1 px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
             isActive
-              ? 'border-gold-400/30 bg-gold-400 text-midnight-950'
+              ? 'border-gold-400/30 bg-gold-400 text-midnight-950 shadow-sm'
               : 'border-mcgiblue-700/50 text-slate-300 hover:bg-midnight-700'
           }`;
         });
@@ -1222,45 +1378,88 @@ const App = {
       }
     }
 
-    if (isAdmin) {
-      if (adminNav) adminNav.classList.remove('hidden');
-      if (memberNav) memberNav.classList.add('hidden');
-      if (adminProfileLink) adminProfileLink.classList.remove('hidden');
-      if (headerRecordBtn) {
-        headerRecordBtn.innerHTML = `
-          <i data-lucide="plus-circle" class="w-4 h-4 stroke-[3]"></i>
-          <span class="hidden sm:inline">Record Attendance</span>
-          <span class="sm:hidden">Record</span>
-        `;
-        headerRecordBtn.onclick = () => App.switchTab('event-entry');
-        headerRecordBtn.classList.remove('hidden');
+    // Toggle navigation items based on role:
+    // Admin Only:
+    const adminNavIds = ['navItemDashboard', 'navItemRoster', 'navItemLeaves', 'navItemReports', 'navItemSettings'];
+    adminNavIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (role === 'admin') el.classList.remove('hidden');
+        else el.classList.add('hidden');
       }
-    } else {
-      if (adminNav) adminNav.classList.add('hidden');
-      if (memberNav) memberNav.classList.remove('hidden');
-      if (adminProfileLink) adminProfileLink.classList.add('hidden');
-      if (headerRecordBtn) {
-        headerRecordBtn.innerHTML = `
-          <i data-lucide="camera" class="w-4 h-4 stroke-[2]"></i>
-          <span class="hidden sm:inline">Scan QR to Log</span>
-          <span class="sm:hidden">Scan</span>
-        `;
-        headerRecordBtn.onclick = () => App.switchTab('member-scan');
-        headerRecordBtn.classList.remove('hidden');
-      }
+    });
 
-      // Member safety redirect: If currently on an administrative tab, redirect to personal profile
-      const adminOnlyTabs = ['dashboard', 'event-entry', 'attendance-logger', 'attendance', 'roster', 'reports', 'settings'];
-      if (adminOnlyTabs.includes(AppState.currentTab)) {
-        AppState.currentTab = 'my-profile';
+    // Navigation items allowed for all roles (Admin, Secretary, Member):
+    ['navItemRecordAttendance', 'navItemAttendanceSheet', 'navItemMyProfile'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    });
+
+    // Excel Export buttons:
+    // Admin: YES
+    // Secretary: YES
+    // Member: NO (hidden)
+    const excelButtonIds = ['btnExportEventEntriesExcel', 'btnExportExcelLogs', 'btnExportAttendanceSheet'];
+    excelButtonIds.forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        if (role === 'member') btn.classList.add('hidden');
+        else btn.classList.remove('hidden');
       }
+    });
+
+    // Bulk actions in Attendance Sheet:
+    // Admin and Secretary: YES
+    // Member: NO (hidden)
+    const bulkContainer = document.getElementById('attendanceBulkButtonsContainer');
+    if (bulkContainer) {
+      if (role === 'member') bulkContainer.classList.add('hidden');
+      else bulkContainer.classList.remove('hidden');
+    }
+
+    // Attendance Role Badge
+    const roleBadge = document.getElementById('attendanceRoleBadge');
+    if (roleBadge) {
+      if (role === 'admin') {
+        roleBadge.className = 'ml-2 px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        roleBadge.textContent = 'ADMIN ACCESS';
+      } else if (role === 'secretary') {
+        roleBadge.className = 'ml-2 px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/30';
+        roleBadge.textContent = 'SECRETARY ACCESS';
+      } else {
+        roleBadge.className = 'ml-2 px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        roleBadge.textContent = 'MEMBER (VIEW ONLY)';
+      }
+    }
+
+    // Top Header Quick Action button
+    const headerRecordBtn = document.getElementById('headerRecordAttendanceBtn');
+    if (headerRecordBtn) {
+      headerRecordBtn.innerHTML = `
+        <i data-lucide="plus-circle" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+        <span class="hidden sm:inline">Record Attendance</span>
+        <span class="sm:hidden">Record</span>
+      `;
+      headerRecordBtn.onclick = () => App.switchTab('event-entry');
+      headerRecordBtn.classList.remove('hidden');
+    }
+
+    // Route guard: Redirect if user is currently on an unauthorized tab
+    const allowedTabsByRole = {
+      admin: ['dashboard', 'event-entry', 'attendance', 'roster', 'leaves', 'reports', 'settings', 'my-profile'],
+      secretary: ['event-entry', 'attendance', 'my-profile'],
+      member: ['event-entry', 'attendance', 'my-profile']
+    };
+    const allowed = allowedTabsByRole[role] || allowedTabsByRole.member;
+    if (!allowed.includes(AppState.currentTab)) {
+      AppState.currentTab = 'event-entry';
     }
 
     if (window.lucide) lucide.createIcons();
   },
 
   /**
-   * Temporarily overrides the rendered UI role for admin preview purposes.
+   * Temporarily overrides the rendered UI role for preview purposes.
    * Only real admins can call this (the widget is hidden for non-admins).
    * @param {'admin'|'member'|'secretary'} role
    */
@@ -1268,17 +1467,13 @@ const App = {
     const user = AppState.currentUser;
     if (!user) return;
 
-    // Preserve the original real-admin flag on first call
-    if (user._realIsAdmin === undefined) {
-      user._realIsAdmin = !!(user.isAdmin === true || user.role === 'admin' || user.username === 'paul' || user.username === 'rodel' || user.username === 'christian' || user.id === 'PROD001' || user.id === 'GCOS001' || user.id === 'TK001');
-    }
+    this.isRealAdminUser();
 
-    // Apply the override
+    user.viewRole = role;
     if (role === 'admin') {
       user.isAdmin = true;
       user.role = 'admin';
     } else if (role === 'secretary') {
-      // Secretary: member-level access, treated as non-admin for nav purposes
       user.isAdmin = false;
       user.role = 'secretary';
     } else {
@@ -1286,11 +1481,30 @@ const App = {
       user.role = 'member';
     }
 
+    // If current tab is unauthorized for the new role, redirect
+    const allowedTabsByRole = {
+      admin: ['dashboard', 'event-entry', 'attendance', 'roster', 'leaves', 'reports', 'settings', 'my-profile'],
+      secretary: ['event-entry', 'attendance', 'my-profile'],
+      member: ['event-entry', 'attendance', 'my-profile']
+    };
+    const allowed = allowedTabsByRole[role] || allowedTabsByRole.member;
+    if (!allowed.includes(AppState.currentTab)) {
+      AppState.currentTab = 'event-entry';
+    }
+
     this.updateRoleBasedUI();
     this.updateHeaderUserInfo();
     this.render();
 
-    const labels = { admin: 'Admin', member: 'Member', secretary: 'Secretary' };
+    if (window.AttendanceLogger && typeof AttendanceLogger.renderAttendanceLogsTable === 'function') {
+      AttendanceLogger.renderAttendanceLogsTable();
+    }
+
+    const labels = {
+      admin: 'Admin (Full Access)',
+      secretary: 'Secretary (Record, Check & Edit, Excel Export)',
+      member: 'Member (Record Attendance & View Records Only)'
+    };
     if (typeof showToast === 'function') showToast(`Viewing as: ${labels[role] || role}`, 'info');
   },
 
@@ -1454,14 +1668,22 @@ const App = {
   },
 
   switchTab(tabName) {
-    const user = AppState.currentUser;
-    const isAdmin = !!(user && (user.isAdmin === true || user.role === 'admin' || user.username === 'paul'));
-    const adminOnlyTabs = ['dashboard', 'event-entry', 'attendance-logger', 'attendance', 'roster', 'reports', 'settings'];
+    const role = this.getEffectiveRole();
 
-    // Route Guard: prevent members from accessing administrative tabs or attendance records
-    if (!isAdmin && adminOnlyTabs.includes(tabName)) {
-      showToast('Access restricted: Members can only view their own profile and scan QR for attendance.', 'warning');
-      tabName = 'my-profile';
+    const allowedTabsByRole = {
+      admin: ['dashboard', 'event-entry', 'attendance', 'roster', 'leaves', 'reports', 'settings', 'my-profile'],
+      secretary: ['event-entry', 'attendance', 'my-profile'],
+      member: ['event-entry', 'attendance', 'my-profile']
+    };
+
+    const allowedTabs = allowedTabsByRole[role] || allowedTabsByRole.member;
+
+    if (!allowedTabs.includes(tabName)) {
+      if (typeof showToast === 'function') {
+        const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
+        showToast(`Access restricted: ${roleLabel}s do not have access to this section.`, 'warning');
+      }
+      tabName = 'event-entry';
     }
 
     AppState.currentTab = tabName;
@@ -1470,7 +1692,7 @@ const App = {
     document.querySelectorAll('[data-tab-target]').forEach(btn => {
       const isCurrent = btn.getAttribute('data-tab-target') === tabName;
       if (isCurrent) {
-        btn.className = 'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all bg-gold-400 text-midnight-950 glow-gold-sm shadow-md';
+        btn.className = 'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all active bg-gold-400 text-midnight-950 glow-gold-sm shadow-md';
       } else {
         btn.className = 'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all';
       }
@@ -1577,7 +1799,7 @@ const App = {
   },
 
   populateDepartmentDropdowns() {
-    const locales = ['all', 'Naic', 'Calubcob', 'Acacia', ...new Set(AppState.members.map(m => m.department))].filter((v, i, a) => a.indexOf(v) === i);
+    const locales = ['all', 'Naic', ...new Set(AppState.members.map(m => m.department))].filter((v, i, a) => a.indexOf(v) === i && v !== 'Calubcob' && v !== 'Acacia');
     const selects = document.querySelectorAll('.app-dept-filter');
     selects.forEach(select => {
       const currentVal = select.value || 'all';
@@ -1606,15 +1828,38 @@ const App = {
     const nameInput = document.getElementById('inputEventFullName');
     if (nameInput) nameInput.value = member.name;
 
-    // Check corresponding Locale
+    // Check corresponding Locale (single-select radio)
     document.querySelectorAll('input[name="eventLocale"]').forEach(cb => {
       cb.checked = (cb.value === member.department);
     });
 
-    // Check corresponding Level
+    // Check corresponding Level (single-select radio)
+    let foundLevel = false;
     document.querySelectorAll('input[name="eventLevel"]').forEach(cb => {
-      cb.checked = (cb.value === member.role);
+      const match = (cb.value === member.role);
+      cb.checked = match;
+      if (match) foundLevel = true;
     });
+
+    // If member has a custom role not currently in the duty levels list, append it dynamically and check it
+    if (!foundLevel && member.role) {
+      const levelGroup = document.getElementById('levelCheckboxGroup');
+      if (levelGroup) {
+        const extraPill = document.createElement('label');
+        extraPill.className = 'custom-pill-checkbox';
+        extraPill.innerHTML = `
+          <input type="radio" name="eventLevel" value="${member.role}" checked>
+          <span class="custom-pill-box">
+            <span class="custom-pill-indicator">
+              <i data-lucide="check" class="w-3 h-3 text-midnight-950 stroke-[3]"></i>
+            </span>
+            <span>${member.role}</span>
+          </span>
+        `;
+        levelGroup.appendChild(extraPill);
+        if (window.lucide) lucide.createIcons();
+      }
+    }
 
     showToast(`Autofilled details for ${member.name}`, 'info');
   },
@@ -1623,6 +1868,8 @@ const App = {
   // NEW MODULE: EVENT ATTENDANCE ENTRY LOGIC & DYNAMIC CONDITIONAL FIELDS
   // =========================================================================
   initEventEntryForm() {
+    renderDutyLevelOptions(getActiveDutyScope());
+
     const dateInput = document.getElementById('inputEventDate');
     if (dateInput && !dateInput.value) {
       dateInput.value = AppState.selectedDate;
@@ -1649,11 +1896,11 @@ const App = {
               PM Schedule / Viewing Slot <span class="text-gold-400">*</span>
             </label>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              ${this.createCheckboxPill('eventSchedule', '3:30AM/WED - LIVE', true)}
-              ${this.createCheckboxPill('eventSchedule', '2:30PM/WED - VIEWING')}
-              ${this.createCheckboxPill('eventSchedule', '5:30PM/WED - VIEWING')}
-              ${this.createCheckboxPill('eventSchedule', '7:00AM/THU - VIEWING')}
-              ${this.createCheckboxPill('eventSchedule', '7:00PM/THU - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '3:30AM/WED - LIVE', true)}
+              ${this.createRadioPill('eventSchedule', '2:30PM/WED - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '5:30PM/WED - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '7:00AM/THU - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '7:00PM/THU - VIEWING')}
             </div>
           </div>
         `;
@@ -1667,10 +1914,10 @@ const App = {
               WS Schedule / Viewing Slot <span class="text-gold-400">*</span>
             </label>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-              ${this.createCheckboxPill('eventSchedule', '3:30AM/SAT - LIVE', true)}
-              ${this.createCheckboxPill('eventSchedule', '11:30AM/SAT - VIEWING')}
-              ${this.createCheckboxPill('eventSchedule', '1:30PM/SUN - VIEWING')}
-              ${this.createCheckboxPill('eventSchedule', '5:30PM/SUN - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '3:30AM/SAT - LIVE', true)}
+              ${this.createRadioPill('eventSchedule', '11:30AM/SAT - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '1:30PM/SUN - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '5:30PM/SUN - VIEWING')}
             </div>
           </div>
         `;
@@ -1684,9 +1931,9 @@ const App = {
               PBB Schedule / Viewing Slot <span class="text-gold-400">*</span>
             </label>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              ${this.createCheckboxPill('eventSchedule', '4:00PM/SAT - LIVE', true)}
-              ${this.createCheckboxPill('eventSchedule', '5:30AM/SUN - VIEWING')}
-              ${this.createCheckboxPill('eventSchedule', '5:30PM/SUN - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '4:00PM/SAT - LIVE', true)}
+              ${this.createRadioPill('eventSchedule', '5:30AM/SUN - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '5:30PM/SUN - VIEWING')}
             </div>
           </div>
         `;
@@ -1700,11 +1947,11 @@ const App = {
               Combined PM/WS Schedule Slot <span class="text-gold-400">*</span>
             </label>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              ${this.createCheckboxPill('eventSchedule', '3:30AM/WED - LIVE', true)}
-              ${this.createCheckboxPill('eventSchedule', '2:30PM/WED - VIEWING')}
-              ${this.createCheckboxPill('eventSchedule', '5:30PM/WED - VIEWING')}
-              ${this.createCheckboxPill('eventSchedule', '7:00AM/THU - VIEWING')}
-              ${this.createCheckboxPill('eventSchedule', '7:00PM/THU - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '3:30AM/WED - LIVE', true)}
+              ${this.createRadioPill('eventSchedule', '2:30PM/WED - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '5:30PM/WED - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '7:00AM/THU - VIEWING')}
+              ${this.createRadioPill('eventSchedule', '7:00PM/THU - VIEWING')}
             </div>
           </div>
         `;
@@ -1718,9 +1965,9 @@ const App = {
               SPBB Day Schedule <span class="text-gold-400">*</span>
             </label>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              ${this.createCheckboxPill('eventSchedule', 'DAY 1/FRI - 4:00PM', true)}
-              ${this.createCheckboxPill('eventSchedule', 'DAY 2/SAT - 4:00PM')}
-              ${this.createCheckboxPill('eventSchedule', 'DAY 3/SUN - 4:00PM')}
+              ${this.createRadioPill('eventSchedule', 'DAY 1/FRI - 4:00PM', true)}
+              ${this.createRadioPill('eventSchedule', 'DAY 2/SAT - 4:00PM')}
+              ${this.createRadioPill('eventSchedule', 'DAY 3/SUN - 4:00PM')}
             </div>
           </div>
         `;
@@ -1729,14 +1976,14 @@ const App = {
       case 'MASS INDOCTRINATION':
         let dayCheckboxes = '';
         for (let day = 1; day <= 14; day++) {
-          dayCheckboxes += this.createCheckboxPill('eventSchedule', `DAY ${day}`, day === 1);
+          dayCheckboxes += this.createRadioPill('eventSchedule', `DAY ${day}`, day === 1);
         }
         html = `
           <div class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-gold-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <i data-lucide="book-open" class="w-3.5 h-3.5 text-gold-400"></i>
-                Mass Indoctrination Session Days <span class="text-gold-400">*</span>
+                Mass Indoctrination Session Day <span class="text-gold-400">*</span>
               </label>
               <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
                 ${dayCheckboxes}
@@ -1774,8 +2021,8 @@ const App = {
                 EDITION <span class="text-gold-400">*</span>
               </label>
               <div class="flex flex-col gap-2">
-                ${this.createCheckboxPill('eventEdition', 'AFTERNOON EDITION - 12:50PM', true)}
-                ${this.createCheckboxPill('eventEdition', 'EVENING EDITION - 9:30PM')}
+                ${this.createRadioPill('eventEdition', 'AFTERNOON EDITION - 12:50PM', true)}
+                ${this.createRadioPill('eventEdition', 'EVENING EDITION - 9:30PM')}
               </div>
             </div>
 
@@ -1786,8 +2033,8 @@ const App = {
                 STATUS <span class="text-gold-400">*</span>
               </label>
               <div class="flex gap-3">
-                ${this.createCheckboxPill('eventStatus', 'PRESENT', true)}
-                ${this.createCheckboxPill('eventStatus', 'ABSENT')}
+                ${this.createRadioPill('eventStatus', 'PRESENT', true)}
+                ${this.createRadioPill('eventStatus', 'ABSENT')}
               </div>
             </div>
           </div>
@@ -2141,21 +2388,23 @@ const App = {
       return;
     }
 
-    // Selected Locales
-    const localeCheckboxes = document.querySelectorAll('input[name="eventLocale"]:checked');
-    const locales = Array.from(localeCheckboxes).map(cb => cb.value);
-    if (locales.length === 0) {
-      showToast('Please select at least one Locale (Naic, Calubcob, Acacia)', 'warning');
+    // Selected Locale (Single-select radio)
+    const localeRadio = document.querySelector('input[name="eventLocale"]:checked');
+    const selectedLocale = localeRadio ? localeRadio.value : '';
+    if (!selectedLocale) {
+      showToast('Please select a Locale (Naic)', 'warning');
       return;
     }
+    const locales = [selectedLocale];
 
-    // Selected Levels
-    const levelCheckboxes = document.querySelectorAll('input[name="eventLevel"]:checked');
-    const levels = Array.from(levelCheckboxes).map(cb => cb.value);
-    if (levels.length === 0) {
-      showToast('Please select at least one Level (MUNICIPAL PROD, LOCALE PROD, TRAINEE)', 'warning');
+    // Selected Level (Single-select radio)
+    const levelRadio = document.querySelector('input[name="eventLevel"]:checked');
+    const selectedLevel = levelRadio ? levelRadio.value : '';
+    if (!selectedLevel) {
+      showToast('Please select a Level / Role', 'warning');
       return;
     }
+    const levels = [selectedLevel];
 
     const eventDate = document.getElementById('inputEventDate').value || AppState.selectedDate;
     const eventType = document.getElementById('selectEventType').value;
@@ -2260,20 +2509,19 @@ const App = {
       }
     }
 
-    // Selected Schedules
-    const scheduleCheckboxes = document.querySelectorAll('input[name="eventSchedule"]:checked');
-    const schedules = Array.from(scheduleCheckboxes).map(cb => cb.value);
+    // Selected Schedules (Single-select radio)
+    const scheduleRadio = document.querySelector('input[name="eventSchedule"]:checked');
+    const schedules = scheduleRadio ? [scheduleRadio.value] : [];
 
-    // Edition
-    const editionCheckboxes = document.querySelectorAll('input[name="eventEdition"]:checked');
-    const edition = Array.from(editionCheckboxes).map(cb => cb.value);
+    // Edition (Single-select radio)
+    const editionRadio = document.querySelector('input[name="eventEdition"]:checked');
+    const edition = editionRadio ? [editionRadio.value] : [];
 
-    // Fallback status if statusOption not used
+    // Fallback status if statusOption not used (Single-select radio)
     let status = statusOption;
     if (!status) {
-      const statusCheckboxes = document.querySelectorAll('input[name="eventStatus"]:checked');
-      const statusValues = Array.from(statusCheckboxes).map(cb => cb.value);
-      status = statusValues.length > 0 ? statusValues.join(', ') : 'PRESENT';
+      const statusRadio = document.querySelector('input[name="eventStatus"]:checked');
+      status = statusRadio ? statusRadio.value : 'PRESENT';
     }
 
     const remarks = document.getElementById('inputEventRemarks').value.trim();
@@ -2352,6 +2600,20 @@ const App = {
     if (quickPick) quickPick.value = '';
 
     if (clearAll) {
+      // Reset Locale to Naic
+      const defaultLocaleRadio = document.querySelector('input[name="eventLocale"][value="Naic"]');
+      if (defaultLocaleRadio) defaultLocaleRadio.checked = true;
+
+      // Reset Level to default for current duty
+      renderDutyLevelOptions(getActiveDutyScope());
+
+      // Reset Event Type to PM
+      const eventSelect = document.getElementById('selectEventType');
+      if (eventSelect) {
+        eventSelect.value = 'PM';
+        this.handleEventDropdownChange('PM');
+      }
+
       const defaultRadio = document.querySelector('input[name="eventStatusOption"][value="ON DUTY (OD)"]');
       if (defaultRadio) {
         defaultRadio.checked = true;
@@ -2376,15 +2638,29 @@ const App = {
   },
 
   deleteEventEntry(id) {
+    if (this.getEffectiveRole() !== 'admin') {
+      if (typeof showToast === 'function') showToast('Only Administrators can delete attendance logs.', 'error');
+      return;
+    }
     if (window.AttendanceLogger && typeof AttendanceLogger.deleteLogEntry === 'function') {
       AttendanceLogger.deleteLogEntry(id);
     }
   },
 
   exportEventEntriesCSV() {
-    if (window.AttendanceLogger && typeof AttendanceLogger.exportLogsCSV === 'function') {
+    if (this.getEffectiveRole() === 'member') {
+      if (typeof showToast === 'function') showToast('Members do not have access to export attendance records.', 'error');
+      return;
+    }
+    if (window.AttendanceLogger && typeof AttendanceLogger.exportLogsExcel === 'function') {
+      AttendanceLogger.exportLogsExcel();
+    } else if (window.AttendanceLogger && typeof AttendanceLogger.exportLogsCSV === 'function') {
       AttendanceLogger.exportLogsCSV();
     }
+  },
+
+  exportEventEntriesExcel() {
+    this.exportEventEntriesCSV();
   },
 
   // =========================================================================
@@ -2394,13 +2670,19 @@ const App = {
     const user = AppState.currentUser;
     if (!user) return;
 
-    const isAdmin = !!(user.isAdmin === true || user.role === 'admin' || user.username === 'paul');
+    const role = this.getEffectiveRole();
     const roleBadge = document.getElementById('profileRoleBadge');
     if (roleBadge) {
-      roleBadge.textContent = isAdmin ? 'ROLE: ADMINISTRATOR' : 'ROLE: PRODUCTION MEMBER';
-      roleBadge.className = isAdmin 
-        ? 'px-3.5 py-1.5 rounded-full bg-amber-400/20 border border-amber-400/50 text-gold-300 font-mono text-xs font-bold'
-        : 'px-3.5 py-1.5 rounded-full bg-mcgiblue-500/20 border border-mcgiblue-400/50 text-mcgiblue-300 font-mono text-xs font-bold';
+      if (role === 'admin') {
+        roleBadge.textContent = 'ROLE: ADMINISTRATOR';
+        roleBadge.className = 'px-3.5 py-1.5 rounded-full bg-amber-400/20 border border-amber-400/50 text-gold-300 font-mono text-xs font-bold';
+      } else if (role === 'secretary') {
+        roleBadge.textContent = 'ROLE: SECRETARY';
+        roleBadge.className = 'px-3.5 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/50 text-blue-300 font-mono text-xs font-bold';
+      } else {
+        roleBadge.textContent = 'ROLE: PRODUCTION MEMBER';
+        roleBadge.className = 'px-3.5 py-1.5 rounded-full bg-mcgiblue-500/20 border border-mcgiblue-400/50 text-mcgiblue-300 font-mono text-xs font-bold';
+      }
     }
 
     const nameInput = document.getElementById('profFullName');
@@ -2662,9 +2944,36 @@ const App = {
       return;
     }
 
+    const isMember = this.getEffectiveRole() === 'member';
+
     tbody.innerHTML = filtered.map((m, index) => {
       const record = AppState.attendance[dateStr][m.id] || { status: 'absent', time: '-', remarks: '' };
       const status = record.status;
+
+      let statusHtml = '';
+      let remarksHtml = '';
+
+      if (isMember) {
+        statusHtml = this.getStatusBadge(status);
+        remarksHtml = `<span class="text-xs text-slate-400 italic">${record.remarks || '-'}</span>`;
+      } else {
+        statusHtml = `
+          <div class="flex items-center gap-1.5">
+            <button onclick="App.setStatus('${m.id}', 'present')" class="btn-status-present px-2.5 py-1 rounded text-xs font-bold transition-all ${status === 'present' ? 'active' : 'bg-midnight-900 text-slate-400 hover:text-emerald-300 border border-slate-700'}">P</button>
+            <button onclick="App.setStatus('${m.id}', 'late')" class="btn-status-late px-2.5 py-1 rounded text-xs font-bold transition-all ${status === 'late' ? 'active' : 'bg-midnight-900 text-slate-400 hover:text-gold-300 border border-slate-700'}">L</button>
+            <button onclick="App.setStatus('${m.id}', 'absent')" class="btn-status-absent px-2.5 py-1 rounded text-xs font-bold transition-all ${status === 'absent' ? 'active' : 'bg-midnight-900 text-slate-400 hover:text-rose-300 border border-slate-700'}">A</button>
+            <button onclick="App.setStatus('${m.id}', 'excused')" class="btn-status-excused px-2.5 py-1 rounded text-xs font-bold transition-all ${status === 'excused' ? 'active' : 'bg-midnight-900 text-slate-400 hover:text-mcgiblue-300 border border-slate-700'}">E</button>
+          </div>
+        `;
+        remarksHtml = `
+          <input 
+            type="text" 
+            placeholder="Add remark..." 
+            value="${record.remarks || ''}" 
+            onchange="App.setRemarks('${m.id}', this.value)"
+            class="w-full bg-midnight-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-200 placeholder-slate-600 focus:border-gold-400 focus:outline-none">
+        `;
+      }
 
       return `
         <tr class="border-b border-slate-800/60 hover:bg-midnight-900/40 transition-colors">
@@ -2691,20 +3000,10 @@ const App = {
             ${record.time}
           </td>
           <td class="px-4 py-3">
-            <div class="flex items-center gap-1.5">
-              <button onclick="App.setStatus('${m.id}', 'present')" class="btn-status-present px-2.5 py-1 rounded text-xs font-bold transition-all ${status === 'present' ? 'active' : 'bg-midnight-900 text-slate-400 hover:text-emerald-300 border border-slate-700'}">P</button>
-              <button onclick="App.setStatus('${m.id}', 'late')" class="btn-status-late px-2.5 py-1 rounded text-xs font-bold transition-all ${status === 'late' ? 'active' : 'bg-midnight-900 text-slate-400 hover:text-gold-300 border border-slate-700'}">L</button>
-              <button onclick="App.setStatus('${m.id}', 'absent')" class="btn-status-absent px-2.5 py-1 rounded text-xs font-bold transition-all ${status === 'absent' ? 'active' : 'bg-midnight-900 text-slate-400 hover:text-rose-300 border border-slate-700'}">A</button>
-              <button onclick="App.setStatus('${m.id}', 'excused')" class="btn-status-excused px-2.5 py-1 rounded text-xs font-bold transition-all ${status === 'excused' ? 'active' : 'bg-midnight-900 text-slate-400 hover:text-mcgiblue-300 border border-slate-700'}">E</button>
-            </div>
+            ${statusHtml}
           </td>
           <td class="px-4 py-3">
-            <input 
-              type="text" 
-              placeholder="Add remark..." 
-              value="${record.remarks || ''}" 
-              onchange="App.setRemarks('${m.id}', this.value)"
-              class="w-full bg-midnight-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-200 placeholder-slate-600 focus:border-gold-400 focus:outline-none">
+            ${remarksHtml}
           </td>
         </tr>
       `;
@@ -2714,6 +3013,10 @@ const App = {
   },
 
   setStatus(memberId, status) {
+    if (this.getEffectiveRole() === 'member') {
+      if (typeof showToast === 'function') showToast('Members have view-only access to attendance records.', 'error');
+      return;
+    }
     const dateStr = AppState.selectedDate;
     if (!AppState.attendance[dateStr]) {
       AppState.attendance[dateStr] = {};
@@ -2737,6 +3040,10 @@ const App = {
   },
 
   setRemarks(memberId, remarks) {
+    if (this.getEffectiveRole() === 'member') {
+      if (typeof showToast === 'function') showToast('Members have view-only access to attendance records.', 'error');
+      return;
+    }
     const dateStr = AppState.selectedDate;
     const activeDuty = getActiveDutyScope();
     if (!AppState.attendance[dateStr]) AppState.attendance[dateStr] = {};
@@ -2749,6 +3056,10 @@ const App = {
   },
 
   markAllStatus(status) {
+    if (this.getEffectiveRole() === 'member') {
+      if (typeof showToast === 'function') showToast('Members have view-only access to attendance records.', 'error');
+      return;
+    }
     const dateStr = AppState.selectedDate;
     if (!AppState.attendance[dateStr]) AppState.attendance[dateStr] = {};
 
@@ -3518,6 +3829,10 @@ const App = {
   },
 
   exportCSV() {
+    if (this.getEffectiveRole() === 'member') {
+      if (typeof showToast === 'function') showToast('Members do not have access to export attendance records.', 'error');
+      return;
+    }
     const activeDuty = getActiveDutyScope();
     let csv = 'ID,Name,Locale/Unit,Role,Date,Time,Status,Remarks\n';
     const dateStr = AppState.selectedDate;
@@ -3656,7 +3971,7 @@ const App = {
     const totalInGroup = subset.length;
     const pct = stats.total > 0 ? Math.round((totalInGroup / stats.total) * 100) : 0;
 
-    const byDept = { Naic: 0, Calubcob: 0, Acacia: 0 };
+    const byDept = { Naic: 0 };
     const byRole = { 'MUNICIPAL PROD': 0, 'LOCALE PROD': 0, 'TRAINEE': 0 };
 
     subset.forEach(m => {
@@ -3678,9 +3993,7 @@ const App = {
       <div class="p-2.5 rounded-xl bg-midnight-900 border border-mcgiblue-900/60 text-center">
         <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">By Locale</span>
         <div class="flex items-center justify-center gap-1.5 mt-1">
-          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-midnight-800 text-slate-200 border border-mcgiblue-800" title="Naic">N: <strong class="text-gold-300">${byDept.Naic}</strong></span>
-          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-midnight-800 text-slate-200 border border-mcgiblue-800" title="Calubcob">C: <strong class="text-gold-300">${byDept.Calubcob}</strong></span>
-          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-midnight-800 text-slate-200 border border-mcgiblue-800" title="Acacia">A: <strong class="text-gold-300">${byDept.Acacia}</strong></span>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-midnight-800 text-slate-200 border border-mcgiblue-800" title="Naic">Naic: <strong class="text-gold-300">${byDept.Naic || 0}</strong></span>
         </div>
       </div>
       <div class="p-2.5 rounded-xl bg-midnight-900 border border-mcgiblue-900/60 text-center">
@@ -3701,8 +4014,8 @@ const App = {
   },
 
   updatePersonnelSummaryDeptButtons() {
-    const depts = ['', 'Naic', 'Calubcob', 'Acacia'];
-    const ids = { '': 'summaryDeptBtnAll', 'Naic': 'summaryDeptBtnNaic', 'Calubcob': 'summaryDeptBtnCalubcob', 'Acacia': 'summaryDeptBtnAcacia' };
+    const depts = ['', 'Naic'];
+    const ids = { '': 'summaryDeptBtnAll', 'Naic': 'summaryDeptBtnNaic' };
     
     depts.forEach(d => {
       const btn = document.getElementById(ids[d]);

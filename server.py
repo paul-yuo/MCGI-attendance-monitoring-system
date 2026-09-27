@@ -12,8 +12,14 @@ PORT = 8080
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
-        # Disable caching for rapid development
-        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate')
+        # Service Worker header & offline caching support
+        if self.path.endswith('sw.js'):
+            self.send_header('Cache-Control', 'no-cache')
+            self.send_header('Service-Worker-Allowed', '/')
+        elif self.path.endswith('.html') or self.path == '/':
+            self.send_header('Cache-Control', 'no-cache')
+        else:
+            self.send_header('Cache-Control', 'public, max-age=86400')
         super().end_headers()
 
 def main():
