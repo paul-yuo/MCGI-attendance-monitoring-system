@@ -140,6 +140,12 @@ const EventSchedule = (() => {
     return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   }
 
+  function resolveAttendanceContext(now = new Date(), preferredEvent = null) {
+    const eventType = preferredEvent || detectApplicableEvent(now);
+    const detected = hasFixedSchedule(eventType) ? detect(eventType, now) : { status: 'unscheduled' };
+    return { eventType, detected };
+  }
+
   /**
    * Safely determines the applicable event for `now`.
    * Priority:
@@ -152,22 +158,17 @@ const EventSchedule = (() => {
    *    - Saturday (6) & Sunday (0): 'WS' (primary gathering if no active configuration)
    */
   function detectApplicableEvent(now = new Date(), preferredEvent = null) {
-    // 1. Check explicit active event memory
+    // 1. An administrator-configured active event is the authoritative event
+    // source. It is separate from the last value chosen in the attendance form.
     let activeConfig = null;
     try {
-      if (typeof sessionStorage !== 'undefined') activeConfig = sessionStorage.getItem('mcgi_active_event');
-      if (!activeConfig && typeof localStorage !== 'undefined') activeConfig = localStorage.getItem('mcgi_active_event');
-      if (!activeConfig && typeof window !== 'undefined' && window.AppState && window.AppState.activeEvent) {
-        activeConfig = window.AppState.activeEvent;
-      }
+      if (typeof localStorage !== 'undefined') activeConfig = localStorage.getItem('mcgi_configured_active_event');
+      if (!activeConfig && typeof sessionStorage !== 'undefined') activeConfig = sessionStorage.getItem('mcgi_configured_active_event');
     } catch (e) {}
 
-    if (activeConfig && hasFixedSchedule(activeConfig)) {
-      const d = detect(activeConfig, now);
-      if (d.status === 'detected') return activeConfig;
-    }
+    if (activeConfig && hasFixedSchedule(activeConfig)) return activeConfig;
 
-    // 2. Check preferredEvent if explicitly set and has schedules today (except default 'PM' on non-PM days)
+    // 2. Check preferredEvent if explicitly supplied by an intentional caller.
     if (preferredEvent && hasFixedSchedule(preferredEvent) && preferredEvent !== 'PM') {
       const d = detect(preferredEvent, now);
       if (d.status === 'detected') return preferredEvent;
@@ -199,7 +200,7 @@ const EventSchedule = (() => {
     return 'PM';
   }
 
-  const api = { DAY_NAMES, getConfig, hasFixedSchedule, findSlot, describeSlot, formatTime12, formatLocalTime, detect, detectApplicableEvent };
+  const api = { DAY_NAMES, getConfig, hasFixedSchedule, findSlot, describeSlot, formatTime12, formatLocalTime, detect, detectApplicableEvent, resolveAttendanceContext };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   return api;
 })();

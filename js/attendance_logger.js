@@ -711,6 +711,32 @@ const AttendanceLogger = (() => {
     });
   }
 
+  function getAttendanceState() {
+    if (window.AppState) return window.AppState;
+    const duty = localStorage.getItem('mcgi_selected_duty') || 'MPRO';
+    const key = duty.toLowerCase();
+    const read = (name, fallback) => {
+      try {
+        const value = localStorage.getItem(`mcgi_${key}_${name}`);
+        return value ? JSON.parse(value) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    };
+    const state = {
+      members: read('members', []),
+      authUsers: read('auth_users', []),
+      eventEntries: read('event_entries', []),
+      attendance: read('attendance', {}),
+      settings: read('settings', {})
+    };
+    state.save = () => {
+      localStorage.setItem(`mcgi_${key}_event_entries`, JSON.stringify(state.eventEntries));
+      localStorage.setItem(`mcgi_${key}_attendance`, JSON.stringify(state.attendance));
+    };
+    return state;
+  }
+
   /**
    * Validates a scanned QR payload, verifies authenticity and checks replay attacks
    */
@@ -732,11 +758,12 @@ const AttendanceLogger = (() => {
       return { valid: false, error: 'QR Code is missing member identifier.' };
     }
 
+    const state = getAttendanceState();
     // Active duty context (MPRO, GCOS, TK)
     const activeDuty = (window.AppState?.currentUser?.duty) || localStorage.getItem('mcgi_selected_duty') || 'MPRO';
 
     // 1. Check in active system members
-    let member = (window.AppState?.members || []).find(m => 
+    let member = (state.members || []).find(m =>
       String(m.id || '').toLowerCase() === String(memberId).toLowerCase() ||
       String(m.rollNo || '').toLowerCase() === String(memberId).toLowerCase()
     );
@@ -761,8 +788,8 @@ const AttendanceLogger = (() => {
     }
 
     // 3. Fallback: Check in authUsers
-    if (!member && Array.isArray(window.AppState?.authUsers)) {
-      const u = window.AppState.authUsers.find(u => 
+    if (!member && Array.isArray(state.authUsers)) {
+      const u = state.authUsers.find(u =>
         String(u.id || '').toLowerCase() === String(memberId).toLowerCase() ||
         String(u.rollNo || '').toLowerCase() === String(memberId).toLowerCase() ||
         String(u.username || '').toLowerCase() === String(memberId).toLowerCase() ||
@@ -796,14 +823,17 @@ const AttendanceLogger = (() => {
       }
       return { valid: false, error: `Member "${memberId}" not found in MCGI ${activeDuty} roster.` };
     }
+    if (member.active === false || member.qrDisabled === true || member.isQrDisabled === true) {
+      return { valid: false, error: 'This member QR code is disabled.' };
+    }
 
-    // Authenticity Check: verify signature if present, with tolerance for updated email/roll
+    // Authenticity Check: accept only signatures produced for this roster member.
     if (parsed.sig) {
       const sig1 = generateSignature(member.id, member.rollNo, member.email);
       const sig2 = parsed.roll ? generateSignature(member.id, parsed.roll, member.email) : null;
       const sig3 = generateSignature(member.id, member.rollNo || '', '');
       if (parsed.sig !== sig1 && parsed.sig !== sig2 && parsed.sig !== sig3) {
-        console.warn('[validateMemberQr] Signature variation accepted for verified system roster record:', member.name);
+        return { valid: false, error: 'Invalid QR signature.' };
       }
     }
 
@@ -828,6 +858,7 @@ const AttendanceLogger = (() => {
         }
 
         const member = validation.member;
+        const state = getAttendanceState();
         const today = typeof getPastDateString === 'function' ? getPastDateString(0) : new Date().toISOString().split('T')[0];
 
         // 2. Anti-Replay / Debounce Check (5 seconds debounce to prevent accidental camera multi-triggers)
@@ -846,20 +877,20 @@ const AttendanceLogger = (() => {
         scanHistoryCache.set(member.id, nowMs);
 
         // 3. Determine Time & Status
-        const now = new Date();
+        const submitNow = new Date();
         const timeStr = (window.EventSchedule && typeof EventSchedule.formatLocalTime === 'function')
-          ? EventSchedule.formatLocalTime(now)
-          : now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const [cutoffHours, cutoffMinutes] = (window.AppState?.settings?.cutoffTime || '08:00').split(':').map(Number);
-        const isLate = now.getHours() > cutoffHours || (now.getHours() === cutoffHours && now.getMinutes() > cutoffMinutes);
+          ? EventSchedule.formatLocalTime(submitNow)
+          : submitNow.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const [cutoffHours, cutoffMinutes] = (state.settings?.cutoffTime || '08:00').split(':').map(Number);
+        const isLate = submitNow.getHours() > cutoffHours || (submitNow.getHours() === cutoffHours && submitNow.getMinutes() > cutoffMinutes);
         const status = isLate ? 'late' : 'present';
 
         // 4. Persist Daily Attendance
-        if (!window.AppState.attendance) {
-          window.AppState.attendance = {};
+        if (!state.attendance) {
+          state.attendance = {};
         }
-        if (!window.AppState.attendance[today]) {
-          window.AppState.attendance[today] = {};
+        if (!state.attendance[today]) {
+          state.attendance[today] = {};
         }
 
         const activeDuty = (window.AppState?.currentUser?.duty) || localStorage.getItem('mcgi_selected_duty') || 'MPRO';
@@ -870,44 +901,32 @@ const AttendanceLogger = (() => {
           duty: activeDuty,
           remarks: `Camera QR Attendance Scan (${activeDuty})`
         };
-        window.AppState.attendance[today][member.id] = attendanceRecord;
-
-        // 5. Detect Active Event & Scheduled Slot (Single Source of Truth)
         const eventSelect = document.getElementById('selectEventType');
-        const activeEventType = (eventSelect && eventSelect.value) ? eventSelect.value : 'PM';
-        let scheduleInfo = null;
+        const context = window.EventSchedule && typeof EventSchedule.resolveAttendanceContext === 'function'
+          ? EventSchedule.resolveAttendanceContext(submitNow)
+          : { eventType: (eventSelect && eventSelect.value) || 'PM', detected: { status: 'unscheduled' } };
+        const activeEventType = context.eventType;
+        const detected = context.detected;
+        const scheduleInfo = detected.status === 'detected' ? {
+          scheduledTime: detected.scheduledTime,
+          dayName: detected.dayName || '',
+          sessionType: detected.sessionType,
+          autoDetected: true,
+          label: detected.slot.label
+        } : null;
 
-        if (window.EventSchedule && EventSchedule.hasFixedSchedule(activeEventType)) {
-          const isManual = window.App && window.App._scheduleManual;
-          if (!isManual) {
-            const detected = EventSchedule.detect(activeEventType, now);
-            if (detected.status === 'detected') {
-              scheduleInfo = {
-                scheduledTime: detected.scheduledTime,
-                dayName: detected.dayName || '',
-                sessionType: detected.sessionType,
-                autoDetected: true,
-                label: detected.slot.label
-              };
-            }
-          } else {
-            const cfg = EventSchedule.getConfig(activeEventType);
-            const radio = document.querySelector(`input[name="${cfg.field}"]:checked`);
-            if (radio && radio.value) {
-              const slot = EventSchedule.findSlot(activeEventType, radio.value);
-              if (slot) {
-                const desc = EventSchedule.describeSlot(slot);
-                scheduleInfo = {
-                  scheduledTime: desc.scheduledTime,
-                  dayName: desc.dayName || '',
-                  sessionType: desc.sessionType,
-                  autoDetected: false,
-                  label: radio.value
-                };
-              }
-            }
-          }
+        const duplicate = (state.eventEntries || []).find(entry =>
+          entry.memberId === member.id &&
+          entry.eventDate === today &&
+          entry.event === activeEventType &&
+          (!scheduleInfo || (entry.schedules || []).includes(scheduleInfo.label))
+        );
+        if (duplicate) {
+          const duplicateError = new Error(`Attendance already recorded for ${member.name} for this attendance session.`);
+          if (typeof showToast === 'function') showToast(duplicateError.message, 'warning');
+          return reject(duplicateError);
         }
+        state.attendance[today][member.id] = attendanceRecord;
 
         // 6. Persist Official Event Entry Log
         const newEventLog = {
@@ -929,17 +948,17 @@ const AttendanceLogger = (() => {
           status: 'ON DUTY (OD)',
           timeIn: timeStr,
           remarks: `Verified secure QR attendance (${status.toUpperCase()}) [${activeDuty}]`,
-          createdAt: now.toISOString()
+          createdAt: submitNow.toISOString()
         };
 
-        if (!Array.isArray(window.AppState.eventEntries)) {
-          window.AppState.eventEntries = [];
+        if (!Array.isArray(state.eventEntries)) {
+          state.eventEntries = [];
         }
-        window.AppState.eventEntries.unshift(newEventLog);
+        state.eventEntries.unshift(newEventLog);
 
         // Persist to storage
-        if (typeof window.AppState.save === 'function') {
-          window.AppState.save();
+        if (typeof state.save === 'function') {
+          state.save();
         }
 
         // Persist to Supabase Cloud (with automatic offline queueing and schedule columns)
@@ -951,7 +970,7 @@ const AttendanceLogger = (() => {
             duty: activeDuty,
             eventType: activeEventType,
             status: status === 'present' ? 'Present' : status === 'late' ? 'Late' : 'Excused',
-            timestamp: now.toISOString(),
+            timestamp: submitNow.toISOString(),
             locale: member.department || 'Naic',
             notes: `QR Check-In at ${timeStr}`,
             scheduledTime: newEventLog.scheduledTime,
@@ -1871,6 +1890,9 @@ ${detailRowsXml}
         <button type="button" id="${containerId}_stopBtn" class="hidden px-4 py-2.5 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-500/50 text-rose-200 text-xs font-bold transition-all cursor-pointer">
           <span>Stop Camera</span>
         </button>
+        <button type="button" id="${containerId}_switchBtn" class="hidden px-4 py-2.5 rounded-xl bg-midnight-800 hover:bg-midnight-700 border border-slate-600 text-slate-200 text-xs font-bold transition-all cursor-pointer">
+          <span>↻ Switch Camera</span>
+        </button>
       </div>
       <p class="text-[11px] text-slate-500 mt-3">Point webcam or mobile camera at your QR badge</p>
     `;
@@ -1880,34 +1902,35 @@ ${detailRowsXml}
 
     const startBtn = document.getElementById(`${containerId}_startBtn`);
     const stopBtn = document.getElementById(`${containerId}_stopBtn`);
+    const switchBtn = document.getElementById(`${containerId}_switchBtn`);
     const videoTarget = document.getElementById(`${containerId}_video`);
     let isProcessingScan = false;
+    let currentFacingMode = 'environment';
+    let availableCameras = [];
 
-    const stopScanner = () => {
+    const stopScanner = async () => {
       if (activeCameraScanner) {
         const sc = activeCameraScanner;
         activeCameraScanner = null;
-        sc.stop().then(() => {
-          try { sc.clear(); } catch (e) {}
-          if (videoTarget) videoTarget.innerHTML = '<span class="text-xs text-slate-500 font-mono">Camera idle</span>';
-          if (startBtn) startBtn.classList.remove('hidden');
-          if (stopBtn) stopBtn.classList.add('hidden');
-        }).catch(() => {
-          try { sc.clear(); } catch (e) {}
-          if (videoTarget) videoTarget.innerHTML = '<span class="text-xs text-slate-500 font-mono">Camera idle</span>';
-          if (startBtn) startBtn.classList.remove('hidden');
-          if (stopBtn) stopBtn.classList.add('hidden');
-        });
+        try { await sc.stop(); } catch (e) {
+          console.warn('[AttendanceLogger] Camera stop warning:', e);
+        }
+        try { sc.clear(); } catch (e) {}
+        if (videoTarget) videoTarget.innerHTML = '<span class="text-xs text-slate-500 font-mono">Camera idle</span>';
+        if (startBtn) startBtn.classList.remove('hidden');
+        if (stopBtn) stopBtn.classList.add('hidden');
+        if (switchBtn) switchBtn.classList.add('hidden');
       } else {
         if (videoTarget) videoTarget.innerHTML = '<span class="text-xs text-slate-500 font-mono">Camera idle</span>';
         if (startBtn) startBtn.classList.remove('hidden');
         if (stopBtn) stopBtn.classList.add('hidden');
+        if (switchBtn) switchBtn.classList.add('hidden');
       }
     };
 
     stopBtn.onclick = stopScanner;
 
-    startBtn.onclick = async () => {
+    const startScanner = async () => {
       if (typeof Html5Qrcode === 'undefined') {
         if (typeof showToast === 'function') {
           showToast('QR scanner library is loading, please wait...', 'warning');
@@ -1960,31 +1983,28 @@ ${detailRowsXml}
           aspectRatio: 1.0
         };
 
-        // Enumerate devices to pick the best camera
-        let cameras = [];
+        // Enumerate devices to pick the best camera. Labels may be unavailable
+        // until permission is granted, so facingMode remains the fallback.
         try {
-          cameras = await Html5Qrcode.getCameras();
+          availableCameras = await Html5Qrcode.getCameras();
         } catch (camErr) {
           console.warn('[AttendanceLogger] Camera enumeration note:', camErr);
         }
 
-        if (cameras && cameras.length > 0) {
-          // If back/rear camera is detected, prefer it (e.g. mobile), else default to first device (webcam)
-          const backCam = cameras.find(c => /back|rear|environment/i.test(c.label));
-          const chosenCamId = backCam ? backCam.id : cameras[0].id;
+        if (availableCameras && availableCameras.length > 0) {
+          const rear = availableCameras.find(c => /back|rear|environment/i.test(c.label));
+          const front = availableCameras.find(c => /front|user|facetime/i.test(c.label));
+          const preferred = currentFacingMode === 'environment' ? (rear || availableCameras[0]) : (front || availableCameras[availableCameras.length > 1 ? 1 : 0]);
+          const chosenCamId = preferred && preferred.id;
           await scanner.start(chosenCamId, config, scanSuccessHandler, () => {});
+          if (switchBtn) switchBtn.classList.toggle('hidden', availableCameras.length < 2);
         } else {
-          // Fallback sequence: environment facingMode -> user facingMode -> any track
+          // Fallback sequence: environment facingMode -> user facingMode.
           try {
-            await scanner.start({ facingMode: 'environment' }, config, scanSuccessHandler, () => {});
+            await scanner.start({ facingMode: currentFacingMode }, config, scanSuccessHandler, () => {});
           } catch (envErr) {
-            console.warn('[AttendanceLogger] environment facingMode fallback to user:', envErr);
-            try {
-              await scanner.start({ facingMode: 'user' }, config, scanSuccessHandler, () => {});
-            } catch (userErr) {
-              console.warn('[AttendanceLogger] user facingMode fallback to generic track:', userErr);
-              await scanner.start(true, config, scanSuccessHandler, () => {});
-            }
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            await scanner.start({ facingMode: currentFacingMode }, config, scanSuccessHandler, () => {});
           }
         }
       } catch (err) {
@@ -2001,6 +2021,14 @@ ${detailRowsXml}
         }
         stopScanner();
       }
+    };
+
+    startBtn.onclick = startScanner;
+    switchBtn.onclick = async () => {
+      if (availableCameras.length < 2 && !activeCameraScanner) return;
+      currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+      await stopScanner();
+      await startScanner();
     };
   }
 

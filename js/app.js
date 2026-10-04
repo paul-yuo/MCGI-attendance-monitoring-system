@@ -991,10 +991,25 @@ const App = {
     this.initResponsiveListeners();
     this.startLiveClock();
     this.initEventEntryForm();
+    this.bindOptionalRadioToggles();
     this.initCloudSync();
     if (window.lucide) {
       lucide.createIcons();
     }
+  },
+
+  bindOptionalRadioToggles() {
+    if (this._optionalRadioTogglesBound) return;
+    this._optionalRadioTogglesBound = true;
+    document.addEventListener('click', (event) => {
+      const input = event.target.closest('input[type="radio"][data-allow-unselect="true"]');
+      if (!input) return;
+      if (input.checked) {
+        event.preventDefault();
+        input.checked = false;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
   },
 
   // =========================================================================
@@ -1892,7 +1907,7 @@ const App = {
     if (eventSelect) {
       this._scheduleManual = false;
       const detectedEvent = (window.EventSchedule && typeof EventSchedule.detectApplicableEvent === 'function')
-        ? EventSchedule.detectApplicableEvent(new Date(), eventSelect.value)
+        ? EventSchedule.detectApplicableEvent(new Date())
         : (eventSelect.value || 'PM');
       eventSelect.value = detectedEvent;
       this.handleEventDropdownChange(detectedEvent);
@@ -2665,7 +2680,9 @@ const App = {
 
       if (!this._scheduleManual && isToday) {
         // Authoritative submission-time re-detection for real-time attendance
-        const submitDet = EventSchedule.detect(eventType, submitNow);
+        const submitDet = (typeof EventSchedule.resolveAttendanceContext === 'function'
+          ? EventSchedule.resolveAttendanceContext(submitNow, eventType).detected
+          : EventSchedule.detect(eventType, submitNow));
         if (submitDet.status === 'detected') {
           scheduleInfo = {
             scheduledTime: submitDet.scheduledTime,
@@ -4019,11 +4036,13 @@ const App = {
     const cutoff = document.getElementById('settingCutoffTime');
     const alertT = document.getElementById('settingAlertThreshold');
     const sound = document.getElementById('settingSoundEffects');
+    const activeEvent = document.getElementById('settingActiveEvent');
 
     if (org) org.value = AppState.settings.orgName || 'MCGI Production Monitoring System';
     if (cutoff) cutoff.value = AppState.settings.cutoffTime || '08:00';
     if (alertT) alertT.value = AppState.settings.alertThreshold || 75;
     if (sound) sound.checked = false;
+    if (activeEvent) activeEvent.value = localStorage.getItem('mcgi_configured_active_event') || '';
   },
 
   saveSettings(e) {
@@ -4033,6 +4052,12 @@ const App = {
     AppState.settings.alertThreshold = parseInt(document.getElementById('settingAlertThreshold').value) || 75;
     const sound = document.getElementById('settingSoundEffects');
     AppState.settings.soundEffects = sound ? sound.checked : false;
+    const activeEvent = document.getElementById('settingActiveEvent');
+    if (activeEvent && activeEvent.value) {
+      localStorage.setItem('mcgi_configured_active_event', activeEvent.value);
+    } else {
+      localStorage.removeItem('mcgi_configured_active_event');
+    }
     AppState.save();
     showToast('Saved system policy preferences', 'success');
   },

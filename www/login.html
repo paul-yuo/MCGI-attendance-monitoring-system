@@ -57,6 +57,7 @@
     }
   </script>
   <script src="js/supabase_client.js"></script>
+  <script src="js/event_schedule.js"></script>
   <script src="js/attendance_logger.js"></script>
 </head>
 <body class="login-page bg-midnight-950 text-slate-100 antialiased selection:bg-gold-400 selection:text-midnight-950 relative min-h-screen overflow-x-hidden">
@@ -232,6 +233,23 @@
                 </button>
               </form>
 
+              <div class="my-4 flex items-center gap-3 text-[10px] uppercase tracking-widest text-slate-500">
+                <span class="h-px flex-1 bg-slate-800"></span><span>or</span><span class="h-px flex-1 bg-slate-800"></span>
+              </div>
+              <button type="button" onclick="LoginQrAttendance.open()"
+                class="w-full py-2.5 rounded-xl bg-midnight-900 hover:bg-midnight-800 border border-gold-400/40 text-gold-300 text-xs font-bold flex items-center justify-center gap-2 transition-all">
+                <i data-lucide="scan-line" class="w-4 h-4"></i>
+                Scan QR for Attendance
+              </button>
+              <div id="loginQrAttendancePanel" class="hidden mt-3 p-3 rounded-xl border border-slate-700/80 bg-midnight-950/80">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-white">Attendance-only QR scanner</span>
+                  <button type="button" onclick="LoginQrAttendance.close()" class="text-slate-400 hover:text-white" aria-label="Close scanner">×</button>
+                </div>
+                <div id="loginQrScannerMountPoint"></div>
+                <p id="loginQrAttendanceResult" class="hidden mt-2 text-xs font-semibold"></p>
+              </div>
+
               <!-- Administrator Quick Access -->
               <div class="mt-4 pt-3 border-t border-slate-800/80">
                 <p class="text-[10px] uppercase font-bold text-slate-500 tracking-wider text-center mb-2">
@@ -368,6 +386,34 @@
 
   <script src="js/neat-gradient.js"></script>
   <script>
+    const LoginQrAttendance = {
+      open() {
+        const panel = document.getElementById('loginQrAttendancePanel');
+        const mount = document.getElementById('loginQrScannerMountPoint');
+        if (!panel || !mount || !window.AttendanceLogger) return;
+        localStorage.setItem('mcgi_selected_duty', DutySelection.currentDuty || 'MPRO');
+        panel.classList.remove('hidden');
+        AttendanceLogger.attachCameraScanner('loginQrScannerMountPoint', (result) => {
+          const output = document.getElementById('loginQrAttendanceResult');
+          if (output) {
+            output.textContent = result.message || 'Scan complete.';
+            output.className = `mt-2 text-xs font-semibold ${result.success ? 'text-emerald-300' : 'text-rose-300'}`;
+          }
+          if (result.success) {
+            setTimeout(() => {
+              this.open();
+              document.getElementById('loginQrScannerMountPoint_startBtn')?.click();
+            }, 700);
+          }
+        });
+        setTimeout(() => document.getElementById('loginQrScannerMountPoint_startBtn')?.click(), 0);
+      },
+      close() {
+        AttendanceLogger?.stopActiveScanner?.();
+        document.getElementById('loginQrAttendancePanel')?.classList.add('hidden');
+      }
+    };
+
     function safeJSONParse(k, fb) {
       try {
         const i = localStorage.getItem(k);

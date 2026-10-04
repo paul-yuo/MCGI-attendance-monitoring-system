@@ -710,13 +710,13 @@
                     </label>
                     <div class="grid grid-cols-2 gap-2" id="gcAttendanceModeGroup">
                       <label class="cursor-pointer">
-                        <input type="radio" name="gcAttendanceMode" value="Face-to-face" checked onchange="AttendanceLogger.updateMessengerDispatcherPreview()" class="peer sr-only">
+                        <input type="radio" name="gcAttendanceMode" value="Face-to-face" checked data-allow-unselect="true" onchange="AttendanceLogger.updateMessengerDispatcherPreview()" class="peer sr-only">
                         <span class="block text-center py-2 px-3 rounded-lg text-xs font-bold border border-slate-700 bg-midnight-900 text-slate-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/20 peer-checked:text-emerald-300 transition-all">
                           Face-to-face
                         </span>
                       </label>
                       <label class="cursor-pointer">
-                        <input type="radio" name="gcAttendanceMode" value="zoom" onchange="AttendanceLogger.updateMessengerDispatcherPreview()" class="peer sr-only">
+                        <input type="radio" name="gcAttendanceMode" value="zoom" data-allow-unselect="true" onchange="AttendanceLogger.updateMessengerDispatcherPreview()" class="peer sr-only">
                         <span class="block text-center py-2 px-3 rounded-lg text-xs font-bold border border-slate-700 bg-midnight-900 text-slate-300 peer-checked:border-blue-500 peer-checked:bg-blue-500/20 peer-checked:text-blue-300 transition-all">
                           zoom
                         </span>
@@ -1366,6 +1366,18 @@
                   <label class="block text-xs font-semibold text-slate-300 mb-1.5">Late Check-In Cutoff Time (24h format)</label>
                   <input type="time" id="settingCutoffTime" class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none font-mono">
                   <span class="text-[11px] text-slate-500 mt-1 block">Check-ins logged after this time will automatically be categorized as Late.</span>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Current Active Event</label>
+                  <select id="settingActiveEvent" class="w-full bg-midnight-900 border border-mcgiblue-800 rounded-xl px-3 py-2 text-sm text-white focus:border-gold-400 focus:outline-none">
+                    <option value="">Use weekday schedule fallback</option>
+                    <option value="PM">PM (Prayer Meeting)</option>
+                    <option value="WS">WS (Worship Service)</option>
+                    <option value="PBB">PBB (Pasalamat ng Buong Bayan)</option>
+                    <option value="SPBB">SPBB (Special Pasalamat ng Buong Bayan)</option>
+                  </select>
+                  <span class="text-[11px] text-slate-500 mt-1 block">Used by all attendance devices to resolve overlapping events.</span>
                 </div>
 
                 <div>
