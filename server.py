@@ -38,7 +38,6 @@ def main():
                 print("=" * 60)
                 print("Press Ctrl+C to stop the server.")
                 
-                # Attempt to open browser automatically
                 try:
                     webbrowser.open(url)
                 except Exception:

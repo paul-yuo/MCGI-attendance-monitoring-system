@@ -1,0 +1,14 @@
+{
+  "appId": "org.mcgiprod.attendance",
+  "appName": "MCGI Attendance",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  }
+}
