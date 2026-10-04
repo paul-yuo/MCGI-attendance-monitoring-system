@@ -1874,14 +1874,15 @@ const App = {
     renderDutyLevelOptions(getActiveDutyScope());
 
     const dateInput = document.getElementById('inputEventDate');
-    const todayStr = typeof getPastDateString === 'function' ? getPastDateString(0) : new Date().toISOString().split('T')[0];
+    const localToday = new Date().toLocaleDateString('en-CA');
     if (dateInput) {
       if (!dateInput.value) {
-        dateInput.value = todayStr;
+        dateInput.value = localToday;
       }
       if (!dateInput._mcgiDateWatched) {
         dateInput._mcgiDateWatched = true;
         dateInput.addEventListener('change', () => {
+          App._scheduleManual = false;
           App.refreshScheduleDetection(true);
         });
       }
@@ -1889,7 +1890,12 @@ const App = {
 
     const eventSelect = document.getElementById('selectEventType');
     if (eventSelect) {
-      this.handleEventDropdownChange(eventSelect.value || 'PM');
+      this._scheduleManual = false;
+      const detectedEvent = (window.EventSchedule && typeof EventSchedule.detectApplicableEvent === 'function')
+        ? EventSchedule.detectApplicableEvent(new Date(), eventSelect.value)
+        : (eventSelect.value || 'PM');
+      eventSelect.value = detectedEvent;
+      this.handleEventDropdownChange(detectedEvent);
     }
 
     if (window.AttendanceLogger && typeof AttendanceLogger.initMessengerDispatcher === 'function') {
@@ -1907,172 +1913,79 @@ const App = {
   },
 
   // ---------------------------------------------------------------------
-  // AUTOMATIC SCHEDULE DETECTION (config + logic live in js/event_schedule.js)
-  // Flow: Active Event (dropdown) -> current day -> current time -> slot.
+  // AUTOMATIC SCHEDULE DETECTION (Operates behind existing UI controls)
+  // Flow: Active Event (dropdown) -> current day -> current time -> check radio pill.
   // ---------------------------------------------------------------------
-  _scheduleManual: false,   // true once the user manually picks a slot (stops auto-changes)
+  _scheduleManual: false,   // true if user explicitly clicks a schedule radio pill
   _scheduleTimer: null,
 
-  buildScheduleBannerHtml(eventType, det, manualLabel = '') {
-    const cfg = EventSchedule.getConfig(eventType);
-    const todayStr = typeof getPastDateString === 'function' ? getPastDateString(0) : new Date().toISOString().split('T')[0];
-    const eventDateInput = document.getElementById('inputEventDate');
-    const selectedDate = (eventDateInput && eventDateInput.value) ? eventDateInput.value : todayStr;
-    const isHistorical = (selectedDate !== todayStr);
-
-    if (manualLabel) {
-      return `
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-midnight-950/90 border border-gold-500/40 shadow-md">
-          <div class="space-y-0.5">
-            <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-gold-500/20 text-gold-300 border border-gold-500/40">
-              <i data-lucide="edit-2" class="w-3 h-3 text-gold-400"></i> Manual Schedule Selected
-            </div>
-            <div class="text-xs font-bold text-white mt-1">${cfg.name} &mdash; <span class="text-gold-300 font-mono">${manualLabel}</span></div>
-          </div>
-          <button type="button" onclick="App.useAutoSchedule()" class="self-end sm:self-center px-3 py-1.5 rounded-lg text-xs font-bold text-gold-300 border border-gold-400/40 bg-midnight-900 hover:bg-gold-500/10 transition-all flex items-center gap-1.5">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-gold-400"></i>
-            <span>Use auto-detect</span>
-          </button>
-        </div>`;
+  handleScheduleUserSelection() {
+    this._scheduleManual = true;
+    if (window.AttendanceLogger && typeof AttendanceLogger.updateMessengerDispatcherPreview === 'function') {
+      AttendanceLogger.updateMessengerDispatcherPreview();
     }
-
-    if (isHistorical) {
-      return `
-        <div class="p-3.5 rounded-xl bg-blue-950/40 border border-blue-500/40 text-xs">
-          <div class="flex items-center gap-2 font-bold text-blue-300">
-            <i data-lucide="calendar" class="w-4 h-4 text-blue-400"></i>
-            <span>Historical Entry (${selectedDate})</span>
-          </div>
-          <div class="text-slate-300 mt-1">Please manually select the scheduled slot that corresponds to this historical date.</div>
-        </div>`;
-    }
-
-    if (det && det.status === 'detected') {
-      const dayName = det.dayName || EventSchedule.DAY_NAMES[new Date().getDay()];
-      const isLive = det.sessionType === 'LIVE';
-      return `
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-gradient-to-r from-emerald-950/70 to-midnight-950 border border-emerald-500/50 shadow-md">
-          <div class="space-y-1">
-            <div class="flex items-center gap-2">
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                <i data-lucide="sparkles" class="w-3 h-3 text-emerald-400"></i> Auto-Detected Schedule
-              </span>
-              <span class="text-[11px] font-semibold text-slate-400">Today (${dayName})</span>
-            </div>
-            <div class="text-sm font-extrabold text-white tracking-wide uppercase font-brand text-gold-300">
-              ${cfg.name}
-            </div>
-            <div class="flex flex-wrap items-center gap-2 text-xs font-bold text-emerald-200">
-              <span class="text-slate-300">${dayName}</span>
-              <span class="text-emerald-400">&bull;</span>
-              <span class="text-white font-mono text-sm">${det.scheduledTime}</span>
-              <span class="text-emerald-400">&bull;</span>
-              <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${isLive ? 'bg-red-500/20 text-red-300 border border-red-500/40' : 'bg-blue-500/20 text-blue-300 border border-blue-500/40'}">${det.sessionType}</span>
-            </div>
-          </div>
-          <button type="button" onclick="App.toggleScheduleManual()" class="self-end sm:self-center px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 border border-slate-700 bg-midnight-900 hover:bg-slate-800 hover:text-white transition-all flex items-center gap-1.5">
-            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-gold-400"></i>
-            <span>Change manually</span>
-          </button>
-        </div>`;
-    }
-
-    const todayName = EventSchedule.DAY_NAMES[new Date().getDay()];
-    return `
-      <div class="p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-xs">
-        <div class="flex items-center gap-2 font-bold text-amber-300">
-          <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
-          <span>No ${cfg.name} schedule for today (${todayName}).</span>
-        </div>
-        <div class="text-amber-200/80 mt-1">Please select a scheduled session manually below to record attendance.</div>
-      </div>`;
   },
 
-  renderAutoScheduleBlock(eventType) {
-    const cfg = EventSchedule.getConfig(eventType);
-    const todayStr = typeof getPastDateString === 'function' ? getPastDateString(0) : new Date().toISOString().split('T')[0];
+  /**
+   * Automatically checks the matching existing schedule radio pill for eventType
+   * based on EventSchedule.detect(). Does not create any extra UI elements.
+   */
+  applyAutoDetectedSchedule(eventType) {
+    if (!window.EventSchedule || !EventSchedule.hasFixedSchedule(eventType)) return;
+
+    // Check if user is entering a historical date
+    const localToday = new Date().toLocaleDateString('en-CA');
     const eventDateInput = document.getElementById('inputEventDate');
-    const selectedDate = (eventDateInput && eventDateInput.value) ? eventDateInput.value : todayStr;
-    const isHistorical = (selectedDate !== todayStr);
+    const selectedDate = (eventDateInput && eventDateInput.value) ? eventDateInput.value : localToday;
+    const isToday = (selectedDate === localToday);
 
-    const det = isHistorical ? { status: 'none' } : EventSchedule.detect(eventType, new Date());
-    const selected = (det.status === 'detected') ? det.slot.label : '';
-    const pills = cfg.slots.map(s =>
-      this.createRadioPill(cfg.field, s.label, s.label === selected, 'App.handleScheduleManualChange()')
-    ).join('');
-    const showPills = isHistorical || (det.status !== 'detected');
+    if (!isToday) return; // Do not apply today's clock to historical backfill dates
 
-    return `
-      <div class="space-y-3" id="scheduleAutoBlock" data-event="${eventType}" data-field="${cfg.field}">
-        <label class="block text-xs font-bold text-gold-300 uppercase tracking-wider flex items-center gap-1.5">
-          <i data-lucide="${cfg.icon}" class="w-3.5 h-3.5 text-gold-400"></i>
-          ${cfg.fieldTitle} <span class="text-gold-400">*</span>
-        </label>
-        <div id="scheduleAutoBanner" data-detected="${selected}">${this.buildScheduleBannerHtml(eventType, det)}</div>
-        <div id="scheduleManualPills" class="${showPills ? '' : 'hidden'}">
-          <div class="grid ${cfg.grid} gap-2.5">${pills}</div>
-        </div>
-      </div>`;
+    const det = EventSchedule.detect(eventType, new Date());
+    if (det.status === 'detected') {
+      const cfg = EventSchedule.getConfig(eventType);
+      const radio = document.querySelector(`input[name="${cfg.field}"][value="${det.slot.label}"]`);
+      if (radio) {
+        radio.checked = true;
+      }
+    }
   },
 
-  /** Re-detects the slot for the current time. No-op if user picked a slot manually or nothing changed. */
+  /** Re-checks slot for current time. Updates radio pill if time boundary crossed without resetting form fields. */
   refreshScheduleDetection(force = false) {
-    const block = document.getElementById('scheduleAutoBlock');
-    const banner = document.getElementById('scheduleAutoBanner');
-    if (!block || !banner || this._scheduleManual) return;
-
     // Check date rollover across midnight
-    const todayStr = typeof getPastDateString === 'function' ? getPastDateString(0) : new Date().toISOString().split('T')[0];
-    if (window.AppState && AppState.selectedDate && AppState.selectedDate !== todayStr) {
+    const localToday = new Date().toLocaleDateString('en-CA');
+    if (window.AppState && AppState.selectedDate && AppState.selectedDate !== localToday) {
       const dateInput = document.getElementById('inputEventDate');
       if (dateInput && dateInput.value === AppState.selectedDate) {
-        dateInput.value = todayStr;
+        dateInput.value = localToday;
       }
-      AppState.selectedDate = todayStr;
+      AppState.selectedDate = localToday;
     }
+
+    if (this._scheduleManual && !force) return;
+
+    const eventSelect = document.getElementById('selectEventType');
+    if (!eventSelect) return;
+    const eventType = eventSelect.value;
+    if (!window.EventSchedule || !EventSchedule.hasFixedSchedule(eventType)) return;
 
     const eventDateInput = document.getElementById('inputEventDate');
-    const selectedDate = (eventDateInput && eventDateInput.value) ? eventDateInput.value : todayStr;
-    const isHistorical = (selectedDate !== todayStr);
+    const selectedDate = (eventDateInput && eventDateInput.value) ? eventDateInput.value : localToday;
+    const isToday = (selectedDate === localToday);
+    if (!isToday && !force) return;
 
-    const eventType = block.dataset.event;
-    const det = isHistorical ? { status: 'none' } : EventSchedule.detect(eventType, new Date());
-    const label = det.status === 'detected' ? det.slot.label : '';
-
-    if (!force && banner.dataset.detected === label && banner.dataset.isHist === String(isHistorical)) return;
-
-    banner.dataset.detected = label;
-    banner.dataset.isHist = String(isHistorical);
-    document.querySelectorAll(`input[name="${block.dataset.field}"]`).forEach(r => { r.checked = (r.value === label); });
-    banner.innerHTML = this.buildScheduleBannerHtml(eventType, det);
-    const pills = document.getElementById('scheduleManualPills');
-    if (pills) pills.classList.toggle('hidden', !isHistorical && det.status === 'detected');
-    if (window.lucide) lucide.createIcons();
-    if (window.AttendanceLogger && typeof AttendanceLogger.updateMessengerDispatcherPreview === 'function') {
-      AttendanceLogger.updateMessengerDispatcherPreview();
+    const det = EventSchedule.detect(eventType, new Date());
+    if (det.status === 'detected') {
+      const cfg = EventSchedule.getConfig(eventType);
+      const radio = document.querySelector(`input[name="${cfg.field}"][value="${det.slot.label}"]`);
+      if (radio && !radio.checked) {
+        radio.checked = true;
+        if (window.AttendanceLogger && typeof AttendanceLogger.updateMessengerDispatcherPreview === 'function') {
+          AttendanceLogger.updateMessengerDispatcherPreview();
+        }
+      }
     }
-  },
-
-  handleScheduleManualChange() {
-    const block = document.getElementById('scheduleAutoBlock');
-    if (!block) return;
-    this._scheduleManual = true;
-    const checked = document.querySelector(`input[name="${block.dataset.field}"]:checked`);
-    document.getElementById('scheduleAutoBanner').innerHTML =
-      this.buildScheduleBannerHtml(block.dataset.event, null, checked ? checked.value : '');
-    if (window.AttendanceLogger && typeof AttendanceLogger.updateMessengerDispatcherPreview === 'function') {
-      AttendanceLogger.updateMessengerDispatcherPreview();
-    }
-  },
-
-  toggleScheduleManual() {
-    const pills = document.getElementById('scheduleManualPills');
-    if (pills) pills.classList.toggle('hidden');
-  },
-
-  useAutoSchedule() {
-    this._scheduleManual = false;
-    this.refreshScheduleDetection(true);
   },
 
   startScheduleAutoRefresh() {
@@ -2088,15 +2001,109 @@ const App = {
     if (!container) return;
     this._scheduleManual = false;
 
+    // Remember the user's selected event in session and local storage
+    try {
+      if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('mcgi_active_event', eventType);
+      if (typeof localStorage !== 'undefined') localStorage.setItem('mcgi_active_event', eventType);
+    } catch (e) {}
+
+    // Determine detected slot for today's date if this event has fixed schedules
+    const eventDateInput = document.getElementById('inputEventDate');
+    const localToday = new Date().toLocaleDateString('en-CA');
+    const selectedDate = (eventDateInput && eventDateInput.value) ? eventDateInput.value : localToday;
+    const isToday = (selectedDate === localToday);
+
+    const det = (isToday && window.EventSchedule && EventSchedule.hasFixedSchedule(eventType))
+      ? EventSchedule.detect(eventType, new Date())
+      : null;
+    const detectedSlotLabel = (det && det.status === 'detected') ? det.slot.label : '';
+
     let html = '';
 
     switch (eventType) {
       case 'PM':
+        html = `
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-gold-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-gold-400"></i>
+              PM Schedule / Viewing Slot <span class="text-gold-400">*</span>
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              ${this.createRadioPill('eventSchedule', '3:30AM/WED - LIVE', detectedSlotLabel === '3:30AM/WED - LIVE', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '2:30PM/WED - VIEWING', detectedSlotLabel === '2:30PM/WED - VIEWING', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '5:30PM/WED - VIEWING', detectedSlotLabel === '5:30PM/WED - VIEWING', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '7:00AM/THU - VIEWING', detectedSlotLabel === '7:00AM/THU - VIEWING', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '7:00PM/THU - VIEWING', detectedSlotLabel === '7:00PM/THU - VIEWING', 'App.handleScheduleUserSelection()')}
+            </div>
+          </div>
+        `;
+        break;
+
       case 'WS':
+        html = `
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-gold-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-gold-400"></i>
+              WS Schedule / Viewing Slot <span class="text-gold-400">*</span>
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+              ${this.createRadioPill('eventSchedule', '3:30AM/SAT - LIVE', detectedSlotLabel === '3:30AM/SAT - LIVE', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '11:30AM/SAT - VIEWING', detectedSlotLabel === '11:30AM/SAT - VIEWING', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '1:30PM/SUN - VIEWING', detectedSlotLabel === '1:30PM/SUN - VIEWING', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '5:30PM/SUN - VIEWING', detectedSlotLabel === '5:30PM/SUN - VIEWING', 'App.handleScheduleUserSelection()')}
+            </div>
+          </div>
+        `;
+        break;
+
       case 'PBB':
+        html = `
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-gold-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-gold-400"></i>
+              PBB Schedule / Viewing Slot <span class="text-gold-400">*</span>
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              ${this.createRadioPill('eventSchedule', '4:00PM/SAT - LIVE', detectedSlotLabel === '4:00PM/SAT - LIVE', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '5:30AM/SUN - VIEWING', detectedSlotLabel === '5:30AM/SUN - VIEWING', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '5:30PM/SUN - VIEWING', detectedSlotLabel === '5:30PM/SUN - VIEWING', 'App.handleScheduleUserSelection()')}
+            </div>
+          </div>
+        `;
+        break;
+
       case 'COMBINED PM/WS':
+        html = `
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-gold-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-gold-400"></i>
+              Combined PM/WS Schedule Slot <span class="text-gold-400">*</span>
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              ${this.createRadioPill('eventSchedule', '3:30AM/WED - LIVE', detectedSlotLabel === '3:30AM/WED - LIVE', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '2:30PM/WED - VIEWING', detectedSlotLabel === '2:30PM/WED - VIEWING', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '5:30PM/WED - VIEWING', detectedSlotLabel === '5:30PM/WED - VIEWING', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '7:00AM/THU - VIEWING', detectedSlotLabel === '7:00AM/THU - VIEWING', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', '7:00PM/THU - VIEWING', detectedSlotLabel === '7:00PM/THU - VIEWING', 'App.handleScheduleUserSelection()')}
+            </div>
+          </div>
+        `;
+        break;
+
       case 'SPBB':
-        html = this.renderAutoScheduleBlock(eventType);
+        html = `
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-gold-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <i data-lucide="star" class="w-3.5 h-3.5 text-gold-400"></i>
+              SPBB Day Schedule <span class="text-gold-400">*</span>
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              ${this.createRadioPill('eventSchedule', 'DAY 1/FRI - 4:00PM', detectedSlotLabel === 'DAY 1/FRI - 4:00PM', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', 'DAY 2/SAT - 4:00PM', detectedSlotLabel === 'DAY 2/SAT - 4:00PM', 'App.handleScheduleUserSelection()')}
+              ${this.createRadioPill('eventSchedule', 'DAY 3/SUN - 4:00PM', detectedSlotLabel === 'DAY 3/SUN - 4:00PM', 'App.handleScheduleUserSelection()')}
+            </div>
+          </div>
+        `;
         break;
 
       case 'MASS INDOCTRINATION':
@@ -2141,9 +2148,15 @@ const App = {
         html = `
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- EDITION Section -->
-            <!-- EDITION Section (auto-detected from current time) -->
             <div>
-              ${this.renderAutoScheduleBlock('SERBISYONG KAPATIRAN')}
+              <label class="block text-xs font-bold text-gold-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <i data-lucide="tv" class="w-3.5 h-3.5 text-gold-400"></i>
+                EDITION <span class="text-gold-400">*</span>
+              </label>
+              <div class="flex flex-col gap-2">
+                ${this.createRadioPill('eventEdition', 'AFTERNOON EDITION - 12:50PM', detectedSlotLabel === 'AFTERNOON EDITION - 12:50PM', 'App.handleScheduleUserSelection()')}
+                ${this.createRadioPill('eventEdition', 'EVENING EDITION - 9:30PM', detectedSlotLabel === 'EVENING EDITION - 9:30PM', 'App.handleScheduleUserSelection()')}
+              </div>
             </div>
 
             <!-- STATUS Section -->
@@ -2358,6 +2371,9 @@ const App = {
 
     container.innerHTML = html;
     if (window.lucide) lucide.createIcons();
+
+    // Automatically check the radio pill for today's current slot (behind the existing UI)
+    this.applyAutoDetectedSchedule(eventType);
 
     // Default time in value if input exists
     const timeInInput = document.getElementById('inputEventTimeIn');
@@ -2672,7 +2688,6 @@ const App = {
         } else {
           showToast(`No active ${cfg.name} schedule for today (${EventSchedule.DAY_NAMES[submitNow.getDay()]}). Please select a schedule manually.`, 'warning');
           this._scheduleManual = true;
-          document.getElementById('scheduleManualPills')?.classList.remove('hidden');
           return;
         }
       } else {
@@ -2681,7 +2696,6 @@ const App = {
         const chosen = chosenRadio ? chosenRadio.value : '';
         if (!chosen) {
           showToast(`Please select a schedule slot for ${cfg.name}.`, 'warning');
-          document.getElementById('scheduleManualPills')?.classList.remove('hidden');
           return;
         }
         const slot = EventSchedule.findSlot(eventType, chosen);
@@ -2842,7 +2856,6 @@ const App = {
     if (quickPick) quickPick.value = '';
 
     this._scheduleManual = false;
-    this.refreshScheduleDetection(true);
 
     if (clearAll) {
       // Reset Locale to Naic
@@ -2852,17 +2865,26 @@ const App = {
       // Reset Level to default for current duty
       renderDutyLevelOptions(getActiveDutyScope());
 
-      // Reset Event Type to PM
+      // Reset Event Type to detected event for today
       const eventSelect = document.getElementById('selectEventType');
       if (eventSelect) {
-        eventSelect.value = 'PM';
-        this.handleEventDropdownChange('PM');
+        const detectedEvent = (window.EventSchedule && typeof EventSchedule.detectApplicableEvent === 'function')
+          ? EventSchedule.detectApplicableEvent(new Date())
+          : 'PM';
+        eventSelect.value = detectedEvent;
+        this.handleEventDropdownChange(detectedEvent);
       }
 
       const defaultRadio = document.querySelector('input[name="eventStatusOption"][value="ON DUTY (OD)"]');
       if (defaultRadio) {
         defaultRadio.checked = true;
         this.handleEventStatusOptionChange('ON DUTY (OD)');
+      }
+    } else {
+      // Re-apply auto-detected schedule on existing radio pills for current event
+      const eventSelect = document.getElementById('selectEventType');
+      if (eventSelect && window.EventSchedule && EventSchedule.hasFixedSchedule(eventSelect.value)) {
+        this.applyAutoDetectedSchedule(eventSelect.value);
       }
     }
   },
@@ -4434,6 +4456,10 @@ const App = {
 window.App = App;
 
 // Bootstrap on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    App.init();
+  });
+} else {
   App.init();
-});
+}

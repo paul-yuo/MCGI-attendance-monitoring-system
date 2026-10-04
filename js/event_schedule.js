@@ -140,7 +140,66 @@ const EventSchedule = (() => {
     return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   }
 
-  const api = { DAY_NAMES, getConfig, hasFixedSchedule, findSlot, describeSlot, formatTime12, formatLocalTime, detect };
+  /**
+   * Safely determines the applicable event for `now`.
+   * Priority:
+   * 1. Active event memory / configuration (sessionStorage/localStorage/AppState) if it has a schedule today
+   * 2. Most recent attendance record logged today (if logged today, the team is attending this event)
+   * 3. Preferred/current event if it has a schedule today
+   * 4. Weekday schedule availability:
+   *    - Wednesday (3) & Thursday (4): 'PM' (only gathering with slots)
+   *    - Friday (5): 'SPBB'
+   *    - Saturday (6) & Sunday (0): 'WS' (primary gathering if no active configuration)
+   */
+  function detectApplicableEvent(now = new Date(), preferredEvent = null) {
+    // 1. Check explicit active event memory
+    let activeConfig = null;
+    try {
+      if (typeof sessionStorage !== 'undefined') activeConfig = sessionStorage.getItem('mcgi_active_event');
+      if (!activeConfig && typeof localStorage !== 'undefined') activeConfig = localStorage.getItem('mcgi_active_event');
+      if (!activeConfig && typeof window !== 'undefined' && window.AppState && window.AppState.activeEvent) {
+        activeConfig = window.AppState.activeEvent;
+      }
+    } catch (e) {}
+
+    if (activeConfig && hasFixedSchedule(activeConfig)) {
+      const d = detect(activeConfig, now);
+      if (d.status === 'detected') return activeConfig;
+    }
+
+    // 2. Check preferredEvent if explicitly set and has schedules today (except default 'PM' on non-PM days)
+    if (preferredEvent && hasFixedSchedule(preferredEvent) && preferredEvent !== 'PM') {
+      const d = detect(preferredEvent, now);
+      if (d.status === 'detected') return preferredEvent;
+    }
+
+    // 3. Check most recent attendance record logged today
+    try {
+      if (typeof window !== 'undefined' && window.AppState && Array.isArray(window.AppState.eventEntries)) {
+        const localToday = now.toLocaleDateString('en-CA');
+        const recentToday = window.AppState.eventEntries.find(e => e && (e.eventDate === localToday || !e.eventDate) && hasFixedSchedule(e.event));
+        if (recentToday && hasFixedSchedule(recentToday.event)) {
+          const d = detect(recentToday.event, now);
+          if (d.status === 'detected') return recentToday.event;
+        }
+      }
+    } catch (e) {}
+
+    // If preferredEvent was PM and today actually has PM schedules (Wed/Thu), keep PM
+    if (preferredEvent === 'PM') {
+      const d = detect('PM', now);
+      if (d.status === 'detected') return 'PM';
+    }
+
+    // 4. Weekday schedule availability
+    const day = now.getDay();
+    if (day === 0 || day === 6) return 'WS';
+    if (day === 3 || day === 4) return 'PM';
+    if (day === 5) return 'SPBB';
+    return 'PM';
+  }
+
+  const api = { DAY_NAMES, getConfig, hasFixedSchedule, findSlot, describeSlot, formatTime12, formatLocalTime, detect, detectApplicableEvent };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   return api;
 })();

@@ -171,6 +171,22 @@ it('formatLocalTime returns clean 12-hour format with AM/PM', () => {
   assert.strictEqual(EventSchedule.formatLocalTime(at(D.SUN, 0, 15)), '12:15 AM');
 });
 
+console.log('\n--- 10. Testing detectApplicableEvent ---');
+it('detectApplicableEvent returns WS on Sunday and Saturday', () => {
+  assert.strictEqual(EventSchedule.detectApplicableEvent(at(D.SUN, 10, 0)), 'WS');
+  assert.strictEqual(EventSchedule.detectApplicableEvent(at(D.SAT, 10, 0)), 'WS');
+});
+
+it('detectApplicableEvent returns PM on Wednesday and Thursday', () => {
+  assert.strictEqual(EventSchedule.detectApplicableEvent(at(D.WED, 10, 0)), 'PM');
+  assert.strictEqual(EventSchedule.detectApplicableEvent(at(D.THU, 10, 0)), 'PM');
+});
+
+it('detectApplicableEvent respects preferredEvent if it has schedules today', () => {
+  assert.strictEqual(EventSchedule.detectApplicableEvent(at(D.SUN, 10, 0), 'PBB'), 'PBB');
+  assert.strictEqual(EventSchedule.detectApplicableEvent(at(D.WED, 10, 0), 'WS'), 'PM'); // WS has no schedule Wed, fallback to PM
+});
+
 console.log(`\n========================================`);
 console.log(`Results: ${passedTests} / ${totalTests} passed`);
 console.log(`========================================`);
