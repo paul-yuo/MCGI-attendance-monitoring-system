@@ -164,6 +164,29 @@
             } else {
               syncedCount++;
             }
+          } else if (item.action === 'update_status' && item.table === 'auth_users') {
+            const p = item.payload || {};
+            const ident = p.identifier;
+            const updatePayload = {
+              status: p.status,
+              qr_active: p.qr_active !== false
+            };
+            if (p.approved_by !== undefined) updatePayload.approved_by = p.approved_by;
+            if (p.approved_at !== undefined) updatePayload.approved_at = p.approved_at;
+            if (p.rejected_by !== undefined) updatePayload.rejected_by = p.rejected_by;
+            if (p.rejected_at !== undefined) updatePayload.rejected_at = p.rejected_at;
+            if (p.qr_code !== undefined) updatePayload.qr_code = p.qr_code;
+
+            const { error } = await client
+              .from('auth_users')
+              .update(updatePayload)
+              .or(`id.eq.${ident},username.eq.${ident},email.eq.${ident}`);
+            if (error) {
+              console.warn('[SupabaseClient] Failed auth status sync, retaining:', item, error);
+              remaining.push(item);
+            } else {
+              syncedCount++;
+            }
           }
         } catch (err) {
           remaining.push(item);
@@ -255,6 +278,21 @@
           };
         }
 
+        // Account Approval Lifecycle Guard
+        const userStatus = String(user.status || 'ACTIVE').toUpperCase();
+        if (userStatus === 'PENDING') {
+          return { success: false, error: 'Your registration is still waiting for administrator approval.' };
+        }
+        if (userStatus === 'REJECTED') {
+          return { success: false, error: 'Your registration was not approved. Please contact the administrator.' };
+        }
+        if (userStatus === 'DISABLED') {
+          return { success: false, error: 'This member account is disabled. Please contact the administrator.' };
+        }
+        if (userStatus !== 'ACTIVE') {
+          return { success: false, error: 'This account is not currently active.' };
+        }
+
         const authenticatedUser = {
           id: user.id,
           name: user.full_name,
@@ -263,7 +301,14 @@
           role: user.role || 'member',
           isAdmin: user.role === 'admin' || isSuperadmin,
           isGlobalAdmin: isSuperadmin,
-          duty: isSuperadmin ? sDuty : userMinistry
+          duty: isSuperadmin ? sDuty : userMinistry,
+          status: userStatus,
+          qr_active: user.qr_active !== false,
+          approved_at: user.approved_at || null,
+          approved_by: user.approved_by || null,
+          rejected_at: user.rejected_at || null,
+          rejected_by: user.rejected_by || null,
+          qrCode: user.qr_code || ''
         };
 
         return { success: true, user: authenticatedUser, isSuperadmin, source: 'supabase' };
@@ -319,6 +364,21 @@
         return { success: false, error: 'Incorrect password.' };
       }
 
+      // Account Approval Lifecycle Guard
+      const localStatus = String(found.status || 'ACTIVE').toUpperCase();
+      if (localStatus === 'PENDING') {
+        return { success: false, error: 'Your registration is still waiting for administrator approval.' };
+      }
+      if (localStatus === 'REJECTED') {
+        return { success: false, error: 'Your registration was not approved. Please contact the administrator.' };
+      }
+      if (localStatus === 'DISABLED') {
+        return { success: false, error: 'This member account is disabled. Please contact the administrator.' };
+      }
+      if (localStatus !== 'ACTIVE') {
+        return { success: false, error: 'This account is not currently active.' };
+      }
+
       return {
         success: true,
         user: {
@@ -329,7 +389,14 @@
           role: found.role || 'member',
           isAdmin: found.role === 'admin' || found.isAdmin === true,
           isGlobalAdmin: found.isGlobalAdmin === true,
-          duty: sDuty
+          duty: sDuty,
+          status: localStatus,
+          qr_active: found.qr_active !== false,
+          approved_at: found.approved_at || null,
+          approved_by: found.approved_by || null,
+          rejected_at: found.rejected_at || null,
+          rejected_by: found.rejected_by || null,
+          qrCode: found.qrCode || found.qr_code || ''
         },
         source: 'local_cache'
       };
@@ -373,8 +440,14 @@
           locale: m.locale,
           level: m.level || 'Regular',
           contact: m.contact_number || '',
-          status: m.status || 'Active',
-          duty: m.ministry_id
+          status: m.status ? m.status.toUpperCase() : 'ACTIVE',
+          duty: m.ministry_id,
+          qr_active: m.qr_active !== false,
+          qrCode: m.qr_code || '',
+          approved_at: m.approved_at || null,
+          approved_by: m.approved_by || null,
+          rejected_at: m.rejected_at || null,
+          rejected_by: m.rejected_by || null
         }));
 
         // Cache locally for offline resilience
@@ -397,11 +470,20 @@
         member_code: member.id || member.member_code || ('MEM-' + Date.now().toString().slice(-4)),
         full_name: member.name || member.full_name,
         ministry_id: duty,
-        locale: member.locale || 'Naic',
-        level: member.level || 'Regular',
+        locale: member.locale || member.department || 'Naic',
+        level: member.level || member.role || 'Regular',
         contact_number: member.contact || member.contact_number || '',
-        status: member.status || 'Active'
+        status: member.status ? member.status.toUpperCase() : 'ACTIVE',
+        qr_active: member.qr_active !== false
       };
+
+      if (member.qrCode || member.qr_code) {
+        payload.qr_code = member.qrCode || member.qr_code;
+      }
+      if (member.approved_at) payload.approved_at = member.approved_at;
+      if (member.approved_by) payload.approved_by = member.approved_by;
+      if (member.rejected_at) payload.rejected_at = member.rejected_at;
+      if (member.rejected_by) payload.rejected_by = member.rejected_by;
 
       if (member.dbId) {
         payload.id = member.dbId;
@@ -426,6 +508,54 @@
         return { success: true, data: data ? data[0] : payload };
       } catch (err) {
         this.addToPendingQueue('upsert', 'members', payload);
+        return { success: true, offline: true, payload };
+      }
+    },
+
+    async updateUserApprovalStatus(userIdOrEmail, approvalData = {}) {
+      const client = this.getClient();
+      const status = (approvalData.status || 'ACTIVE').toUpperCase();
+      const payload = {
+        identifier: userIdOrEmail,
+        status: status,
+        qr_active: approvalData.qr_active !== false
+      };
+      if (approvalData.approved_by !== undefined) payload.approved_by = approvalData.approved_by;
+      if (approvalData.approved_at !== undefined) payload.approved_at = approvalData.approved_at;
+      if (approvalData.rejected_by !== undefined) payload.rejected_by = approvalData.rejected_by;
+      if (approvalData.rejected_at !== undefined) payload.rejected_at = approvalData.rejected_at;
+      if (approvalData.qr_code !== undefined) payload.qr_code = approvalData.qr_code;
+
+      if (!client || !navigator.onLine) {
+        this.addToPendingQueue('update_status', 'auth_users', payload);
+        return { success: true, offline: true, payload };
+      }
+
+      try {
+        const updateFields = {
+          status: payload.status,
+          qr_active: payload.qr_active
+        };
+        if (payload.approved_by !== undefined) updateFields.approved_by = payload.approved_by;
+        if (payload.approved_at !== undefined) updateFields.approved_at = payload.approved_at;
+        if (payload.rejected_by !== undefined) updateFields.rejected_by = payload.rejected_by;
+        if (payload.rejected_at !== undefined) updateFields.rejected_at = payload.rejected_at;
+        if (payload.qr_code !== undefined) updateFields.qr_code = payload.qr_code;
+
+        const { data, error } = await client
+          .from('auth_users')
+          .update(updateFields)
+          .or(`id.eq.${userIdOrEmail},username.eq.${userIdOrEmail},email.eq.${userIdOrEmail}`)
+          .select();
+
+        if (error) {
+          console.warn('[SupabaseClient] updateUserApprovalStatus error, queuing:', error);
+          this.addToPendingQueue('update_status', 'auth_users', payload);
+          return { success: true, offline: true, payload };
+        }
+        return { success: true, data: data ? data[0] : updateFields };
+      } catch (err) {
+        this.addToPendingQueue('update_status', 'auth_users', payload);
         return { success: true, offline: true, payload };
       }
     },
