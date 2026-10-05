@@ -699,10 +699,14 @@ const AttendanceLogger = (() => {
   }
 
   /**
-   * Generates a secure QR payload string to store with a member profile
+   * Generates a secure QR payload string to store with a member profile.
+   * Enforces approval lifecycle: ONLY generates for ACTIVE and enabled profiles.
    */
   function generateMemberQr(member) {
     if (!member || !member.id) return '';
+    const status = String(member.status || 'ACTIVE').toUpperCase();
+    if (status !== 'ACTIVE') return '';
+    if (member.qr_active === false || member.qrDisabled === true || member.active === false) return '';
     const sig = generateSignature(member.id, member.rollNo, member.email);
     return JSON.stringify({
       mid: member.id,
@@ -738,7 +742,7 @@ const AttendanceLogger = (() => {
   }
 
   /**
-   * Validates a scanned QR payload, verifies authenticity and checks replay attacks
+   * Validates a scanned QR payload, verifies authenticity, approval status, and checks replay attacks
    */
   function validateMemberQr(qrString) {
     if (!qrString || typeof qrString !== 'string') {
@@ -782,7 +786,11 @@ const AttendanceLogger = (() => {
           department: cu.locale || cu.department || 'Naic',
           role: cu.level || cu.role || 'LOCALE PROD',
           email: cu.email || '',
-          duty: cu.duty || activeDuty
+          duty: cu.duty || activeDuty,
+          status: cu.status,
+          qr_active: cu.qr_active,
+          active: cu.active,
+          qrDisabled: cu.qrDisabled
         };
       }
     }
@@ -803,7 +811,11 @@ const AttendanceLogger = (() => {
           department: u.locale || u.department || 'Naic',
           role: u.level || u.role || 'LOCALE PROD',
           email: u.email || '',
-          duty: u.duty || activeDuty
+          duty: u.duty || activeDuty,
+          status: u.status,
+          qr_active: u.qr_active,
+          active: u.active,
+          qrDisabled: u.qrDisabled
         };
       }
     }
@@ -823,8 +835,38 @@ const AttendanceLogger = (() => {
       }
       return { valid: false, error: `Member "${memberId}" not found in MCGI ${activeDuty} roster.` };
     }
-    if (member.active === false || member.qrDisabled === true || member.isQrDisabled === true) {
-      return { valid: false, error: 'This member QR code is disabled.' };
+
+    // 5. Account Approval Lifecycle & QR Activation Gate
+    // Link member to auth_users record if available for latest authoritative lifecycle status
+    const linkedAuth = (state.authUsers || []).find(u =>
+      String(u.id || '').toLowerCase() === String(member.id || '').toLowerCase() ||
+      (u.email && member.email && String(u.email).toLowerCase() === String(member.email).toLowerCase()) ||
+      (u.rollNo && member.rollNo && String(u.rollNo).toLowerCase() === String(member.rollNo).toLowerCase())
+    );
+
+    const effectiveStatus = String((linkedAuth && linkedAuth.status) || member.status || 'ACTIVE').toUpperCase();
+    const effectiveQrActive = (
+      (linkedAuth && typeof linkedAuth.qr_active === 'boolean' ? linkedAuth.qr_active : true) &&
+      (typeof member.qr_active === 'boolean' ? member.qr_active : true) &&
+      member.active !== false &&
+      member.qrDisabled !== true &&
+      member.isQrDisabled !== true
+    );
+
+    if (effectiveStatus === 'PENDING') {
+      return { valid: false, error: 'Registration is still waiting for administrator approval.' };
+    }
+    if (effectiveStatus === 'REJECTED') {
+      return { valid: false, error: 'This registration has not been approved.' };
+    }
+    if (effectiveStatus === 'DISABLED' || member.active === false) {
+      return { valid: false, error: 'This member account is disabled.' };
+    }
+    if (effectiveStatus !== 'ACTIVE') {
+      return { valid: false, error: 'Registration is still waiting for administrator approval.' };
+    }
+    if (effectiveQrActive === false || member.qr_active === false || member.qrDisabled === true || member.isQrDisabled === true) {
+      return { valid: false, error: 'This QR code is not currently active.' };
     }
 
     // Authenticity Check: accept only signatures produced for this roster member.
