@@ -285,95 +285,125 @@
 
             <!-- REGISTER PANEL -->
             <div id="panelRegister" class="auth-panel">
-              <div class="mb-3">
-                <h2 class="text-lg font-extrabold text-white leading-tight">Register Member</h2>
-                <p class="text-xs text-slate-400">Add yourself to the personnel roster</p>
+              <div id="regFormContainer">
+                <div class="mb-3">
+                  <h2 class="text-lg font-extrabold text-white leading-tight">Register Member</h2>
+                  <p class="text-xs text-slate-400">Add yourself to the personnel roster</p>
+                </div>
+
+                <form id="formRegister" onsubmit="LoginAuth.handleRegisterSubmit(event)" novalidate class="space-y-2.5">
+                  <div>
+                    <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegFullName">
+                      Full Name
+                    </label>
+                    <input id="inputRegFullName" type="text" placeholder="e.g. Bro. Juan Dela Cruz" required
+                      class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegLocale">
+                        Locale / Chapter
+                      </label>
+                      <select id="inputRegLocale"
+                        class="w-full px-2.5 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-gold-400">
+                        <option value="Naic">Naic</option>
+                        <option value="Cavite City">Cavite City</option>
+                        <option value="Dasmarinas">Dasmarinas</option>
+                        <option value="Imus">Imus</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegLevel">
+                        Role / Position
+                      </label>
+                      <select id="inputRegLevel"
+                        class="w-full px-2.5 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-gold-400">
+                        <option value="LOCALE PROD">LOCALE PROD</option>
+                        <option value="MUNICIPAL PROD">MUNICIPAL PROD</option>
+                        <option value="CAMERA OPERATOR">CAMERA OPERATOR</option>
+                        <option value="TECHNICAL CREW">TECHNICAL CREW</option>
+                        <option value="GUEST COORDINATOR">GUEST COORDINATOR</option>
+                        <option value="TEATRO KRISTIANO">TEATRO KRISTIANO</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegEmail">
+                      Email Address
+                    </label>
+                    <input id="inputRegEmail" type="email" placeholder="name@domain.com" required
+                      class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegPassword">
+                        Password
+                      </label>
+                      <input id="inputRegPassword" type="password" placeholder="Min 4 chars" required
+                        class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegConfirmPassword">
+                        Confirm
+                      </label>
+                      <input id="inputRegConfirmPassword" type="password" placeholder="Repeat" required
+                        class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
+                    </div>
+                  </div>
+
+                  <button type="submit" id="btnRegisterSubmit"
+                    class="w-full gold-gradient-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg mt-2">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    <span>Complete Registration</span>
+                  </button>
+                </form>
+
+                <!-- Switch to Login -->
+                <div class="mt-3 text-center">
+                  <p class="text-xs text-slate-400">
+                    Already registered?
+                    <button type="button" onclick="LoginAuth.toggleAuthSlide('login')"
+                      class="text-gold-400 hover:text-gold-300 font-bold hover:underline ml-1">
+                      Sign In
+                    </button>
+                  </p>
+                  <button type="button" onclick="DutySelection.backToDutySelection()"
+                    class="login-bottom-back-btn mt-3.5 text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    <span>Back to Duty Selection (MPRO / GCOS / TK)</span>
+                  </button>
+                </div>
               </div>
 
-              <form id="formRegister" onsubmit="LoginAuth.handleRegisterSubmit(event)" novalidate class="space-y-2.5">
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegFullName">
-                    Full Name
-                  </label>
-                  <input id="inputRegFullName" type="text" placeholder="e.g. Bro. Juan Dela Cruz" required
-                    class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
+              <!-- PENDING CONFIRMATION SCREEN (Shown after submission) -->
+              <div id="regPendingConfirmation" class="hidden text-center py-4 space-y-4 animate-fade-in">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/20 border-2 border-amber-400/50 flex items-center justify-center text-amber-300 shadow-xl shadow-amber-500/10">
+                  <i data-lucide="clock" class="w-7 h-7 animate-pulse"></i>
+                </div>
+                
+                <div class="space-y-1.5">
+                  <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono">
+                    Status: Pending Approval
+                  </span>
+                  <h3 class="text-base font-extrabold text-white">Registration Submitted</h3>
+                  <p class="text-xs text-slate-300 leading-relaxed max-w-xs mx-auto">
+                    Your account is waiting for administrator approval.
+                  </p>
+                  <p class="text-[11px] text-slate-400 leading-normal max-w-xs mx-auto pt-1">
+                    You will be able to sign in and access your attendance QR after your registration is approved.
+                  </p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegLocale">
-                      Locale / Chapter
-                    </label>
-                    <select id="inputRegLocale"
-                      class="w-full px-2.5 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-gold-400">
-                      <option value="Naic">Naic</option>
-                      <option value="Cavite City">Cavite City</option>
-                      <option value="Dasmarinas">Dasmarinas</option>
-                      <option value="Imus">Imus</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegLevel">
-                      Role / Position
-                    </label>
-                    <select id="inputRegLevel"
-                      class="w-full px-2.5 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-gold-400">
-                      <option value="LOCALE PROD">LOCALE PROD</option>
-                      <option value="MUNICIPAL PROD">MUNICIPAL PROD</option>
-                      <option value="CAMERA OPERATOR">CAMERA OPERATOR</option>
-                      <option value="TECHNICAL CREW">TECHNICAL CREW</option>
-                      <option value="GUEST COORDINATOR">GUEST COORDINATOR</option>
-                      <option value="TEATRO KRISTIANO">TEATRO KRISTIANO</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegEmail">
-                    Email Address
-                  </label>
-                  <input id="inputRegEmail" type="email" placeholder="name@domain.com" required
-                    class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegPassword">
-                      Password
-                    </label>
-                    <input id="inputRegPassword" type="password" placeholder="Min 4 chars" required
-                      class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
-                  </div>
-                  <div>
-                    <label class="block text-[11px] font-semibold text-slate-300 mb-0.5" for="inputRegConfirmPassword">
-                      Confirm
-                    </label>
-                    <input id="inputRegConfirmPassword" type="password" placeholder="Repeat" required
-                      class="w-full px-3 py-2 rounded-xl bg-midnight-900 border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400">
-                  </div>
-                </div>
-
-                <button type="submit" id="btnRegisterSubmit"
-                  class="w-full gold-gradient-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg mt-2">
-                  <i data-lucide="user-plus" class="w-4 h-4"></i>
-                  <span>Complete Registration</span>
-                </button>
-              </form>
-
-              <!-- Switch to Login -->
-              <div class="mt-3 text-center">
-                <p class="text-xs text-slate-400">
-                  Already registered?
-                  <button type="button" onclick="LoginAuth.toggleAuthSlide('login')"
-                    class="text-gold-400 hover:text-gold-300 font-bold hover:underline ml-1">
-                    Sign In
+                <div class="pt-2">
+                  <button type="button" onclick="LoginAuth.dismissRegisterSuccess()"
+                    class="w-full gold-gradient-btn py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg">
+                    <i data-lucide="log-in" class="w-4 h-4"></i>
+                    <span>Back to Sign In</span>
                   </button>
-                </p>
-                <button type="button" onclick="DutySelection.backToDutySelection()"
-                  class="login-bottom-back-btn mt-3.5 text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors">
-                  <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-                  <span>Back to Duty Selection (MPRO / GCOS / TK)</span>
-                </button>
+                </div>
               </div>
             </div>
 
@@ -668,7 +698,15 @@
         const t = document.getElementById('authSlideTrack');
         if (!t) return;
         this.clearError();
-        v === 'register' ? t.classList.add('slide-to-register') : t.classList.remove('slide-to-register');
+        if (v === 'register') {
+          const formBox = document.getElementById('regFormContainer');
+          const confirmBox = document.getElementById('regPendingConfirmation');
+          if (confirmBox) confirmBox.classList.add('hidden');
+          if (formBox) formBox.classList.remove('hidden');
+          t.classList.add('slide-to-register');
+        } else {
+          t.classList.remove('slide-to-register');
+        }
         if (window.lucide) lucide.createIcons();
       },
 
@@ -873,10 +911,31 @@
           return;
         }
 
+        // Account Approval Lifecycle Guard
+        const userStatus = String(user.status || 'ACTIVE').toUpperCase();
+        if (userStatus === 'PENDING') {
+          this.showError('Your registration is still waiting for administrator approval.', 'inputLoginEmail');
+          return;
+        }
+        if (userStatus === 'REJECTED') {
+          this.showError('Your registration was not approved. Please contact the administrator.', 'inputLoginEmail');
+          return;
+        }
+        if (userStatus === 'DISABLED') {
+          this.showError('This member account is disabled. Please contact the administrator.', 'inputLoginEmail');
+          return;
+        }
+        if (userStatus !== 'ACTIVE') {
+          this.showError('This account is not currently active.', 'inputLoginEmail');
+          return;
+        }
+
         const updatedUser = {
           ...user,
           duty: du,
-          dutyLabel: d.label
+          dutyLabel: d.label,
+          status: userStatus,
+          qr_active: user.qr_active !== false
         };
 
         localStorage.setItem('mcgi_current_user', JSON.stringify(updatedUser));
@@ -905,7 +964,9 @@
           isAdmin: true,
           isGlobalAdmin: true,
           duty: du,
-          dutyLabel: d.label
+          dutyLabel: d.label,
+          status: 'ACTIVE',
+          qr_active: true
         };
 
         if (window.AttendanceLogger) {
@@ -930,6 +991,7 @@
         const pw = document.getElementById('inputRegPassword').value;
         const cpw = document.getElementById('inputRegConfirmPassword').value;
 
+        if (!fn) { this.showToast('Please enter your full name.', 'warning'); return; }
         if (pw !== cpw) { this.showToast('Passwords do not match!', 'error'); return; }
         if (pw.length < 4) { this.showToast('Password must be at least 4 characters.', 'warning'); return; }
 
@@ -943,8 +1005,15 @@
         if (!au && du === 'MPRO') au = safeJSONParse('mcgi_auth_users', null);
         au = au || JSON.parse(JSON.stringify(d.seedAuthUsers || []));
 
-        if (au.find(u => u.email.toLowerCase() === em)) {
-          this.showToast(`An account with email "${em}" already exists in ${d.systemName}.`, 'warning');
+        // Duplicate Registration Check
+        const existingUser = au.find(u => u.email && u.email.toLowerCase() === em);
+        if (existingUser) {
+          const exStatus = String(existingUser.status || 'ACTIVE').toUpperCase();
+          if (exStatus === 'PENDING') {
+            this.showToast(`An account with email "${em}" is already submitted and waiting for administrator approval.`, 'warning');
+          } else {
+            this.showToast(`An account with email "${em}" already exists in ${d.systemName}. Please sign in.`, 'warning');
+          }
           this.toggleAuthSlide('login');
           return;
         }
@@ -952,20 +1021,29 @@
         const prefix = du === 'MPRO' ? 'PROD' : du;
         const nid = `${prefix}${Date.now().toString().slice(-4)}`;
         const rno = `${prefix}-${loc.slice(0, 3).toUpperCase()}-${Date.now().toString().slice(-2)}`;
-        const qr = window.AttendanceLogger ? AttendanceLogger.generateMemberQr({ id: nid, rollNo: rno, email: em }) : '';
+        const registeredAt = new Date().toISOString();
 
+        // Target Workflow: New registration defaults to PENDING with NO active QR
         const nu = {
           id: nid,
           name: fn,
+          username: em.split('@')[0],
           email: em,
           password: pw,
           locale: loc,
           level: lev,
           role: 'member',
           isAdmin: false,
-          qrCode: qr,
+          status: 'PENDING',
+          qr_active: false,
+          qrCode: '',
           duty: du,
-          dutyLabel: d.label
+          dutyLabel: d.label,
+          registered_at: registeredAt,
+          approved_at: null,
+          approved_by: null,
+          rejected_at: null,
+          rejected_by: null
         };
 
         au.push(nu);
@@ -975,11 +1053,26 @@
         let mb = safeJSONParse(mbKey, null);
         if (!mb && du === 'MPRO') mb = safeJSONParse('mcgi_members', []);
         mb = mb || [];
-        mb.push({ id: nid, name: fn, rollNo: rno, department: loc, role: lev, email: em, qrCode: qr, avatarColor: '#3b82f6', duty: du });
+        mb.push({
+          id: nid,
+          name: fn,
+          rollNo: rno,
+          department: loc,
+          role: lev,
+          email: em,
+          qrCode: '',
+          qr_active: false,
+          avatarColor: '#3b82f6',
+          duty: du,
+          status: 'PENDING',
+          registered_at: registeredAt,
+          approved_at: null,
+          approved_by: null
+        });
         localStorage.setItem(mbKey, JSON.stringify(mb));
         if (du === 'MPRO') localStorage.setItem('mcgi_members', JSON.stringify(mb));
 
-        // Sync to Supabase Cloud
+        // Sync to Supabase Cloud Database (with status = 'PENDING', qr_active = false)
         if (window.SupabaseClient) {
           try {
             const client = SupabaseClient.getClient();
@@ -990,7 +1083,9 @@
                 full_name: fn,
                 ministry_id: du,
                 role: 'member',
-                locale: loc
+                locale: loc,
+                status: 'PENDING',
+                qr_active: false
               }]);
             }
             await SupabaseClient.saveMember({
@@ -998,20 +1093,37 @@
               name: fn,
               duty: du,
               locale: loc,
-              level: lev
+              level: lev,
+              status: 'PENDING',
+              qr_active: false,
+              qrCode: '',
+              registered_at: registeredAt
             }, du);
           } catch (cloudErr) {
             console.warn('[Register] Cloud sync exception:', cloudErr);
           }
         }
 
-        localStorage.setItem('mcgi_current_user', JSON.stringify(nu));
-        localStorage.setItem('mcgi_selected_duty', du);
-        sessionStorage.setItem('mcgi_duty_session_active', 'true');
-        sessionStorage.setItem('mcgi_portal_access_token', 'granted_' + Date.now());
+        // Show confirmation screen instead of auto-logging in
+        const formBox = document.getElementById('regFormContainer');
+        const confirmBox = document.getElementById('regPendingConfirmation');
+        if (formBox && confirmBox) {
+          formBox.classList.add('hidden');
+          confirmBox.classList.remove('hidden');
+          if (window.lucide) lucide.createIcons();
+        }
 
-        this.showToast(`Account registered in ${d.systemName}! Welcome, ${fn}`, 'success');
-        setTimeout(() => { window.location.replace('index.html'); }, 300);
+        this.showToast('Registration submitted. Please wait for administrator approval.', 'info');
+      },
+
+      dismissRegisterSuccess() {
+        const formBox = document.getElementById('regFormContainer');
+        const confirmBox = document.getElementById('regPendingConfirmation');
+        const regForm = document.getElementById('formRegister');
+        if (regForm) regForm.reset();
+        if (confirmBox) confirmBox.classList.add('hidden');
+        if (formBox) formBox.classList.remove('hidden');
+        this.toggleAuthSlide('login');
       },
 
       showToast(msg, type = 'info') {
