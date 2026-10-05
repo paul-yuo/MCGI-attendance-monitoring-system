@@ -229,9 +229,12 @@
         </button>
 
         <!-- 7. SETTINGS (Admin Only) -->
-        <button id="navItemSettings" data-tab-target="settings" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all">
-          <i data-lucide="shield" class="w-4 h-4 text-gold-400"></i>
-          <span>Admin Settings</span>
+        <button id="navItemSettings" data-tab-target="settings" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:bg-midnight-800/80 transition-all">
+          <div class="flex items-center gap-3">
+            <i data-lucide="shield" class="w-4 h-4 text-gold-400"></i>
+            <span>Admin Settings</span>
+          </div>
+          <span id="sidebarPendingCountBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-amber-500 text-midnight-950">0</span>
         </button>
 
         <!-- 8. MY PROFILE (All Roles) -->
@@ -292,6 +295,17 @@
           <span id="headerDutyBadge" class="hidden sm:inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider bg-gold-400/15 text-gold-300 border border-gold-400/30 shadow-sm whitespace-nowrap flex-shrink-0">
             DUTY: MPRO
           </span>
+
+          <!-- Pending Registrations Alert Badge (Admin Only) -->
+          <button 
+            id="headerPendingRegistrationsBadge" 
+            onclick="App.switchTab('settings'); setTimeout(() => document.getElementById('settingsApprovalHubCard')?.scrollIntoView({behavior:'smooth'}), 100);"
+            title="Pending Registrations awaiting review" 
+            class="hidden items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10.5px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/40 transition-all hover:bg-amber-500/25 active:scale-95 cursor-pointer whitespace-nowrap flex-shrink-0">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span class="hidden md:inline">PENDING:</span>
+            <span id="headerPendingCountText" class="font-bold">0</span>
+          </button>
 
           <!-- Cloud Database Sync Indicator (Responsive on Mobile & Desktop) -->
           <button 
@@ -1347,6 +1361,34 @@
               System Preferences & Data Management
             </h2>
             <p class="text-xs text-slate-400">Configure organization policies, call time cutoff thresholds, and manage data backups</p>
+          <!-- ============================================== -->
+          <!-- ADMIN APPROVAL HUB (REGISTRATION APPROVALS)     -->
+          <!-- ============================================== -->
+          <div id="settingsApprovalHubCard" class="glass-card p-6 border border-amber-500/30">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-mcgiblue-900/60">
+              <div>
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                  <i data-lucide="user-check" class="w-5 h-5 text-amber-400"></i>
+                  <span>Pending Registrations & Approvals</span>
+                  <span id="approvalHubPendingBadge" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">0 Pending</span>
+                </h3>
+                <p class="text-xs text-slate-400 mt-1">Review newly registered accounts. Approving an account activates their profile and generates their attendance QR code.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="App.renderPendingRegistrations()" class="px-3 py-1.5 rounded-lg bg-midnight-800 hover:bg-midnight-700 text-xs font-semibold text-slate-300 border border-mcgiblue-800 flex items-center gap-1.5 transition-all">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-gold-400"></i> Refresh
+                </button>
+                <div class="flex rounded-lg bg-midnight-950 p-1 border border-mcgiblue-900">
+                  <button type="button" id="approvalFilterPendingBtn" onclick="App.setApprovalHubFilter('pending')" class="px-2.5 py-1 rounded text-xs font-bold bg-amber-500 text-midnight-950 transition-all">Pending</button>
+                  <button type="button" id="approvalFilterAllBtn" onclick="App.setApprovalHubFilter('all')" class="px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition-all">All Accounts</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Registrations List Container -->
+            <div id="pendingRegistrationsContainer" class="space-y-3">
+              <!-- Dynamically populated by App.renderPendingRegistrations() -->
+            </div>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1703,6 +1745,22 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- QR Status & Revocation Toggle (Admin Only) -->
+      <div id="profileModalQrControl" class="mb-4 p-3 rounded-xl bg-midnight-900/90 border border-mcgiblue-800 flex items-center justify-between hidden">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-midnight-800 border border-slate-700 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="qr-code" class="w-5 h-5 text-gold-400"></i>
+          </div>
+          <div>
+            <span class="text-xs font-bold text-white block">Attendance QR Code Status</span>
+            <span id="profileModalQrStatusLabel" class="text-[11px] text-emerald-400 font-mono font-semibold">ACTIVE & VALID FOR ATTENDANCE</span>
+          </div>
+        </div>
+        <button type="button" id="btnToggleMemberQrActive" onclick="App.toggleCurrentProfileQrActive()" class="px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer">
+          Revoke QR
+        </button>
       </div>
 
       <!-- History List -->

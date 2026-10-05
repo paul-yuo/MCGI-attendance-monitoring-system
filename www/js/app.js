@@ -640,15 +640,30 @@ function ensureMemberQrsAndRoles() {
   if (!window.AppState) return;
   const logger = window.AttendanceLogger;
   
-  // Ensure members have internal qrCode
+  // Backward compatibility & lifecycle migration for members
   (AppState.members || []).forEach(m => {
-    if (!m.qrCode && logger) {
+    if (m.status === undefined || m.status === null) {
+      m.status = (m.active === false || m.qrDisabled === true) ? 'DISABLED' : 'ACTIVE';
+    }
+    if (m.qr_active === undefined || m.qr_active === null) {
+      m.qr_active = (m.status === 'ACTIVE' && m.active !== false && !m.qrDisabled);
+    }
+    // ONLY heal QR if account is ACTIVE and qr_active !== false
+    const mStatus = String(m.status || 'ACTIVE').toUpperCase();
+    if (!m.qrCode && logger && mStatus === 'ACTIVE' && m.qr_active !== false && m.active !== false && m.qrDisabled !== true) {
       m.qrCode = logger.generateMemberQr(m);
     }
   });
 
-  // Ensure all auth users have roles and qrCodes
+  // Backward compatibility & lifecycle migration for auth users
   (AppState.authUsers || []).forEach(u => {
+    if (u.status === undefined || u.status === null) {
+      u.status = u.disabled ? 'DISABLED' : 'ACTIVE';
+    }
+    if (u.qr_active === undefined || u.qr_active === null) {
+      u.qr_active = (u.status === 'ACTIVE' && !u.disabled);
+    }
+
     const isSpecialAdmin = u.isAdmin === true || u.role === 'admin' || 
       u.username === 'paul' || u.username === 'rodel' || u.username === 'christian' ||
       u.id === 'PROD001' || u.id === 'GCOS001' || u.id === 'TK001' || 
@@ -663,18 +678,27 @@ function ensureMemberQrsAndRoles() {
       u.isAdmin = false;
       u.role = 'member';
     }
-    if (!u.qrCode && logger) {
+
+    // ONLY heal QR if account is ACTIVE and qr_active !== false
+    const uStatus = String(u.status || 'ACTIVE').toUpperCase();
+    if (!u.qrCode && logger && uStatus === 'ACTIVE' && u.qr_active !== false && !u.disabled) {
       const prefix = u.id && u.id.startsWith('GCOS') ? 'GCOS' : u.id && u.id.startsWith('TK') ? 'TK' : 'PROD';
       u.qrCode = logger.generateMemberQr({
         id: u.id,
         rollNo: u.rollNo || `${prefix}-${(u.locale || 'NAIC').slice(0, 3).toUpperCase()}-01`,
-        email: u.email
+        email: u.email,
+        status: 'ACTIVE',
+        qr_active: true
       });
     }
   });
 
   // Synchronize current user
   if (AppState.currentUser) {
+    if (AppState.currentUser.status === undefined || AppState.currentUser.status === null) {
+      AppState.currentUser.status = 'ACTIVE';
+      AppState.currentUser.qr_active = true;
+    }
     const matched = (AppState.authUsers || []).find(u => 
       (u.id && u.id === AppState.currentUser.id) || 
       (u.username && u.username === AppState.currentUser.username) ||
@@ -693,7 +717,8 @@ function ensureMemberQrsAndRoles() {
         AppState.currentUser.isAdmin = false;
         AppState.currentUser.role = 'member';
       }
-      if (!AppState.currentUser.qrCode && logger) {
+      const cStatus = String(AppState.currentUser.status || 'ACTIVE').toUpperCase();
+      if (!AppState.currentUser.qrCode && logger && cStatus === 'ACTIVE' && AppState.currentUser.qr_active !== false && !AppState.currentUser.disabled) {
         AppState.currentUser.qrCode = logger.generateMemberQr(AppState.currentUser);
       }
     }
@@ -1314,6 +1339,17 @@ const App = {
       return;
     }
 
+    // Account Approval Lifecycle Guard:
+    // Block session if account is PENDING, REJECTED, or DISABLED
+    const userStatus = String(AppState.currentUser.status || 'ACTIVE').toUpperCase();
+    if (userStatus !== 'ACTIVE') {
+      console.warn(`Access blocked: Account status is "${userStatus}". Redirecting to sign in.`);
+      sessionStorage.clear();
+      localStorage.removeItem('mcgi_current_user');
+      window.location.replace('login.html');
+      return;
+    }
+
     const isPaul = AppState.currentUser.isGlobalAdmin === true || (AppState.currentUser.username && AppState.currentUser.username.toLowerCase() === 'paul');
 
     // Security & Data Boundary Guard:
@@ -1344,6 +1380,12 @@ const App = {
     this.updateRoleBasedUI();
     this.updateHeaderUserInfo();
     this.render();
+    this.updatePendingRegistrationsBadge();
+  },
+
+  hasAdminPermission(user = AppState.currentUser) {
+    if (!user) return false;
+    return !!(user.isAdmin === true || user.role === 'admin' || user.isGlobalAdmin === true);
   },
 
   getEffectiveRole() {
@@ -3014,37 +3056,55 @@ const App = {
     if (usernameInput) usernameInput.value = user.username || (user.name ? user.name.toLowerCase().replace(/[^a-z0-9]/g, '') : 'member');
     if (passInput) passInput.value = '';
 
-    // Render personal stored QR code
+    // Render personal stored QR code (Defensive check: only active and approved users)
     const qrContainer = document.getElementById('myProfileQrContainer');
     const qrDisplay = document.getElementById('profileQrCodeDisplay');
+    const isProfileActive = String(user.status || 'ACTIVE').toUpperCase() === 'ACTIVE' && user.qr_active !== false && !user.disabled && !user.qrDisabled;
+
     if (qrContainer) {
       qrContainer.innerHTML = '';
 
-      let qrPayload = user.qrCode;
-      if (!qrPayload && window.AttendanceLogger) {
-        qrPayload = AttendanceLogger.generateMemberQr({
-          id: user.id,
-          rollNo: user.rollNo || `PROD-${(user.locale || 'NAIC').slice(0, 3).toUpperCase()}-01`,
-          email: user.email
-        });
-        user.qrCode = qrPayload;
-        AppState.save();
-      }
+      if (!isProfileActive) {
+        qrContainer.innerHTML = `
+          <div class="flex flex-col items-center justify-center p-6 text-center text-amber-400">
+            <i data-lucide="shield-alert" class="w-10 h-10 mb-2 text-amber-400"></i>
+            <span class="text-xs font-bold font-mono">ATTENDANCE QR INACTIVE</span>
+            <p class="text-[11px] text-slate-400 mt-1 max-w-[200px]">This account is waiting for approval or the QR code has been disabled by an administrator.</p>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        if (qrDisplay) {
+          qrDisplay.textContent = 'QR CODE INACTIVE';
+        }
+      } else {
+        let qrPayload = user.qrCode;
+        if (!qrPayload && window.AttendanceLogger) {
+          qrPayload = AttendanceLogger.generateMemberQr({
+            id: user.id,
+            rollNo: user.rollNo || `PROD-${(user.locale || 'NAIC').slice(0, 3).toUpperCase()}-01`,
+            email: user.email,
+            status: 'ACTIVE',
+            qr_active: true
+          });
+          user.qrCode = qrPayload;
+          AppState.save();
+        }
 
-      if (qrPayload && window.QRCode) {
-        new QRCode(qrContainer, {
-          text: qrPayload,
-          width: 170,
-          height: 170,
-          colorDark: '#0a0a0f',
-          colorLight: '#ffffff',
-          correctLevel: QRCode.CorrectLevel.H
-        });
-      }
-    }
+        if (qrPayload && window.QRCode) {
+          new QRCode(qrContainer, {
+            text: qrPayload,
+            width: 170,
+            height: 170,
+            colorDark: '#0a0a0f',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+          });
+        }
 
-    if (qrDisplay) {
-      qrDisplay.textContent = `${user.rollNo || user.id || 'PROD-ID'} (${user.locale || 'Naic'})`;
+        if (qrDisplay) {
+          qrDisplay.textContent = `${user.rollNo || user.id || 'PROD-ID'} (${user.locale || 'Naic'})`;
+        }
+      }
     }
   },
 
@@ -3070,12 +3130,14 @@ const App = {
       user.password = newPass;
     }
 
-    // Refresh QR code to match updated details
-    if (window.AttendanceLogger) {
+    // Refresh QR code to match updated details ONLY if account is active and approved
+    if (window.AttendanceLogger && String(user.status || 'ACTIVE').toUpperCase() === 'ACTIVE' && user.qr_active !== false && !user.disabled && !user.qrDisabled) {
       user.qrCode = AttendanceLogger.generateMemberQr({
         id: user.id,
         rollNo: user.rollNo || `PROD-${(user.locale || 'NAIC').slice(0, 3).toUpperCase()}-01`,
-        email: user.email
+        email: user.email,
+        status: 'ACTIVE',
+        qr_active: true
       });
     }
 
@@ -3452,15 +3514,28 @@ const App = {
       });
       const rate = totalPossible > 0 ? Math.round((totalPresents / totalPossible) * 100) : 0;
 
+      const mStatus = String(m.status || 'ACTIVE').toUpperCase();
+      let statusTag = '';
+      if (mStatus === 'PENDING') {
+        statusTag = '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">PENDING</span>';
+      } else if (mStatus === 'REJECTED') {
+        statusTag = '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">REJECTED</span>';
+      } else if (m.qr_active === false || m.qrDisabled === true) {
+        statusTag = '<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-rose-950/60 text-rose-300 border border-rose-500/30">QR OFF</span>';
+      }
+
       return `
         <div onclick="App.openMemberProfile('${m.id}')" class="glass-card p-5 glass-card-hover cursor-pointer border border-mcgiblue-900/50 relative group">
           <div class="flex items-start justify-between mb-3">
             <div class="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-midnight-950 text-base shadow-md" style="background-color: ${m.avatarColor};">
               ${m.name.split(' ').map(n=>n[0]).join('')}
             </div>
-            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-midnight-900 text-gold-300 border border-gold-400/30">
-              ${rate}%
-            </span>
+            <div class="flex items-center gap-1.5">
+              ${statusTag}
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-midnight-900 text-gold-300 border border-gold-400/30">
+                ${rate}%
+              </span>
+            </div>
           </div>
           <h3 class="font-bold text-white text-base group-hover:text-gold-400 transition-colors">${m.name}</h3>
           <p class="text-xs text-slate-400 font-mono mt-0.5">${m.rollNo}</p>
@@ -3622,13 +3697,8 @@ const App = {
     document.getElementById('profileAbsentDisplay').textContent = absent;
     document.getElementById('profileExcusedDisplay').textContent = excused;
 
-    // Admin Credentials Visibility & Population (Admin / Bro. Paul Only)
-    const isAdm = !!(
-      AppState.currentUser?.isAdmin || 
-      AppState.currentUser?.role === 'admin' || 
-      (AppState.currentUser?.username && AppState.currentUser.username.toLowerCase() === 'paul') ||
-      AppState.currentUser?.isGlobalAdmin
-    );
+    // Admin Credentials Visibility & Population (Admin Permission Required)
+    const isAdm = this.hasAdminPermission();
     const credSection = document.getElementById('profileModalAdminCredentials');
     if (credSection) {
       if (isAdm) {
@@ -3653,6 +3723,9 @@ const App = {
         credSection.classList.add('hidden');
       }
     }
+
+    // QR Status & Revocation Control (Admin Only)
+    this.updateProfileModalQrControl(member);
 
     document.getElementById('memberProfileModal').classList.remove('hidden');
     if (window.lucide) lucide.createIcons();
@@ -4078,6 +4151,11 @@ const App = {
     if (alertT) alertT.value = AppState.settings.alertThreshold || 75;
     if (sound) sound.checked = false;
     if (activeEvent) activeEvent.value = localStorage.getItem('mcgi_configured_active_event') || '';
+
+    if (this.hasAdminPermission()) {
+      this.renderPendingRegistrations();
+      this.updatePendingRegistrationsBadge();
+    }
   },
 
   saveSettings(e) {
@@ -4095,6 +4173,464 @@ const App = {
     }
     AppState.save();
     showToast('Saved system policy preferences', 'success');
+  },
+
+  // =========================================================================
+  // ADMIN REGISTRATION APPROVAL & QR ACTIVATION HUB
+  // =========================================================================
+  approvalHubFilter: 'pending',
+
+  setApprovalHubFilter(filter) {
+    this.approvalHubFilter = filter;
+    const btnPending = document.getElementById('approvalFilterPendingBtn');
+    const btnAll = document.getElementById('approvalFilterAllBtn');
+    if (btnPending && btnAll) {
+      if (filter === 'pending') {
+        btnPending.className = 'px-2.5 py-1 rounded text-xs font-bold bg-amber-500 text-midnight-950 transition-all';
+        btnAll.className = 'px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition-all';
+      } else {
+        btnPending.className = 'px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition-all';
+        btnAll.className = 'px-2.5 py-1 rounded text-xs font-bold bg-amber-500 text-midnight-950 transition-all';
+      }
+    }
+    this.renderPendingRegistrations();
+  },
+
+  updatePendingRegistrationsBadge() {
+    if (!this.hasAdminPermission()) {
+      const sBadge = document.getElementById('sidebarPendingCountBadge');
+      const hBadge = document.getElementById('headerPendingRegistrationsBadge');
+      if (sBadge) sBadge.classList.add('hidden');
+      if (hBadge) {
+        hBadge.classList.add('hidden');
+        hBadge.classList.remove('inline-flex');
+      }
+      return;
+    }
+
+    const pendingList = (AppState.authUsers || []).filter(u => String(u.status || '').toUpperCase() === 'PENDING');
+    const count = pendingList.length;
+
+    // Sidebar badge
+    const sBadge = document.getElementById('sidebarPendingCountBadge');
+    if (sBadge) {
+      if (count > 0) {
+        sBadge.textContent = count;
+        sBadge.classList.remove('hidden');
+      } else {
+        sBadge.classList.add('hidden');
+      }
+    }
+
+    // Header badge
+    const hBadge = document.getElementById('headerPendingRegistrationsBadge');
+    const hText = document.getElementById('headerPendingCountText');
+    if (hBadge) {
+      if (count > 0) {
+        if (hText) hText.textContent = count;
+        hBadge.classList.remove('hidden');
+        hBadge.classList.add('inline-flex');
+      } else {
+        hBadge.classList.add('hidden');
+        hBadge.classList.remove('inline-flex');
+      }
+    }
+
+    // Settings hub pill badge
+    const hubBadge = document.getElementById('approvalHubPendingBadge');
+    if (hubBadge) {
+      hubBadge.textContent = `${count} Pending`;
+      if (count > 0) {
+        hubBadge.className = 'px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse';
+      } else {
+        hubBadge.className = 'px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        hubBadge.textContent = 'All Reviewed (0)';
+      }
+    }
+  },
+
+  renderPendingRegistrations() {
+    const container = document.getElementById('pendingRegistrationsContainer');
+    if (!container) return;
+
+    if (!this.hasAdminPermission()) {
+      container.innerHTML = `
+        <div class="p-6 rounded-xl bg-midnight-900/60 border border-mcgiblue-900/50 text-center text-slate-400">
+          <p class="text-xs font-mono">Administrator access required to view registration approvals.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const filter = this.approvalHubFilter || 'pending';
+    let users = (AppState.authUsers || []);
+
+    if (filter === 'pending') {
+      users = users.filter(u => String(u.status || '').toUpperCase() === 'PENDING');
+    }
+
+    if (users.length === 0) {
+      container.innerHTML = `
+        <div class="p-8 rounded-xl bg-midnight-900/60 border border-mcgiblue-900/50 text-center text-slate-400">
+          <div class="w-10 h-10 rounded-full bg-midnight-800 text-emerald-400 flex items-center justify-center mx-auto mb-2.5 border border-emerald-500/30">
+            <i data-lucide="check" class="w-5 h-5 stroke-[3]"></i>
+          </div>
+          <h4 class="text-sm font-bold text-slate-200 mb-1">
+            ${filter === 'pending' ? 'No Pending Registrations' : 'No Account Records Found'}
+          </h4>
+          <p class="text-xs text-slate-400 max-w-sm mx-auto">
+            ${filter === 'pending' ? 'All user registration requests have been reviewed and processed.' : 'There are currently no registered users matching this filter.'}
+          </p>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+      return;
+    }
+
+    container.innerHTML = users.map(u => {
+      const status = String(u.status || 'ACTIVE').toUpperCase();
+      let statusBadge = '';
+      if (status === 'PENDING') {
+        statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold font-mono uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">PENDING</span>';
+      } else if (status === 'ACTIVE') {
+        statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold font-mono uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">ACTIVE</span>';
+      } else if (status === 'REJECTED') {
+        statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold font-mono uppercase bg-rose-500/20 text-rose-300 border border-rose-500/40">REJECTED</span>';
+      } else {
+        statusBadge = '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold font-mono uppercase bg-slate-500/20 text-slate-300 border border-slate-500/40">DISABLED</span>';
+      }
+
+      const regDate = u.registered_at ? new Date(u.registered_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Earlier record';
+      const dutyName = u.duty === 'GCOS' ? 'Guest Coordinators (GCOS)' : u.duty === 'TK' ? 'Teatro Kristiano (TK)' : 'Production (MPRO)';
+
+      return `
+        <div class="p-4 rounded-xl bg-midnight-900 hover:bg-midnight-850 border border-mcgiblue-900/60 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1.5 min-w-0">
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <h4 class="text-sm font-bold text-white">${u.name || u.username}</h4>
+              ${statusBadge}
+              ${u.qr_active === false ? '<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-950/60 text-rose-300 border border-rose-500/30">QR Inactive</span>' : '<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">QR Active</span>'}
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-1 text-xs text-slate-400">
+              <div><span class="text-slate-500">Email:</span> <span class="text-slate-200 font-mono">${u.email || 'N/A'}</span></div>
+              <div><span class="text-slate-500">Locale:</span> <span class="text-slate-200 font-semibold">${u.locale || 'Naic'}</span></div>
+              <div><span class="text-slate-500">Duty:</span> <span class="text-gold-300">${dutyName}</span></div>
+              <div><span class="text-slate-500">Level:</span> <span class="text-slate-200">${u.level || u.role || 'Member'}</span></div>
+            </div>
+            <div class="text-[11px] text-slate-500 font-mono flex items-center gap-2 flex-wrap pt-0.5">
+              <span>Registered: ${regDate}</span>
+              ${u.approved_at ? `<span>• Approved: ${new Date(u.approved_at).toLocaleDateString('en-US')}</span>` : ''}
+              ${u.rejected_at ? `<span>• Rejected: ${new Date(u.rejected_at).toLocaleDateString('en-US')}</span>` : ''}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800/60">
+            ${status === 'PENDING' ? `
+              <button type="button" onclick="App.approveRegistration('${u.id}')" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md flex items-center gap-1.5 transition-all cursor-pointer">
+                <i data-lucide="check" class="w-3.5 h-3.5 stroke-[3]"></i>
+                <span>Approve</span>
+              </button>
+              <button type="button" onclick="App.rejectRegistration('${u.id}')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-midnight-800 hover:bg-rose-950 text-rose-300 border border-rose-500/40 hover:border-rose-500 transition-all cursor-pointer">
+                <i data-lucide="x" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+                <span>Reject</span>
+              </button>
+            ` : status === 'REJECTED' ? `
+              <button type="button" onclick="App.approveRegistration('${u.id}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-950 hover:bg-emerald-800 text-emerald-300 border border-emerald-500/40 transition-all cursor-pointer">
+                Re-Approve
+              </button>
+            ` : `
+              <button type="button" onclick="App.rejectRegistration('${u.id}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-midnight-800 hover:bg-rose-950 text-slate-400 hover:text-rose-300 border border-slate-700 hover:border-rose-500/40 transition-all cursor-pointer">
+                Reject Account
+              </button>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+  },
+
+  async approveRegistration(userId) {
+    if (!this.hasAdminPermission()) {
+      showToast('Unauthorized: Admin permission required to approve accounts.', 'error');
+      return;
+    }
+    const adminUser = AppState.currentUser;
+    const adminId = adminUser.id || adminUser.username || 'admin';
+    const nowIso = new Date().toISOString();
+
+    let authUser = (AppState.authUsers || []).find(u => String(u.id) === String(userId) || String(u.username) === String(userId));
+    if (!authUser) {
+      showToast('User record not found in system.', 'error');
+      return;
+    }
+
+    if (authUser.status === 'ACTIVE' && authUser.qr_active !== false) {
+      showToast('User is already approved and active.', 'info');
+      return;
+    }
+
+    // Update Auth User
+    authUser.status = 'ACTIVE';
+    authUser.approved_at = nowIso;
+    authUser.approved_by = adminId;
+    authUser.rejected_at = null;
+    authUser.rejected_by = null;
+    authUser.qr_active = true;
+
+    // Generate QR using AttendanceLogger
+    let qrPayload = '';
+    if (window.AttendanceLogger && typeof AttendanceLogger.generateMemberQr === 'function') {
+      qrPayload = AttendanceLogger.generateMemberQr({
+        id: authUser.id,
+        rollNo: authUser.rollNo,
+        email: authUser.email,
+        status: 'ACTIVE',
+        qr_active: true
+      });
+    }
+    authUser.qrCode = qrPayload;
+
+    // Ensure user exists in AppState.members roster
+    let member = (AppState.members || []).find(m => String(m.id) === String(authUser.id) || (m.email && m.email === authUser.email));
+    if (member) {
+      member.status = 'ACTIVE';
+      member.approved_at = nowIso;
+      member.approved_by = adminId;
+      member.rejected_at = null;
+      member.rejected_by = null;
+      member.qr_active = true;
+      member.active = true;
+      member.qrDisabled = false;
+      member.qrCode = qrPayload;
+    } else {
+      member = {
+        id: authUser.id,
+        name: authUser.name || 'Member',
+        rollNo: authUser.rollNo || `PROD-${(authUser.locale || 'NAIC').slice(0, 3).toUpperCase()}-01`,
+        department: authUser.locale || authUser.department || 'Naic',
+        role: authUser.level || authUser.role || 'LOCALE PROD',
+        email: authUser.email || '',
+        duty: authUser.duty || AppState.currentUser?.duty || 'MPRO',
+        status: 'ACTIVE',
+        approved_at: nowIso,
+        approved_by: adminId,
+        rejected_at: null,
+        rejected_by: null,
+        qr_active: true,
+        active: true,
+        qrDisabled: false,
+        qrCode: qrPayload,
+        avatarColor: ['#fbbf24', '#38bdf8', '#a855f7', '#34d399', '#f43f5e', '#fb923c'][Math.floor(Math.random() * 6)]
+      };
+      AppState.members.push(member);
+    }
+
+    AppState.save();
+
+    // Sync to Supabase Cloud Database
+    if (window.SupabaseSyncClient) {
+      try {
+        await SupabaseSyncClient.updateUserApprovalStatus({
+          id: authUser.id,
+          status: 'ACTIVE',
+          approved_at: nowIso,
+          approved_by: adminId,
+          rejected_at: null,
+          rejected_by: null,
+          qr_active: true,
+          qr_code: qrPayload
+        });
+        if (typeof SupabaseSyncClient.saveMember === 'function') {
+          await SupabaseSyncClient.saveMember(member);
+        }
+      } catch (err) {
+        console.warn('[App] Supabase approval sync error:', err);
+      }
+    }
+
+    this.renderPendingRegistrations();
+    this.updatePendingRegistrationsBadge();
+    this.renderRoster();
+    showToast('Registration approved successfully.', 'success');
+  },
+
+  async rejectRegistration(userId) {
+    if (!this.hasAdminPermission()) {
+      showToast('Unauthorized: Admin permission required to reject accounts.', 'error');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to reject this registration? The account will not be allowed to log in or use QR attendance.')) {
+      return;
+    }
+
+    const adminUser = AppState.currentUser;
+    const adminId = adminUser.id || adminUser.username || 'admin';
+    const nowIso = new Date().toISOString();
+
+    let authUser = (AppState.authUsers || []).find(u => String(u.id) === String(userId) || String(u.username) === String(userId));
+    if (!authUser) {
+      showToast('User record not found in system.', 'error');
+      return;
+    }
+
+    authUser.status = 'REJECTED';
+    authUser.rejected_at = nowIso;
+    authUser.rejected_by = adminId;
+    authUser.qr_active = false;
+    authUser.qrCode = '';
+
+    let member = (AppState.members || []).find(m => String(m.id) === String(authUser.id) || (m.email && m.email === authUser.email));
+    if (member) {
+      member.status = 'REJECTED';
+      member.rejected_at = nowIso;
+      member.rejected_by = adminId;
+      member.qr_active = false;
+      member.active = false;
+      member.qrDisabled = true;
+      member.qrCode = '';
+    }
+
+    AppState.save();
+
+    if (window.SupabaseSyncClient) {
+      try {
+        await SupabaseSyncClient.updateUserApprovalStatus({
+          id: authUser.id,
+          status: 'REJECTED',
+          rejected_at: nowIso,
+          rejected_by: adminId,
+          qr_active: false,
+          qr_code: ''
+        });
+        if (member && typeof SupabaseSyncClient.saveMember === 'function') {
+          await SupabaseSyncClient.saveMember(member);
+        }
+      } catch (err) {
+        console.warn('[App] Supabase rejection sync error:', err);
+      }
+    }
+
+    this.renderPendingRegistrations();
+    this.updatePendingRegistrationsBadge();
+    this.renderRoster();
+    showToast('Registration has been rejected.', 'info');
+  },
+
+  updateProfileModalQrControl(member) {
+    const isAdm = this.hasAdminPermission();
+    const qrControl = document.getElementById('profileModalQrControl');
+    if (!qrControl) return;
+
+    if (!isAdm) {
+      qrControl.classList.add('hidden');
+      return;
+    }
+
+    qrControl.classList.remove('hidden');
+    const label = document.getElementById('profileModalQrStatusLabel');
+    const btn = document.getElementById('btnToggleMemberQrActive');
+    if (!label || !btn) return;
+
+    const mStatus = String(member.status || 'ACTIVE').toUpperCase();
+    const isQrActive = (member.qr_active !== false && !member.qrDisabled && member.active !== false && mStatus === 'ACTIVE');
+
+    if (mStatus === 'PENDING') {
+      label.textContent = 'PENDING APPROVAL · QR NOT GENERATED';
+      label.className = 'text-[11px] text-amber-400 font-mono font-semibold';
+      btn.textContent = 'Pending Approval';
+      btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold border border-amber-500/40 bg-amber-500/10 text-amber-300 opacity-60 cursor-not-allowed';
+      btn.disabled = true;
+    } else if (mStatus === 'REJECTED') {
+      label.textContent = 'REGISTRATION REJECTED · ACCESS BLOCKED';
+      label.className = 'text-[11px] text-rose-400 font-mono font-semibold';
+      btn.textContent = 'Rejected';
+      btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-500/40 bg-rose-500/10 text-rose-300 opacity-60 cursor-not-allowed';
+      btn.disabled = true;
+    } else if (mStatus === 'DISABLED' || !isQrActive) {
+      label.textContent = 'REVOKED / INACTIVE · ATTENDANCE BLOCKED';
+      label.className = 'text-[11px] text-rose-400 font-mono font-semibold';
+      btn.textContent = 'Activate QR';
+      btn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold border border-emerald-500/40 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-midnight-950 transition-all cursor-pointer';
+      btn.disabled = false;
+    } else {
+      label.textContent = 'ACTIVE & VALID FOR ATTENDANCE';
+      label.className = 'text-[11px] text-emerald-400 font-mono font-semibold';
+      btn.textContent = 'Revoke QR';
+      btn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500 text-rose-300 hover:text-white transition-all cursor-pointer';
+      btn.disabled = false;
+    }
+  },
+
+  async toggleCurrentProfileQrActive() {
+    if (!this.hasAdminPermission()) {
+      showToast('Admin permission required to change QR status.', 'error');
+      return;
+    }
+    const memberId = AppState.viewingMemberId;
+    if (!memberId) return;
+
+    const member = (AppState.members || []).find(m => String(m.id) === String(memberId));
+    if (!member) return;
+
+    const currentStatus = String(member.status || 'ACTIVE').toUpperCase();
+    if (currentStatus === 'PENDING') {
+      showToast('Cannot activate QR for a pending registration. Please approve the registration in Admin Settings first.', 'warning');
+      return;
+    }
+    if (currentStatus === 'REJECTED') {
+      showToast('Cannot activate QR for a rejected registration.', 'warning');
+      return;
+    }
+
+    const currentlyActive = (member.qr_active !== false && !member.qrDisabled && member.active !== false);
+    const nextActive = !currentlyActive;
+
+    member.qr_active = nextActive;
+    member.qrDisabled = !nextActive;
+    if (!nextActive) {
+      member.active = false;
+    } else {
+      member.active = true;
+      if (!member.qrCode && window.AttendanceLogger) {
+        member.qrCode = AttendanceLogger.generateMemberQr(member);
+      }
+    }
+
+    // Sync to authUsers
+    const authUser = (AppState.authUsers || []).find(u => String(u.id) === String(member.id) || (u.email && u.email === member.email));
+    if (authUser) {
+      authUser.qr_active = nextActive;
+      if (nextActive && !authUser.qrCode && member.qrCode) {
+        authUser.qrCode = member.qrCode;
+      }
+    }
+
+    AppState.save();
+
+    if (window.SupabaseSyncClient) {
+      try {
+        if (authUser) {
+          await SupabaseSyncClient.updateUserApprovalStatus({
+            id: authUser.id,
+            status: member.status || 'ACTIVE',
+            qr_active: nextActive,
+            qr_code: member.qrCode || ''
+          });
+        }
+        if (typeof SupabaseSyncClient.saveMember === 'function') {
+          await SupabaseSyncClient.saveMember(member);
+        }
+      } catch (e) {
+        console.warn('[App] Supabase QR toggle sync error:', e);
+      }
+    }
+
+    this.updateProfileModalQrControl(member);
+    this.renderRoster();
+    showToast(nextActive ? 'Attendance QR has been ACTIVATED.' : 'Attendance QR has been REVOKED and is now unusable.', nextActive ? 'success' : 'warning');
   },
 
   exportBackupJSON() {
