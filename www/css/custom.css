@@ -274,7 +274,7 @@ body.login-page {
 .auth-overlay-backdrop {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, rgba(4, 8, 19, 0.2) 0%, rgba(4, 8, 19, 0.72) 100%);
+  background: radial-gradient(circle at center, rgba(2, 4, 8, 0.28) 0%, rgba(2, 4, 8, 0.72) 100%);
   z-index: 1;
   pointer-events: none;
 }
@@ -292,14 +292,106 @@ body.login-page {
 }
 
 .auth-glass-box {
-  background: rgba(14, 14, 18, 0.94);
+  background: rgba(10, 12, 16, 0.96) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border: 1px solid rgba(245, 158, 11, 0.28) !important;
   border-radius: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+  box-shadow: none !important;
   overflow: hidden;
 }
+
+.auth-glass-box h1,
+.auth-glass-box h2,
+.auth-glass-box h3,
+.auth-glass-box p,
+.auth-glass-box label,
+.auth-glass-box span,
+.auth-glass-box a,
+.auth-glass-box button {
+  color: inherit;
+}
+
+.auth-glass-box .text-slate-300,
+.auth-glass-box .text-slate-400,
+.auth-glass-box .text-slate-500,
+.auth-glass-box .text-slate-600 {
+  color: #d1d5db !important;
+}
+
+.auth-glass-box .text-gold-300,
+.auth-glass-box .text-gold-400,
+.auth-glass-box .text-gold-500 {
+  color: #fbbf24 !important;
+}
+
+.auth-glass-box input,
+.auth-glass-box select,
+.auth-glass-box textarea {
+  background: rgba(17, 17, 20, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.auth-glass-box input::placeholder,
+.auth-glass-box textarea::placeholder {
+  color: rgba(255, 255, 255, 0.52) !important;
+}
+
+.auth-glass-box input:focus,
+.auth-glass-box select:focus,
+.auth-glass-box textarea:focus {
+  border-color: rgba(245, 158, 11, 0.9) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.auth-glass-box .gold-gradient-btn,
+.auth-glass-box .gold-gradient-btn *,
+.auth-glass-box .gold-gradient-btn span,
+.auth-glass-box .gold-gradient-btn i,
+.auth-glass-box .gold-gradient-btn svg {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
+  color: #050507 !important;
+  border-color: rgba(245, 158, 11, 0.8) !important;
+  box-shadow: none !important;
+}
+
+.auth-glass-box .gold-gradient-btn:hover,
+.auth-glass-box .gold-gradient-btn:hover *,
+.auth-glass-box .gold-gradient-btn:hover span,
+.auth-glass-box .gold-gradient-btn:hover i,
+.auth-glass-box .gold-gradient-btn:hover svg {
+  background: linear-gradient(135deg, #fde047 0%, #f59e0b 100%) !important;
+  color: #050507 !important;
+  box-shadow: none !important;
+}
+
+.auth-glass-box button:not(.login-back-btn):not(.gold-gradient-btn) {
+  box-shadow: none !important;
+}
+
+.auth-glass-box .bg-midnight-900,
+.auth-glass-box .bg-midnight-900\/70,
+.auth-glass-box .bg-midnight-950\/80,
+.auth-glass-box .bg-midnight-900\/95 {
+  background: rgba(17, 17, 20, 0.96) !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+.auth-glass-box .border-slate-700\/60,
+.auth-glass-box .border-slate-700\/80,
+.auth-glass-box .border-slate-800\/80,
+.auth-glass-box .border-mcgiblue-900\/50 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.auth-glass-box .hover\:bg-midnight-800:hover,
+.auth-glass-box button[id*="btnDemoAdmin"]:hover {
+  background: rgba(25, 25, 29, 0.96) !important;
+}
+
 
 /* Slide Viewport & Track */
 .auth-slide-viewport {
@@ -1103,98 +1195,225 @@ body.login-page {
 /* AUTH FORM THEME OVERRIDES                                                   */
 /* ========================================================================= */
 
-/* GCOS – Black-and-White Design */
+/* MPRO – Black-and-Gold Login Design */
+.auth-theme-mpro .auth-glass-box {
+  background: rgba(10, 12, 16, 0.96) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.28) !important;
+  box-shadow: none !important;
+}
+.auth-theme-mpro .auth-glass-box h1,
+.auth-theme-mpro .auth-glass-box h2,
+.auth-theme-mpro .auth-glass-box p,
+.auth-theme-mpro .auth-glass-box label,
+.auth-theme-mpro .auth-glass-box span,
+.auth-theme-mpro .auth-glass-box a {
+  color: #ffffff !important;
+}
+.auth-theme-mpro .auth-glass-box .text-slate-300,
+.auth-theme-mpro .auth-glass-box .text-slate-400,
+.auth-theme-mpro .auth-glass-box .text-slate-500 {
+  color: #d1d5db !important;
+}
+.auth-theme-mpro .auth-glass-box .text-gold-300,
+.auth-theme-mpro .auth-glass-box .text-gold-400,
+.auth-theme-mpro .auth-glass-box .text-gold-500 {
+  color: #fbbf24 !important;
+}
+.auth-theme-mpro .auth-glass-box input,
+.auth-theme-mpro .auth-glass-box select,
+.auth-theme-mpro .auth-glass-box textarea {
+  background: rgba(17, 17, 20, 0.96) !important;
+  border-color: rgba(245, 158, 11, 0.18) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+.auth-theme-mpro .auth-glass-box input:focus,
+.auth-theme-mpro .auth-glass-box select:focus,
+.auth-theme-mpro .auth-glass-box textarea:focus {
+  border-color: rgba(245, 158, 11, 0.95) !important;
+  box-shadow: none !important;
+}
+.auth-theme-mpro .auth-glass-box input::placeholder,
+.auth-theme-mpro .auth-glass-box textarea::placeholder {
+  color: rgba(255, 255, 255, 0.52) !important;
+}
+.auth-theme-mpro .auth-glass-box .gold-gradient-btn,
+.auth-theme-mpro .auth-glass-box .gold-gradient-btn *,
+.auth-theme-mpro .auth-glass-box .gold-gradient-btn span,
+.auth-theme-mpro .auth-glass-box .gold-gradient-btn i,
+.auth-theme-mpro .auth-glass-box .gold-gradient-btn svg {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
+  color: #050507 !important;
+  border-color: rgba(245, 158, 11, 0.8) !important;
+  box-shadow: none !important;
+}
+.auth-theme-mpro .auth-glass-box .gold-gradient-btn:hover,
+.auth-theme-mpro .auth-glass-box .gold-gradient-btn:hover *,
+.auth-theme-mpro .auth-glass-box .gold-gradient-btn:hover span,
+.auth-theme-mpro .auth-glass-box .gold-gradient-btn:hover i,
+.auth-theme-mpro .auth-glass-box .gold-gradient-btn:hover svg {
+  background: linear-gradient(135deg, #fde047 0%, #f59e0b 100%) !important;
+  color: #050507 !important;
+  box-shadow: none !important;
+}
+
+/* GCOS – Black-and-White Login Design */
 .auth-theme-gcos .auth-glass-box {
-  background: rgba(255, 255, 255, 0.98) !important;
-  border: 1.5px solid #000000 !important;
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.25) !important;
+  background: rgba(8, 9, 12, 0.96) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: none !important;
 }
 .auth-theme-gcos .auth-glass-box h1,
 .auth-theme-gcos .auth-glass-box h2,
 .auth-theme-gcos .auth-glass-box p,
-.auth-theme-gcos .auth-glass-box label { color: #000000 !important; }
-.auth-theme-gcos .auth-glass-box span:not(.gold-gradient-btn *):not(.login-back-btn *) { color: #000000 !important; }
+.auth-theme-gcos .auth-glass-box label,
+.auth-theme-gcos .auth-glass-box span,
+.auth-theme-gcos .auth-glass-box a {
+  color: #ffffff !important;
+}
+.auth-theme-gcos .auth-glass-box .text-slate-300,
 .auth-theme-gcos .auth-glass-box .text-slate-400,
-.auth-theme-gcos .auth-glass-box .text-slate-500 { color: #475569 !important; }
+.auth-theme-gcos .auth-glass-box .text-slate-500 {
+  color: #e5e7eb !important;
+}
 .auth-theme-gcos .auth-glass-box .text-gold-300,
-.auth-theme-gcos .auth-glass-box .text-gold-400 { color: #000000 !important; }
+.auth-theme-gcos .auth-glass-box .text-gold-400,
+.auth-theme-gcos .auth-glass-box .text-gold-500 {
+  color: #ffffff !important;
+}
 .auth-theme-gcos .auth-glass-box input,
-.auth-theme-gcos .auth-glass-box select { background: #f8fafc !important; border-color: #94a3b8 !important; color: #000000 !important; }
+.auth-theme-gcos .auth-glass-box select,
+.auth-theme-gcos .auth-glass-box textarea {
+  background: rgba(17, 17, 20, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
 .auth-theme-gcos .auth-glass-box input:focus,
-.auth-theme-gcos .auth-glass-box select:focus { border-color: #000000 !important; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2) !important; }
-.auth-theme-gcos .auth-glass-box input::placeholder { color: #64748b !important; }
+.auth-theme-gcos .auth-glass-box select:focus,
+.auth-theme-gcos .auth-glass-box textarea:focus {
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: none !important;
+}
+.auth-theme-gcos .auth-glass-box input::placeholder,
+.auth-theme-gcos .auth-glass-box textarea::placeholder {
+  color: rgba(255, 255, 255, 0.56) !important;
+}
 
-/* GCOS Primary Action Buttons: Solid Black Background with Crisp Pure White Text & Icons */
 .auth-theme-gcos .auth-glass-box .gold-gradient-btn,
 .auth-theme-gcos .auth-glass-box .gold-gradient-btn *,
 .auth-theme-gcos .auth-glass-box .gold-gradient-btn span,
 .auth-theme-gcos .auth-glass-box .gold-gradient-btn i,
 .auth-theme-gcos .auth-glass-box .gold-gradient-btn svg {
-  background: #000000 !important;
-  color: #ffffff !important;
-  border-color: #000000 !important;
-  fill: none !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: none !important;
 }
 .auth-theme-gcos .auth-glass-box .gold-gradient-btn:hover,
 .auth-theme-gcos .auth-glass-box .gold-gradient-btn:hover *,
 .auth-theme-gcos .auth-glass-box .gold-gradient-btn:hover span,
 .auth-theme-gcos .auth-glass-box .gold-gradient-btn:hover i,
 .auth-theme-gcos .auth-glass-box .gold-gradient-btn:hover svg {
-  background: #18181b !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35) !important;
+  background: #e5e7eb !important;
+  color: #000000 !important;
+  box-shadow: none !important;
 }
 
 .auth-theme-gcos .auth-glass-box .border-b,
-.auth-theme-gcos .auth-glass-box .border-slate-800\/80 { border-color: rgba(0, 0, 0, 0.15) !important; }
-.auth-theme-gcos .auth-glass-box .bg-midnight-900\/70 { background: rgba(248, 250, 252, 0.95) !important; }
-.auth-theme-gcos .auth-glass-box .bg-midnight-900 { background: #f1f5f9 !important; border-color: #cbd5e1 !important; }
-.auth-theme-gcos .auth-glass-box .hover\:bg-midnight-800:hover { background: #e2e8f0 !important; }
-
-/* TK – Pink-and-White Design */
-.auth-theme-tk .auth-glass-box {
-  background: rgba(253, 242, 248, 0.97) !important;
-  border: 1.5px solid rgba(190, 24, 93, 0.35) !important;
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.2) !important;
+.auth-theme-gcos .auth-glass-box .border-slate-800\/80,
+.auth-theme-gcos .auth-glass-box .border-mcgiblue-900\/50 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
-.auth-theme-tk .auth-glass-box h1 { color: #500724 !important; }
-.auth-theme-tk .auth-glass-box h2 { color: #9d174d !important; }
-.auth-theme-tk .auth-glass-box p  { color: #be185d !important; }
-.auth-theme-tk .auth-glass-box label { color: #500724 !important; }
-.auth-theme-tk .auth-glass-box span:not(.gold-gradient-btn *):not(.login-back-btn *) { color: #500724 !important; }
-.auth-theme-tk .auth-glass-box .text-slate-400,
-.auth-theme-tk .auth-glass-box .text-slate-500 { color: #9d174d !important; }
-.auth-theme-tk .auth-glass-box .text-gold-300,
-.auth-theme-tk .auth-glass-box .text-gold-400 { color: #be185d !important; }
-.auth-theme-tk .auth-glass-box input,
-.auth-theme-tk .auth-glass-box select { background: #fdf2f8 !important; border-color: #f9a8d4 !important; color: #500724 !important; }
-.auth-theme-tk .auth-glass-box input:focus,
-.auth-theme-tk .auth-glass-box select:focus { border-color: #be185d !important; outline: none !important; box-shadow: none !important; }
-.auth-theme-tk .auth-glass-box input::placeholder { color: #f472b6 !important; }
+.auth-theme-gcos .auth-glass-box .bg-midnight-900\/70,
+.auth-theme-gcos .auth-glass-box .bg-midnight-900,
+.auth-theme-gcos .auth-glass-box .bg-midnight-950\/80 {
+  background: rgba(15, 16, 18, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+.auth-theme-gcos .auth-glass-box .hover\:bg-midnight-800:hover,
+.auth-theme-gcos .auth-glass-box button[id*="btnDemoAdmin"]:hover {
+  background: rgba(24, 24, 27, 0.96) !important;
+}
 
-/* TK Primary Action Buttons: Pure White Text & Icons */
+/* TK – Black-and-Pink Login Design */
+.auth-theme-tk .auth-glass-box {
+  background: rgba(10, 8, 12, 0.96) !important;
+  border: 1.5px solid rgba(244, 114, 182, 0.28) !important;
+  box-shadow: none !important;
+}
+.auth-theme-tk .auth-glass-box h1,
+.auth-theme-tk .auth-glass-box h2,
+.auth-theme-tk .auth-glass-box p,
+.auth-theme-tk .auth-glass-box label,
+.auth-theme-tk .auth-glass-box span,
+.auth-theme-tk .auth-glass-box a {
+  color: #ffffff !important;
+}
+.auth-theme-tk .auth-glass-box .text-slate-300,
+.auth-theme-tk .auth-glass-box .text-slate-400,
+.auth-theme-tk .auth-glass-box .text-slate-500 {
+  color: #e5e7eb !important;
+}
+.auth-theme-tk .auth-glass-box .text-gold-300,
+.auth-theme-tk .auth-glass-box .text-gold-400,
+.auth-theme-tk .auth-glass-box .text-gold-500 {
+  color: #f9a8d4 !important;
+}
+.auth-theme-tk .auth-glass-box input,
+.auth-theme-tk .auth-glass-box select,
+.auth-theme-tk .auth-glass-box textarea {
+  background: rgba(17, 17, 20, 0.96) !important;
+  border-color: rgba(244, 114, 182, 0.24) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+.auth-theme-tk .auth-glass-box input:focus,
+.auth-theme-tk .auth-glass-box select:focus,
+.auth-theme-tk .auth-glass-box textarea:focus {
+  border-color: rgba(244, 114, 182, 0.9) !important;
+  box-shadow: none !important;
+}
+.auth-theme-tk .auth-glass-box input::placeholder,
+.auth-theme-tk .auth-glass-box textarea::placeholder {
+  color: rgba(255, 255, 255, 0.56) !important;
+}
+
 .auth-theme-tk .auth-glass-box .gold-gradient-btn,
 .auth-theme-tk .auth-glass-box .gold-gradient-btn *,
 .auth-theme-tk .auth-glass-box .gold-gradient-btn span,
 .auth-theme-tk .auth-glass-box .gold-gradient-btn i,
 .auth-theme-tk .auth-glass-box .gold-gradient-btn svg {
-  background: linear-gradient(135deg, #be185d 0%, #ec4899 100%) !important;
+  background: linear-gradient(135deg, #ec4899 0%, #be185d 100%) !important;
   color: #ffffff !important;
+  border-color: rgba(244, 114, 182, 0.9) !important;
+  box-shadow: none !important;
 }
 .auth-theme-tk .auth-glass-box .gold-gradient-btn:hover,
 .auth-theme-tk .auth-glass-box .gold-gradient-btn:hover *,
 .auth-theme-tk .auth-glass-box .gold-gradient-btn:hover span,
 .auth-theme-tk .auth-glass-box .gold-gradient-btn:hover i,
 .auth-theme-tk .auth-glass-box .gold-gradient-btn:hover svg {
-  background: linear-gradient(135deg, #9d174d 0%, #db2777 100%) !important;
+  background: linear-gradient(135deg, #f472b6 0%, #db2777 100%) !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(190, 24, 93, 0.35) !important;
+  box-shadow: none !important;
 }
+
 .auth-theme-tk .auth-glass-box .border-b,
-.auth-theme-tk .auth-glass-box .border-slate-800\/80 { border-color: rgba(190, 24, 93, 0.2) !important; }
-.auth-theme-tk .auth-glass-box .bg-midnight-900\/70 { background: rgba(253, 242, 248, 0.95) !important; }
-.auth-theme-tk .auth-glass-box .bg-midnight-900 { background: #fdf2f8 !important; border-color: #f9a8d4 !important; }
-.auth-theme-tk .auth-glass-box .hover\:bg-midnight-800:hover { background: #fce7f3 !important; }
+.auth-theme-tk .auth-glass-box .border-slate-800\/80,
+.auth-theme-tk .auth-glass-box .border-mcgiblue-900\/50 {
+  border-color: rgba(244, 114, 182, 0.18) !important;
+}
+.auth-theme-tk .auth-glass-box .bg-midnight-900\/70,
+.auth-theme-tk .auth-glass-box .bg-midnight-900,
+.auth-theme-tk .auth-glass-box .bg-midnight-950\/80 {
+  background: rgba(15, 13, 17, 0.96) !important;
+  border-color: rgba(244, 114, 182, 0.18) !important;
+}
+.auth-theme-tk .auth-glass-box .hover\:bg-midnight-800:hover,
+.auth-theme-tk .auth-glass-box button[id*="btnDemoAdmin"]:hover {
+  background: rgba(29, 18, 24, 0.96) !important;
+}
 
 /* ========================================================================= */
 /* HIGH-CONTRAST BACK BUTTONS FOR ALL THREE DUTY THEMES                     */
@@ -1206,18 +1425,18 @@ body.login-page {
   color: #fbbf24 !important;
 }
 .login-back-btn {
-  background: rgba(14, 16, 24, 0.94) !important;
-  border: 1.5px solid rgba(245, 158, 11, 0.65) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+  background: rgba(12, 12, 15, 0.96) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.7) !important;
+  box-shadow: none !important;
 }
 .login-back-btn:hover,
 .login-back-btn:hover * {
-  background: #f59e0b !important;
-  color: #050508 !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #fde047 !important;
 }
 .login-back-btn:hover {
-  border-color: #f59e0b !important;
-  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.5) !important;
+  border-color: rgba(245, 158, 11, 0.9) !important;
+  box-shadow: none !important;
 }
 .login-back-btn i,
 .login-back-btn svg {
@@ -1237,7 +1456,7 @@ body.login-page {
   color: #f59e0b !important;
 }
 
-/* 2. GCOS Theme (Crisp White Card: Solid Black High-Contrast Buttons with Pure White Text & Icons) */
+/* 2. GCOS Theme (Black + White login treatment) */
 .auth-theme-gcos .login-back-btn,
 .auth-theme-gcos .login-back-btn *,
 .auth-theme-gcos .login-back-btn span,
@@ -1245,71 +1464,72 @@ body.login-page {
 .auth-theme-gcos .login-back-btn svg {
   background: #000000 !important;
   color: #ffffff !important;
-  border-color: #000000 !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
 }
 .auth-theme-gcos .login-back-btn {
-  border: 1.5px solid #000000 !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: none !important;
 }
 .auth-theme-gcos .login-back-btn:hover,
 .auth-theme-gcos .login-back-btn:hover *,
 .auth-theme-gcos .login-back-btn:hover span,
 .auth-theme-gcos .login-back-btn:hover i,
 .auth-theme-gcos .login-back-btn:hover svg {
-  background: #27272a !important;
+  background: #1f2937 !important;
   color: #ffffff !important;
-  border-color: #000000 !important;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  box-shadow: none !important;
 }
 
 .auth-theme-gcos .login-bottom-back-btn {
-  color: #000000 !important;
+  color: #ffffff !important;
   font-weight: 800 !important;
 }
 .auth-theme-gcos .login-bottom-back-btn:hover {
-  color: #3f3f46 !important;
+  color: #e5e7eb !important;
   text-decoration: underline !important;
 }
 .auth-theme-gcos .login-bottom-back-btn i,
 .auth-theme-gcos .login-bottom-back-btn svg {
-  color: #000000 !important;
+  color: #ffffff !important;
 }
 
-/* 3. TK Theme (Soft Pink Card: Vivid Berry Rose High-Contrast Buttons with Pure White Text & Icons) */
+/* 3. TK Theme (Black + Pink login treatment) */
 .auth-theme-tk .login-back-btn,
 .auth-theme-tk .login-back-btn *,
 .auth-theme-tk .login-back-btn span,
 .auth-theme-tk .login-back-btn i,
 .auth-theme-tk .login-back-btn svg {
-  background: #be185d !important;
-  color: #ffffff !important;
+  background: #050507 !important;
+  color: #f9a8d4 !important;
+  border-color: rgba(244, 114, 182, 0.8) !important;
 }
 .auth-theme-tk .login-back-btn {
-  border: 1.5px solid #9d174d !important;
-  box-shadow: 0 4px 14px rgba(190, 24, 93, 0.35) !important;
+  border: 1.5px solid rgba(244, 114, 182, 0.8) !important;
+  box-shadow: none !important;
 }
 .auth-theme-tk .login-back-btn:hover,
 .auth-theme-tk .login-back-btn:hover *,
 .auth-theme-tk .login-back-btn:hover span,
 .auth-theme-tk .login-back-btn:hover i,
 .auth-theme-tk .login-back-btn:hover svg {
-  background: #9d174d !important;
-  color: #ffffff !important;
-  border-color: #831843 !important;
-  box-shadow: 0 4px 18px rgba(157, 23, 77, 0.45) !important;
+  background: rgba(244, 114, 182, 0.1) !important;
+  color: #fbcfe8 !important;
+  border-color: rgba(244, 114, 182, 1) !important;
+  box-shadow: none !important;
 }
 
 .auth-theme-tk .login-bottom-back-btn {
-  color: #9d174d !important;
+  color: #f9a8d4 !important;
   font-weight: 800 !important;
 }
 .auth-theme-tk .login-bottom-back-btn:hover {
-  color: #700730 !important;
+  color: #fbcfe8 !important;
   text-decoration: underline !important;
 }
 .auth-theme-tk .login-bottom-back-btn i,
 .auth-theme-tk .login-bottom-back-btn svg {
-  color: #be185d !important;
+  color: #f9a8d4 !important;
 }
 
 /* Duty indicator strip (Clean status badge) */
@@ -1581,18 +1801,144 @@ html:not(.light-mode) .portal-theme-gcos .badge-late [data-lucide] {
 /* Visual-only layer: IDs, hooks, layout order and existing controls remain. */
 /* ========================================================================= */
 :root {
-  --workspace-bg: #f4f6f8;
-  --workspace-surface: #ffffff;
-  --workspace-surface-muted: #f8fafc;
-  --workspace-border: #e2e8f0;
-  --workspace-text: #172033;
-  --workspace-muted: #64748b;
-  --workspace-sidebar: #17202b;
-  --workspace-sidebar-muted: #aab5c3;
+  --workspace-bg: #050507;
+  --workspace-surface: #111318;
+  --workspace-surface-alt: #171b22;
+  --workspace-surface-muted: #1d2430;
+  --workspace-border: rgba(255, 255, 255, 0.10);
+  --workspace-text: #f8fafc;
+  --workspace-muted: #aeb6c2;
+  --workspace-sidebar: #0b0d11;
+  --workspace-sidebar-muted: #dfe6ee;
   --workspace-radius-sm: 6px;
   --workspace-radius-md: 10px;
   --workspace-radius-lg: 14px;
-  --workspace-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --workspace-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --accent: #f59e0b;
+  --accent-strong: #fbbf24;
+  --accent-hover: #d97706;
+  --accent-soft: rgba(245, 158, 11, 0.16);
+  --accent-contrast: #111111;
+}
+
+html.light-mode {
+  --workspace-bg: #f3f4f6;
+  --workspace-surface: #ffffff;
+  --workspace-surface-alt: #f8fafc;
+  --workspace-surface-muted: #eef2f7;
+  --workspace-border: rgba(15, 23, 42, 0.12);
+  --workspace-text: #101828;
+  --workspace-muted: #475569;
+  --workspace-sidebar: #17202b;
+  --workspace-sidebar-muted: #b9c7d6;
+  --workspace-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --accent: #d97706;
+  --accent-strong: #b45309;
+  --accent-hover: #a16207;
+  --accent-soft: rgba(217, 119, 6, 0.12);
+  --accent-contrast: #111111;
+}
+
+body.portal-theme-mpro {
+  --workspace-bg: #050507;
+  --workspace-surface: #111318;
+  --workspace-surface-alt: #171b22;
+  --workspace-surface-muted: #1d2430;
+  --workspace-border: rgba(255, 255, 255, 0.10);
+  --workspace-text: #f8fafc;
+  --workspace-muted: #aeb6c2;
+  --workspace-sidebar: #0b0d11;
+  --workspace-sidebar-muted: #dfe6ee;
+  --accent: #f59e0b;
+  --accent-strong: #fbbf24;
+  --accent-hover: #d97706;
+  --accent-soft: rgba(245, 158, 11, 0.16);
+  --accent-contrast: #111111;
+}
+
+html.light-mode .portal-theme-mpro {
+  --workspace-bg: #f7f7f5;
+  --workspace-surface: #ffffff;
+  --workspace-surface-alt: #fafaf9;
+  --workspace-surface-muted: #f3f4f6;
+  --workspace-border: rgba(15, 23, 42, 0.12);
+  --workspace-text: #101828;
+  --workspace-muted: #475569;
+  --workspace-sidebar: #171b22;
+  --workspace-sidebar-muted: #c7d0dc;
+  --accent: #d97706;
+  --accent-strong: #b45309;
+  --accent-hover: #a16207;
+  --accent-soft: rgba(217, 119, 6, 0.12);
+  --accent-contrast: #111111;
+}
+
+body.portal-theme-gcos {
+  --workspace-bg: #09090b;
+  --workspace-surface: #121318;
+  --workspace-surface-alt: #171b22;
+  --workspace-surface-muted: #1f2430;
+  --workspace-border: rgba(255, 255, 255, 0.12);
+  --workspace-text: #f8fafc;
+  --workspace-muted: #d4d4d8;
+  --workspace-sidebar: #0c0d11;
+  --workspace-sidebar-muted: #e5e7eb;
+  --accent: #ffffff;
+  --accent-strong: #e5e7eb;
+  --accent-hover: #d4d4d8;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-contrast: #000000;
+}
+
+html.light-mode .portal-theme-gcos {
+  --workspace-bg: #f8fafc;
+  --workspace-surface: #ffffff;
+  --workspace-surface-alt: #f3f4f6;
+  --workspace-surface-muted: #f8fafc;
+  --workspace-border: rgba(15, 23, 42, 0.12);
+  --workspace-text: #0f172a;
+  --workspace-muted: #475569;
+  --workspace-sidebar: #0f172a;
+  --workspace-sidebar-muted: #dfe6ee;
+  --accent: #0f172a;
+  --accent-strong: #111827;
+  --accent-hover: #1f2937;
+  --accent-soft: rgba(15, 23, 42, 0.08);
+  --accent-contrast: #ffffff;
+}
+
+body.portal-theme-tk {
+  --workspace-bg: #0b090d;
+  --workspace-surface: #1a0f1a;
+  --workspace-surface-alt: #26131f;
+  --workspace-surface-muted: #2f1629;
+  --workspace-border: rgba(255, 255, 255, 0.10);
+  --workspace-text: #fff7fb;
+  --workspace-muted: #f1bfd7;
+  --workspace-sidebar: #120d15;
+  --workspace-sidebar-muted: #f7d9eb;
+  --accent: #ec4899;
+  --accent-strong: #f472b6;
+  --accent-hover: #be185d;
+  --accent-soft: rgba(236, 72, 153, 0.16);
+  --accent-contrast: #ffffff;
+}
+
+html.light-mode .portal-theme-tk {
+  --workspace-bg: #fdf2f8;
+  --workspace-surface: #ffffff;
+  --workspace-surface-alt: #fff7fb;
+  --workspace-surface-muted: #fdf2f8;
+  --workspace-border: rgba(190, 24, 93, 0.16);
+  --workspace-text: #3f0d1f;
+  --workspace-muted: #7b2d4d;
+  --workspace-sidebar: #2d0d1e;
+  --workspace-sidebar-muted: #f4cfe1;
+  --accent: #be185d;
+  --accent-strong: #9d174d;
+  --accent-hover: #831843;
+  --accent-soft: rgba(190, 24, 93, 0.10);
+  --accent-contrast: #ffffff;
 }
 
 body,
@@ -1611,7 +1957,7 @@ body.portal-theme-tk {
 body #mainSidebar,
 body aside {
   background: var(--workspace-sidebar) !important;
-  border-color: #2b3949 !important;
+  border-color: var(--workspace-border) !important;
   color: #f8fafc !important;
 }
 
@@ -1619,8 +1965,8 @@ body aside {
 #mainSidebar > div:last-child,
 #sidebarClockWidget,
 #roleSwitcherWidget {
-  background: #1d2937 !important;
-  border-color: #334155 !important;
+  background: var(--workspace-surface-alt) !important;
+  border-color: var(--workspace-border) !important;
 }
 
 #sidebarNavList button[data-tab-target] {
@@ -1630,24 +1976,26 @@ body aside {
 }
 
 #sidebarNavList button[data-tab-target]:hover {
-  background: #263445 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
   color: #ffffff !important;
 }
 
 #sidebarNavList button[data-tab-target].active,
 #sidebarNavList button[data-tab-target].bg-gold-400 {
   background: var(--accent, #d97706) !important;
-  color: #ffffff !important;
+  color: var(--accent-contrast, #111111) !important;
 }
 
 body.portal-theme-gcos #sidebarNavList button[data-tab-target].active,
 body.portal-theme-gcos #sidebarNavList button[data-tab-target].bg-gold-400 {
-  background: #475569 !important;
+  background: #ffffff !important;
+  color: #000000 !important;
 }
 
 body.portal-theme-tk #sidebarNavList button[data-tab-target].active,
 body.portal-theme-tk #sidebarNavList button[data-tab-target].bg-gold-400 {
-  background: #c02675 !important;
+  background: #ec4899 !important;
+  color: #ffffff !important;
 }
 
 #mainSidebar .text-gold-300,
@@ -1659,7 +2007,7 @@ body.portal-theme-tk #sidebarNavList button[data-tab-target].bg-gold-400 {
 body.portal-theme-gcos #mainSidebar .text-gold-300,
 body.portal-theme-gcos #mainSidebar .text-gold-400,
 body.portal-theme-gcos #mainSidebar .text-gold-500 {
-  color: #e2e8f0 !important;
+  color: #ffffff !important;
 }
 
 body.portal-theme-tk #mainSidebar .text-gold-300,
@@ -1670,7 +2018,7 @@ body.portal-theme-tk #mainSidebar .text-gold-500 {
 
 #mainSidebar .border-t,
 #mainSidebar .border-b {
-  border-color: #334155 !important;
+  border-color: var(--workspace-border) !important;
 }
 
 main {
@@ -1678,29 +2026,27 @@ main {
   color: var(--workspace-text) !important;
 }
 
-main > header,
-main header {
-  background: rgba(255, 255, 255, 0.96) !important;
+html:not(.light-mode) .portal-theme-mpro main > header,
+html:not(.light-mode) .portal-theme-mpro main header,
+html:not(.light-mode) .portal-theme-gcos main > header,
+html:not(.light-mode) .portal-theme-gcos main header,
+html:not(.light-mode) .portal-theme-tk main > header,
+html:not(.light-mode) .portal-theme-tk main header {
+  background: var(--workspace-surface) !important;
   border-color: var(--workspace-border) !important;
   color: var(--workspace-text) !important;
   box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04) !important;
 }
 
-main header .text-white,
-main header .text-slate-100,
-main header .text-slate-200,
-main header .text-slate-300 {
-  color: var(--workspace-text) !important;
-}
-
-main header .text-slate-400,
-main header .text-slate-500 {
-  color: var(--workspace-muted) !important;
-}
-
-.glass-card,
-.glass-panel,
-main [class*="bg-midnight-"] {
+html:not(.light-mode) .portal-theme-mpro .glass-card,
+html:not(.light-mode) .portal-theme-mpro .glass-panel,
+html:not(.light-mode) .portal-theme-mpro main [class*="bg-midnight-"],
+html:not(.light-mode) .portal-theme-gcos .glass-card,
+html:not(.light-mode) .portal-theme-gcos .glass-panel,
+html:not(.light-mode) .portal-theme-gcos main [class*="bg-midnight-"],
+html:not(.light-mode) .portal-theme-tk .glass-card,
+html:not(.light-mode) .portal-theme-tk .glass-panel,
+html:not(.light-mode) .portal-theme-tk main [class*="bg-midnight-"] {
   background: var(--workspace-surface) !important;
   border-color: var(--workspace-border) !important;
   border-radius: var(--workspace-radius-lg) !important;
@@ -1709,31 +2055,86 @@ main [class*="bg-midnight-"] {
   backdrop-filter: none !important;
 }
 
-main [class*="bg-midnight-"] [class*="bg-midnight-"],
-main .glass-card [class*="bg-midnight-"] {
+html:not(.light-mode) .portal-theme-mpro main [class*="bg-midnight-"] [class*="bg-midnight-"],
+html:not(.light-mode) .portal-theme-mpro main .glass-card [class*="bg-midnight-"],
+html:not(.light-mode) .portal-theme-gcos main [class*="bg-midnight-"] [class*="bg-midnight-"],
+html:not(.light-mode) .portal-theme-gcos main .glass-card [class*="bg-midnight-"],
+html:not(.light-mode) .portal-theme-tk main [class*="bg-midnight-"] [class*="bg-midnight-"],
+html:not(.light-mode) .portal-theme-tk main .glass-card [class*="bg-midnight-"] {
   background: var(--workspace-surface-muted) !important;
   box-shadow: none !important;
+}
+
+main header .text-white,
+main header .text-slate-100,
+main header .text-slate-200,
+main header .text-slate-300,
+html:not(.light-mode) .portal-theme-mpro main header .text-white,
+html:not(.light-mode) .portal-theme-gcos main header .text-white,
+html:not(.light-mode) .portal-theme-tk main header .text-white,
+html:not(.light-mode) .portal-theme-mpro main header .text-slate-100,
+html:not(.light-mode) .portal-theme-gcos main header .text-slate-100,
+html:not(.light-mode) .portal-theme-tk main header .text-slate-100,
+html:not(.light-mode) .portal-theme-mpro main header .text-slate-200,
+html:not(.light-mode) .portal-theme-gcos main header .text-slate-200,
+html:not(.light-mode) .portal-theme-tk main header .text-slate-200,
+html:not(.light-mode) .portal-theme-mpro main header .text-slate-300,
+html:not(.light-mode) .portal-theme-gcos main header .text-slate-300,
+html:not(.light-mode) .portal-theme-tk main header .text-slate-300 {
+  color: var(--workspace-text) !important;
+}
+
+main header .text-slate-400,
+main header .text-slate-500,
+html:not(.light-mode) .portal-theme-mpro main header .text-slate-400,
+html:not(.light-mode) .portal-theme-gcos main header .text-slate-400,
+html:not(.light-mode) .portal-theme-tk main header .text-slate-400,
+html:not(.light-mode) .portal-theme-mpro main header .text-slate-500,
+html:not(.light-mode) .portal-theme-gcos main header .text-slate-500,
+html:not(.light-mode) .portal-theme-tk main header .text-slate-500 {
+  color: var(--workspace-muted) !important;
 }
 
 main .text-white,
 main .text-slate-100,
 main .text-slate-200,
-main .text-slate-300 {
+main .text-slate-300,
+html:not(.light-mode) .portal-theme-mpro main .text-white,
+html:not(.light-mode) .portal-theme-gcos main .text-white,
+html:not(.light-mode) .portal-theme-tk main .text-white,
+html:not(.light-mode) .portal-theme-mpro main .text-slate-100,
+html:not(.light-mode) .portal-theme-gcos main .text-slate-100,
+html:not(.light-mode) .portal-theme-tk main .text-slate-100,
+html:not(.light-mode) .portal-theme-mpro main .text-slate-200,
+html:not(.light-mode) .portal-theme-gcos main .text-slate-200,
+html:not(.light-mode) .portal-theme-tk main .text-slate-200,
+html:not(.light-mode) .portal-theme-mpro main .text-slate-300,
+html:not(.light-mode) .portal-theme-gcos main .text-slate-300,
+html:not(.light-mode) .portal-theme-tk main .text-slate-300 {
   color: var(--workspace-text) !important;
 }
 
 main .text-slate-400,
 main .text-slate-500,
-main .text-slate-600 {
+main .text-slate-600,
+html:not(.light-mode) .portal-theme-mpro main .text-slate-400,
+html:not(.light-mode) .portal-theme-gcos main .text-slate-400,
+html:not(.light-mode) .portal-theme-tk main .text-slate-400,
+html:not(.light-mode) .portal-theme-mpro main .text-slate-500,
+html:not(.light-mode) .portal-theme-gcos main .text-slate-500,
+html:not(.light-mode) .portal-theme-tk main .text-slate-500,
+html:not(.light-mode) .portal-theme-mpro main .text-slate-600,
+html:not(.light-mode) .portal-theme-gcos main .text-slate-600,
+html:not(.light-mode) .portal-theme-tk main .text-slate-600 {
   color: var(--workspace-muted) !important;
 }
 
 main input,
 main select,
 main textarea {
-  background: #ffffff !important;
+  background: var(--workspace-surface-alt) !important;
   color: var(--workspace-text) !important;
-  border: 1px solid #cbd5e1 !important;
+  border: 1px solid var(--workspace-border) !important;
   border-radius: var(--workspace-radius-sm) !important;
   box-shadow: none !important;
 }
@@ -1838,46 +2239,82 @@ body.portal-theme-tk {
 
 /* Keep the authentication screen in the same visual language. */
 body.login-page {
-  background: var(--workspace-bg) !important;
-  color: var(--workspace-text) !important;
+  background: rgba(2, 3, 5, 0.72) !important;
+  color: #f8fafc !important;
 }
 
 body.login-page .auth-glass-box,
 body.login-page .auth-card-container {
-  background: #ffffff !important;
-  border: 1px solid var(--workspace-border) !important;
-  border-radius: var(--workspace-radius-lg) !important;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.10) !important;
+  background: rgba(8, 9, 12, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: none !important;
   backdrop-filter: none !important;
 }
 
 body.login-page .auth-glass-box input,
 body.login-page .auth-glass-box select {
-  background: #ffffff !important;
-  color: var(--workspace-text) !important;
-  border-color: #cbd5e1 !important;
-  border-radius: var(--workspace-radius-sm) !important;
+  background: rgba(17, 17, 20, 0.96) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  border-radius: 0.75rem !important;
 }
 
 body.login-page .auth-glass-box input::placeholder {
-  color: #94a3b8 !important;
+  color: rgba(255, 255, 255, 0.52) !important;
 }
 
 body.login-page .auth-glass-box .text-white,
 body.login-page .auth-glass-box .text-slate-100,
 body.login-page .auth-glass-box .text-slate-200,
 body.login-page .auth-glass-box .text-slate-300 {
-  color: var(--workspace-text) !important;
+  color: #ffffff !important;
 }
 
 body.login-page .auth-glass-box .text-slate-400,
 body.login-page .auth-glass-box .text-slate-500 {
-  color: var(--workspace-muted) !important;
+  color: #d1d5db !important;
 }
 
 body.login-page .auth-glass-box > div:first-child {
-  background: #f8fafc !important;
-  border-color: var(--workspace-border) !important;
+  background: rgba(10, 10, 12, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.login-page .auth-theme-gcos .auth-glass-box {
+  background: rgba(8, 9, 12, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.login-page .auth-theme-gcos .auth-glass-box input,
+body.login-page .auth-theme-gcos .auth-glass-box select {
+  background: rgba(17, 17, 20, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+body.login-page .auth-theme-gcos .auth-glass-box .gold-gradient-btn,
+body.login-page .auth-theme-gcos .auth-glass-box .gold-gradient-btn * {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+body.login-page .auth-theme-tk .auth-glass-box {
+  background: rgba(10, 8, 12, 0.96) !important;
+  border-color: rgba(244, 114, 182, 0.28) !important;
+}
+
+body.login-page .auth-theme-tk .auth-glass-box input,
+body.login-page .auth-theme-tk .auth-glass-box select {
+  background: rgba(17, 17, 20, 0.96) !important;
+  border-color: rgba(244, 114, 182, 0.24) !important;
+}
+
+body.login-page .auth-theme-tk .auth-glass-box .gold-gradient-btn,
+body.login-page .auth-theme-tk .auth-glass-box .gold-gradient-btn * {
+  background: linear-gradient(135deg, #ec4899 0%, #be185d 100%) !important;
+  color: #ffffff !important;
+  border-color: rgba(244, 114, 182, 0.9) !important;
 }
 
 html:not(.light-mode) .portal-theme-gcos .badge-absent {
@@ -3531,21 +3968,68 @@ main table td { border-color: var(--workspace-border, #e2e8f0) !important; }
 main table tr:hover { background: #f8fafc !important; }
 
 body.login-page {
-  background: var(--workspace-bg, #f4f6f8) !important;
-  color: var(--workspace-text, #172033) !important;
+  background: rgba(2, 3, 5, 0.72) !important;
+  color: #f8fafc !important;
 }
 body.login-page .auth-glass-box,
 body.login-page .auth-card-container {
-  background: #ffffff !important;
-  border: 1px solid var(--workspace-border, #e2e8f0) !important;
-  border-radius: var(--workspace-radius-lg, 14px) !important;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.10) !important;
+  background: rgba(8, 9, 12, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: none !important;
   backdrop-filter: none !important;
 }
 body.login-page .auth-glass-box input,
 body.login-page .auth-glass-box select {
+  background: rgba(17, 17, 20, 0.96) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  border-radius: 0.75rem !important;
+}
+body.login-page .auth-glass-box input::placeholder {
+  color: rgba(255, 255, 255, 0.52) !important;
+}
+body.login-page .auth-glass-box .text-white,
+body.login-page .auth-glass-box .text-slate-100,
+body.login-page .auth-glass-box .text-slate-200,
+body.login-page .auth-glass-box .text-slate-300 {
+  color: #ffffff !important;
+}
+body.login-page .auth-glass-box .text-slate-400,
+body.login-page .auth-glass-box .text-slate-500 {
+  color: #d1d5db !important;
+}
+body.login-page .auth-glass-box > div:first-child {
+  background: rgba(10, 10, 12, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+body.login-page .auth-theme-gcos .auth-glass-box {
+  background: rgba(8, 9, 12, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+body.login-page .auth-theme-gcos .auth-glass-box input,
+body.login-page .auth-theme-gcos .auth-glass-box select {
+  background: rgba(17, 17, 20, 0.96) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+body.login-page .auth-theme-gcos .auth-glass-box .gold-gradient-btn,
+body.login-page .auth-theme-gcos .auth-glass-box .gold-gradient-btn * {
   background: #ffffff !important;
-  color: var(--workspace-text, #172033) !important;
-  border-color: #cbd5e1 !important;
-  border-radius: var(--workspace-radius-sm, 6px) !important;
+  color: #000000 !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+}
+body.login-page .auth-theme-tk .auth-glass-box {
+  background: rgba(10, 8, 12, 0.96) !important;
+  border-color: rgba(244, 114, 182, 0.28) !important;
+}
+body.login-page .auth-theme-tk .auth-glass-box input,
+body.login-page .auth-theme-tk .auth-glass-box select {
+  background: rgba(17, 17, 20, 0.96) !important;
+  border-color: rgba(244, 114, 182, 0.24) !important;
+}
+body.login-page .auth-theme-tk .auth-glass-box .gold-gradient-btn,
+body.login-page .auth-theme-tk .auth-glass-box .gold-gradient-btn * {
+  background: linear-gradient(135deg, #ec4899 0%, #be185d 100%) !important;
+  color: #ffffff !important;
+  border-color: rgba(244, 114, 182, 0.9) !important;
 }
