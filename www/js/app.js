@@ -57,6 +57,14 @@ function getPastDateString(daysAgo = 0) {
   return d.toISOString().split('T')[0];
 }
 
+function getLocalDateString(date = new Date()) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0')
+  ].join('-');
+}
+
 // Generate rich initial historical attendance
 function generateInitialAttendance(membersList = DEFAULT_MEMBERS, dutyCode = 'MPRO') {
   const attendance = {};
@@ -1889,7 +1897,7 @@ const App = {
     renderDutyLevelOptions(getActiveDutyScope());
 
     const dateInput = document.getElementById('inputEventDate');
-    const localToday = new Date().toLocaleDateString('en-CA');
+    const localToday = getLocalDateString();
     if (dateInput) {
       if (!dateInput.value) {
         dateInput.value = localToday;
@@ -1908,9 +1916,10 @@ const App = {
       this._scheduleManual = false;
       const detectedEvent = (window.EventSchedule && typeof EventSchedule.detectApplicableEvent === 'function')
         ? EventSchedule.detectApplicableEvent(new Date())
-        : (eventSelect.value || 'PM');
+        : eventSelect.value;
       eventSelect.value = detectedEvent;
       this.handleEventDropdownChange(detectedEvent);
+      this.applyAutoDetectedSchedule(detectedEvent);
     }
 
     if (window.AttendanceLogger && typeof AttendanceLogger.initMessengerDispatcher === 'function') {
@@ -1942,34 +1951,71 @@ const App = {
   },
 
   /**
+   * Synchronizes the existing event dropdown and schedule controls with the
+   * administrator-selected active event. Schedule detection intentionally
+   * happens after the event controls have been rendered.
+   */
+  synchronizeActiveAttendanceContext(now = new Date()) {
+    const eventSelect = document.getElementById('selectEventType');
+    if (!eventSelect) return { eventType: '', detected: { status: 'unscheduled' } };
+
+    const activeEvent = (window.EventSchedule && typeof EventSchedule.detectApplicableEvent === 'function')
+      ? EventSchedule.detectApplicableEvent(now)
+      : eventSelect.value;
+    if (!activeEvent) return { eventType: '', detected: { status: 'unscheduled' } };
+
+    const eventChanged = eventSelect.value !== activeEvent;
+    eventSelect.value = activeEvent;
+    if (eventChanged || !document.querySelector('input[name="eventSchedule"], input[name="eventEdition"]')) {
+      this.handleEventDropdownChange(activeEvent);
+    }
+
+    const detected = this.applyAutoDetectedSchedule(activeEvent, now);
+    return { eventType: activeEvent, detected };
+  },
+
+  /**
    * Automatically checks the matching existing schedule radio pill for eventType
    * based on EventSchedule.detect(). Does not create any extra UI elements.
    */
-  applyAutoDetectedSchedule(eventType) {
-    if (!window.EventSchedule || !EventSchedule.hasFixedSchedule(eventType)) return;
+  applyAutoDetectedSchedule(eventType, now = new Date()) {
+    if (!window.EventSchedule || !EventSchedule.hasFixedSchedule(eventType)) {
+      return { status: 'unscheduled' };
+    }
 
     // Check if user is entering a historical date
-    const localToday = new Date().toLocaleDateString('en-CA');
+    const localToday = getLocalDateString(now);
     const eventDateInput = document.getElementById('inputEventDate');
     const selectedDate = (eventDateInput && eventDateInput.value) ? eventDateInput.value : localToday;
     const isToday = (selectedDate === localToday);
 
-    if (!isToday) return; // Do not apply today's clock to historical backfill dates
+    if (!isToday) return { status: 'historical' }; // Do not apply today's clock to historical backfill dates
 
-    const det = EventSchedule.detect(eventType, new Date());
+    const det = EventSchedule.detect(eventType, now);
     if (det.status === 'detected') {
       const cfg = EventSchedule.getConfig(eventType);
-      const radio = document.querySelector(`input[name="${cfg.field}"][value="${det.slot.label}"]`);
+      const radio = Array.from(document.querySelectorAll(`input[name="${cfg.field}"]`))
+        .find(input => input.value === det.slot.label);
       if (radio) {
-        radio.checked = true;
+        document.querySelectorAll(`input[name="${cfg.field}"]`).forEach(input => {
+          input.checked = input === radio;
+        });
       }
+    } else {
+      const cfg = EventSchedule.getConfig(eventType);
+      document.querySelectorAll(`input[name="${cfg.field}"]`).forEach(input => {
+        input.checked = false;
+      });
     }
+    return det;
   },
 
   /** Re-checks slot for current time. Updates radio pill if time boundary crossed without resetting form fields. */
   refreshScheduleDetection(force = false) {
+    const now = new Date();
+
     // Check date rollover across midnight
-    const localToday = new Date().toLocaleDateString('en-CA');
+    const localToday = getLocalDateString(now);
     if (window.AppState && AppState.selectedDate && AppState.selectedDate !== localToday) {
       const dateInput = document.getElementById('inputEventDate');
       if (dateInput && dateInput.value === AppState.selectedDate) {
@@ -1980,25 +2026,21 @@ const App = {
 
     if (this._scheduleManual && !force) return;
 
-    const eventSelect = document.getElementById('selectEventType');
-    if (!eventSelect) return;
-    const eventType = eventSelect.value;
-    if (!window.EventSchedule || !EventSchedule.hasFixedSchedule(eventType)) return;
+    const context = this.synchronizeActiveAttendanceContext(now);
+    const eventType = context.eventType;
+    if (!eventType || !window.EventSchedule || !EventSchedule.hasFixedSchedule(eventType)) return;
 
     const eventDateInput = document.getElementById('inputEventDate');
     const selectedDate = (eventDateInput && eventDateInput.value) ? eventDateInput.value : localToday;
     const isToday = (selectedDate === localToday);
     if (!isToday && !force) return;
 
-    const det = EventSchedule.detect(eventType, new Date());
-    if (det.status === 'detected') {
-      const cfg = EventSchedule.getConfig(eventType);
-      const radio = document.querySelector(`input[name="${cfg.field}"][value="${det.slot.label}"]`);
-      if (radio && !radio.checked) {
-        radio.checked = true;
-        if (window.AttendanceLogger && typeof AttendanceLogger.updateMessengerDispatcherPreview === 'function') {
-          AttendanceLogger.updateMessengerDispatcherPreview();
-        }
+    const previous = document.querySelector(`input[name="${EventSchedule.getConfig(eventType).field}"]:checked`);
+    const det = this.applyAutoDetectedSchedule(eventType, now);
+    const current = document.querySelector(`input[name="${EventSchedule.getConfig(eventType).field}"]:checked`);
+    if (det.status === 'detected' && (!previous || !current || previous.value !== current.value)) {
+      if (window.AttendanceLogger && typeof AttendanceLogger.updateMessengerDispatcherPreview === 'function') {
+        AttendanceLogger.updateMessengerDispatcherPreview();
       }
     }
   },
@@ -2022,16 +2064,7 @@ const App = {
       if (typeof localStorage !== 'undefined') localStorage.setItem('mcgi_active_event', eventType);
     } catch (e) {}
 
-    // Determine detected slot for today's date if this event has fixed schedules
-    const eventDateInput = document.getElementById('inputEventDate');
-    const localToday = new Date().toLocaleDateString('en-CA');
-    const selectedDate = (eventDateInput && eventDateInput.value) ? eventDateInput.value : localToday;
-    const isToday = (selectedDate === localToday);
-
-    const det = (isToday && window.EventSchedule && EventSchedule.hasFixedSchedule(eventType))
-      ? EventSchedule.detect(eventType, new Date())
-      : null;
-    const detectedSlotLabel = (det && det.status === 'detected') ? det.slot.label : '';
+    const detectedSlotLabel = '';
 
     let html = '';
 
@@ -2537,8 +2570,10 @@ const App = {
   handleEventAttendanceSubmit(e) {
     e.preventDefault();
 
-    // Make sure the auto-detected slot reflects the exact moment of recording
-    this.refreshScheduleDetection();
+    // Re-read the authoritative active event and detect its slot at the exact
+    // submission moment, after the existing controls have been synchronized.
+    const submitNow = new Date();
+    const attendanceContext = this.synchronizeActiveAttendanceContext(submitNow);
 
     const fullName = document.getElementById('inputEventFullName').value.trim();
     if (!fullName) {
@@ -2565,7 +2600,7 @@ const App = {
     const levels = [selectedLevel];
 
     const eventDate = document.getElementById('inputEventDate').value || AppState.selectedDate;
-    const eventType = document.getElementById('selectEventType').value;
+    const eventType = attendanceContext.eventType || document.getElementById('selectEventType').value;
 
     // Status option (OD, DOC, NOD, ABSENT) if present
     const statusRadio = document.querySelector('input[name="eventStatusOption"]:checked');
@@ -2667,8 +2702,7 @@ const App = {
       }
     }
 
-    const submitNow = new Date();
-    const todayStr = typeof getPastDateString === 'function' ? getPastDateString(0) : submitNow.toISOString().split('T')[0];
+    const todayStr = getLocalDateString(submitNow);
     const isToday = (eventDate === todayStr);
 
     let schedules = [];
@@ -2887,9 +2921,10 @@ const App = {
       if (eventSelect) {
         const detectedEvent = (window.EventSchedule && typeof EventSchedule.detectApplicableEvent === 'function')
           ? EventSchedule.detectApplicableEvent(new Date())
-          : 'PM';
+          : eventSelect.value;
         eventSelect.value = detectedEvent;
         this.handleEventDropdownChange(detectedEvent);
+        this.applyAutoDetectedSchedule(detectedEvent);
       }
 
       const defaultRadio = document.querySelector('input[name="eventStatusOption"][value="ON DUTY (OD)"]');

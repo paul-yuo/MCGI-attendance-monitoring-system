@@ -150,9 +150,8 @@ const EventSchedule = (() => {
    * Safely determines the applicable event for `now`.
    * Priority:
    * 1. Active event memory / configuration (sessionStorage/localStorage/AppState) if it has a schedule today
-   * 2. Most recent attendance record logged today (if logged today, the team is attending this event)
-   * 3. Preferred/current event if it has a schedule today
-   * 4. Weekday schedule availability:
+   * 2. Preferred/current event if it has a schedule today
+   * 3. Weekday schedule availability:
    *    - Wednesday (3) & Thursday (4): 'PM' (only gathering with slots)
    *    - Friday (5): 'SPBB'
    *    - Saturday (6) & Sunday (0): 'WS' (primary gathering if no active configuration)
@@ -163,7 +162,6 @@ const EventSchedule = (() => {
     let activeConfig = null;
     try {
       if (typeof localStorage !== 'undefined') activeConfig = localStorage.getItem('mcgi_configured_active_event');
-      if (!activeConfig && typeof sessionStorage !== 'undefined') activeConfig = sessionStorage.getItem('mcgi_configured_active_event');
     } catch (e) {}
 
     if (activeConfig && hasFixedSchedule(activeConfig)) return activeConfig;
@@ -173,18 +171,6 @@ const EventSchedule = (() => {
       const d = detect(preferredEvent, now);
       if (d.status === 'detected') return preferredEvent;
     }
-
-    // 3. Check most recent attendance record logged today
-    try {
-      if (typeof window !== 'undefined' && window.AppState && Array.isArray(window.AppState.eventEntries)) {
-        const localToday = now.toLocaleDateString('en-CA');
-        const recentToday = window.AppState.eventEntries.find(e => e && (e.eventDate === localToday || !e.eventDate) && hasFixedSchedule(e.event));
-        if (recentToday && hasFixedSchedule(recentToday.event)) {
-          const d = detect(recentToday.event, now);
-          if (d.status === 'detected') return recentToday.event;
-        }
-      }
-    } catch (e) {}
 
     // If preferredEvent was PM and today actually has PM schedules (Wed/Thu), keep PM
     if (preferredEvent === 'PM') {
@@ -201,6 +187,7 @@ const EventSchedule = (() => {
   }
 
   const api = { DAY_NAMES, getConfig, hasFixedSchedule, findSlot, describeSlot, formatTime12, formatLocalTime, detect, detectApplicableEvent, resolveAttendanceContext };
+  if (typeof window !== 'undefined') window.EventSchedule = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   return api;
 })();

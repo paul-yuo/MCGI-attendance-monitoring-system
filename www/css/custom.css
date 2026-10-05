@@ -1576,6 +1576,310 @@ html:not(.light-mode) .portal-theme-gcos .badge-late [data-lucide] {
   stroke: #ffffff !important;
 }
 
+/* ========================================================================= */
+/* PROFESSIONAL WORKSPACE REFRESH                                            */
+/* Visual-only layer: IDs, hooks, layout order and existing controls remain. */
+/* ========================================================================= */
+:root {
+  --workspace-bg: #f4f6f8;
+  --workspace-surface: #ffffff;
+  --workspace-surface-muted: #f8fafc;
+  --workspace-border: #e2e8f0;
+  --workspace-text: #172033;
+  --workspace-muted: #64748b;
+  --workspace-sidebar: #17202b;
+  --workspace-sidebar-muted: #aab5c3;
+  --workspace-radius-sm: 6px;
+  --workspace-radius-md: 10px;
+  --workspace-radius-lg: 14px;
+  --workspace-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+body,
+body.portal-theme-mpro,
+body.portal-theme-gcos,
+body.portal-theme-tk {
+  background: var(--workspace-bg) !important;
+  color: var(--workspace-text) !important;
+}
+
+#appContainer {
+  background: var(--workspace-bg) !important;
+}
+
+#mainSidebar,
+body #mainSidebar,
+body aside {
+  background: var(--workspace-sidebar) !important;
+  border-color: #2b3949 !important;
+  color: #f8fafc !important;
+}
+
+#mainSidebar > div:first-child,
+#mainSidebar > div:last-child,
+#sidebarClockWidget,
+#roleSwitcherWidget {
+  background: #1d2937 !important;
+  border-color: #334155 !important;
+}
+
+#sidebarNavList button[data-tab-target] {
+  border-radius: var(--workspace-radius-sm) !important;
+  color: var(--workspace-sidebar-muted) !important;
+  box-shadow: none !important;
+}
+
+#sidebarNavList button[data-tab-target]:hover {
+  background: #263445 !important;
+  color: #ffffff !important;
+}
+
+#sidebarNavList button[data-tab-target].active,
+#sidebarNavList button[data-tab-target].bg-gold-400 {
+  background: var(--accent, #d97706) !important;
+  color: #ffffff !important;
+}
+
+body.portal-theme-gcos #sidebarNavList button[data-tab-target].active,
+body.portal-theme-gcos #sidebarNavList button[data-tab-target].bg-gold-400 {
+  background: #475569 !important;
+}
+
+body.portal-theme-tk #sidebarNavList button[data-tab-target].active,
+body.portal-theme-tk #sidebarNavList button[data-tab-target].bg-gold-400 {
+  background: #c02675 !important;
+}
+
+#mainSidebar .text-gold-300,
+#mainSidebar .text-gold-400,
+#mainSidebar .text-gold-500 {
+  color: var(--accent, #fbbf24) !important;
+}
+
+body.portal-theme-gcos #mainSidebar .text-gold-300,
+body.portal-theme-gcos #mainSidebar .text-gold-400,
+body.portal-theme-gcos #mainSidebar .text-gold-500 {
+  color: #e2e8f0 !important;
+}
+
+body.portal-theme-tk #mainSidebar .text-gold-300,
+body.portal-theme-tk #mainSidebar .text-gold-400,
+body.portal-theme-tk #mainSidebar .text-gold-500 {
+  color: #f9a8d4 !important;
+}
+
+#mainSidebar .border-t,
+#mainSidebar .border-b {
+  border-color: #334155 !important;
+}
+
+main {
+  background: var(--workspace-bg) !important;
+  color: var(--workspace-text) !important;
+}
+
+main > header,
+main header {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: var(--workspace-border) !important;
+  color: var(--workspace-text) !important;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04) !important;
+}
+
+main header .text-white,
+main header .text-slate-100,
+main header .text-slate-200,
+main header .text-slate-300 {
+  color: var(--workspace-text) !important;
+}
+
+main header .text-slate-400,
+main header .text-slate-500 {
+  color: var(--workspace-muted) !important;
+}
+
+.glass-card,
+.glass-panel,
+main [class*="bg-midnight-"] {
+  background: var(--workspace-surface) !important;
+  border-color: var(--workspace-border) !important;
+  border-radius: var(--workspace-radius-lg) !important;
+  box-shadow: var(--workspace-shadow) !important;
+  color: var(--workspace-text) !important;
+  backdrop-filter: none !important;
+}
+
+main [class*="bg-midnight-"] [class*="bg-midnight-"],
+main .glass-card [class*="bg-midnight-"] {
+  background: var(--workspace-surface-muted) !important;
+  box-shadow: none !important;
+}
+
+main .text-white,
+main .text-slate-100,
+main .text-slate-200,
+main .text-slate-300 {
+  color: var(--workspace-text) !important;
+}
+
+main .text-slate-400,
+main .text-slate-500,
+main .text-slate-600 {
+  color: var(--workspace-muted) !important;
+}
+
+main input,
+main select,
+main textarea {
+  background: #ffffff !important;
+  color: var(--workspace-text) !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: var(--workspace-radius-sm) !important;
+  box-shadow: none !important;
+}
+
+main input::placeholder,
+main textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+main input:focus,
+main select:focus,
+main textarea:focus {
+  border-color: var(--accent, #d97706) !important;
+  box-shadow: 0 0 0 3px var(--accent-soft, rgba(217, 119, 6, 0.14)) !important;
+}
+
+main select option {
+  background: #ffffff !important;
+  color: var(--workspace-text) !important;
+}
+
+main button {
+  border-radius: var(--workspace-radius-sm) !important;
+  box-shadow: none !important;
+}
+
+.gold-gradient-btn,
+main .gold-gradient-btn {
+  background: var(--accent, #d97706) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--accent, #d97706) !important;
+  border-radius: var(--workspace-radius-sm) !important;
+}
+
+.gold-gradient-btn:hover,
+main .gold-gradient-btn:hover {
+  background: var(--accent-hover, #b45309) !important;
+  transform: none !important;
+}
+
+.custom-pill-box {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: var(--workspace-radius-sm) !important;
+  color: var(--workspace-text) !important;
+  box-shadow: none !important;
+}
+
+.custom-pill-checkbox:hover .custom-pill-box {
+  background: #f8fafc !important;
+  border-color: var(--accent, #d97706) !important;
+  color: var(--workspace-text) !important;
+}
+
+.custom-pill-checkbox input:checked + .custom-pill-box {
+  background: var(--accent-soft, rgba(217, 119, 6, 0.12)) !important;
+  border-color: var(--accent, #d97706) !important;
+  color: var(--workspace-text) !important;
+  box-shadow: none !important;
+}
+
+.custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator {
+  background: var(--accent, #d97706) !important;
+  border-color: var(--accent, #d97706) !important;
+}
+
+main table {
+  color: var(--workspace-text) !important;
+}
+
+main table th {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  border-color: var(--workspace-border) !important;
+}
+
+main table td {
+  border-color: var(--workspace-border) !important;
+}
+
+main table tr:hover {
+  background: #f8fafc !important;
+}
+
+body.portal-theme-mpro {
+  --accent: #b7791f;
+  --accent-hover: #975a16;
+  --accent-soft: rgba(183, 121, 31, 0.13);
+}
+
+body.portal-theme-gcos {
+  --accent: #334155;
+  --accent-hover: #1e293b;
+  --accent-soft: rgba(71, 85, 105, 0.13);
+}
+
+body.portal-theme-tk {
+  --accent: #c02675;
+  --accent-hover: #9d174d;
+  --accent-soft: rgba(192, 38, 117, 0.13);
+}
+
+/* Keep the authentication screen in the same visual language. */
+body.login-page {
+  background: var(--workspace-bg) !important;
+  color: var(--workspace-text) !important;
+}
+
+body.login-page .auth-glass-box,
+body.login-page .auth-card-container {
+  background: #ffffff !important;
+  border: 1px solid var(--workspace-border) !important;
+  border-radius: var(--workspace-radius-lg) !important;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.10) !important;
+  backdrop-filter: none !important;
+}
+
+body.login-page .auth-glass-box input,
+body.login-page .auth-glass-box select {
+  background: #ffffff !important;
+  color: var(--workspace-text) !important;
+  border-color: #cbd5e1 !important;
+  border-radius: var(--workspace-radius-sm) !important;
+}
+
+body.login-page .auth-glass-box input::placeholder {
+  color: #94a3b8 !important;
+}
+
+body.login-page .auth-glass-box .text-white,
+body.login-page .auth-glass-box .text-slate-100,
+body.login-page .auth-glass-box .text-slate-200,
+body.login-page .auth-glass-box .text-slate-300 {
+  color: var(--workspace-text) !important;
+}
+
+body.login-page .auth-glass-box .text-slate-400,
+body.login-page .auth-glass-box .text-slate-500 {
+  color: var(--workspace-muted) !important;
+}
+
+body.login-page .auth-glass-box > div:first-child {
+  background: #f8fafc !important;
+  border-color: var(--workspace-border) !important;
+}
+
 html:not(.light-mode) .portal-theme-gcos .badge-absent {
   background-color: #09090b !important;
   color: #a1a1aa !important;
@@ -3101,3 +3405,147 @@ html.light-mode .portal-theme-tk svg.text-gold-400 {
   }
 }
 
+/* Final workspace tokens (kept last so legacy theme rules cannot override them). */
+body.portal-theme-mpro,
+body.portal-theme-gcos,
+body.portal-theme-tk {
+  background: var(--workspace-bg, #f4f6f8) !important;
+  color: var(--workspace-text, #172033) !important;
+}
+
+body.portal-theme-mpro { --accent: #b7791f; --accent-hover: #975a16; --accent-soft: rgba(183, 121, 31, 0.13); }
+body.portal-theme-gcos { --accent: #334155; --accent-hover: #1e293b; --accent-soft: rgba(71, 85, 105, 0.13); }
+body.portal-theme-tk { --accent: #c02675; --accent-hover: #9d174d; --accent-soft: rgba(192, 38, 117, 0.13); }
+
+#appContainer,
+main {
+  background: var(--workspace-bg, #f4f6f8) !important;
+  color: var(--workspace-text, #172033) !important;
+}
+
+#mainSidebar,
+body #mainSidebar,
+body aside {
+  background: var(--workspace-sidebar, #17202b) !important;
+  border-color: #2b3949 !important;
+  color: #f8fafc !important;
+}
+
+#sidebarNavList button[data-tab-target] {
+  border-radius: var(--workspace-radius-sm, 6px) !important;
+  color: var(--workspace-sidebar-muted, #aab5c3) !important;
+  box-shadow: none !important;
+}
+
+#sidebarNavList button[data-tab-target]:hover { background: #263445 !important; color: #ffffff !important; }
+#sidebarNavList button[data-tab-target].active,
+#sidebarNavList button[data-tab-target].bg-gold-400 {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+}
+
+main > header,
+main header {
+  background: #ffffff !important;
+  border-color: var(--workspace-border, #e2e8f0) !important;
+  color: var(--workspace-text, #172033) !important;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04) !important;
+}
+
+main .glass-card,
+main .glass-panel,
+main [class*="bg-midnight-"] {
+  background: #ffffff !important;
+  border-color: var(--workspace-border, #e2e8f0) !important;
+  border-radius: var(--workspace-radius-lg, 14px) !important;
+  box-shadow: var(--workspace-shadow, 0 8px 24px rgba(15, 23, 42, 0.06)) !important;
+  color: var(--workspace-text, #172033) !important;
+  backdrop-filter: none !important;
+}
+
+main [class*="bg-midnight-"] [class*="bg-midnight-"],
+main .glass-card [class*="bg-midnight-"] {
+  background: #f8fafc !important;
+  box-shadow: none !important;
+}
+
+main .text-white,
+main .text-slate-100,
+main .text-slate-200,
+main .text-slate-300 { color: var(--workspace-text, #172033) !important; }
+main .text-slate-400,
+main .text-slate-500,
+main .text-slate-600 { color: var(--workspace-muted, #64748b) !important; }
+
+main input,
+main select,
+main textarea {
+  background: #ffffff !important;
+  color: var(--workspace-text, #172033) !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: var(--workspace-radius-sm, 6px) !important;
+  box-shadow: none !important;
+}
+
+main input:focus,
+main select:focus,
+main textarea:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-soft) !important;
+}
+
+main button { border-radius: var(--workspace-radius-sm, 6px) !important; box-shadow: none !important; }
+main .gold-gradient-btn,
+.gold-gradient-btn {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  border-color: var(--accent) !important;
+  border-radius: var(--workspace-radius-sm, 6px) !important;
+}
+main .gold-gradient-btn:hover,
+.gold-gradient-btn:hover { background: var(--accent-hover) !important; transform: none !important; }
+
+main .custom-pill-box,
+.custom-pill-box {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: var(--workspace-radius-sm, 6px) !important;
+  color: var(--workspace-text, #172033) !important;
+  box-shadow: none !important;
+}
+main .custom-pill-checkbox input:checked + .custom-pill-box,
+.custom-pill-checkbox input:checked + .custom-pill-box {
+  background: var(--accent-soft) !important;
+  border-color: var(--accent) !important;
+  color: var(--workspace-text, #172033) !important;
+  box-shadow: none !important;
+}
+main .custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator,
+.custom-pill-checkbox input:checked + .custom-pill-box .custom-pill-indicator {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+main table th { background: #f8fafc !important; color: #475569 !important; border-color: var(--workspace-border, #e2e8f0) !important; }
+main table td { border-color: var(--workspace-border, #e2e8f0) !important; }
+main table tr:hover { background: #f8fafc !important; }
+
+body.login-page {
+  background: var(--workspace-bg, #f4f6f8) !important;
+  color: var(--workspace-text, #172033) !important;
+}
+body.login-page .auth-glass-box,
+body.login-page .auth-card-container {
+  background: #ffffff !important;
+  border: 1px solid var(--workspace-border, #e2e8f0) !important;
+  border-radius: var(--workspace-radius-lg, 14px) !important;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.10) !important;
+  backdrop-filter: none !important;
+}
+body.login-page .auth-glass-box input,
+body.login-page .auth-glass-box select {
+  background: #ffffff !important;
+  color: var(--workspace-text, #172033) !important;
+  border-color: #cbd5e1 !important;
+  border-radius: var(--workspace-radius-sm, 6px) !important;
+}
